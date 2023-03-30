@@ -7,7 +7,7 @@
 
 <link rel="alternate" href="/atom.xml" title="F4miti0n&#39;s Blog" type="application/atom+xml">
 <meta name="theme-color" content="#">
-<title>F4miti0n&#39;s Blog</title>
+<title>Freinds - F4miti0n&#39;s Blog</title>
 <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 <link rel="shortcut icon" href="/favicon.png">
 
@@ -15,45 +15,60 @@
 
 <nav class="main-nav">
 	
+	    <a href="/">← Home</a>
+	
 	
 	    <a href="/about/">About</a>
 	
 	    <a href="/archives/">Archives</a>
-		<a href="/archives/">Friends</a>
+	
 	<a class="cta" href="/atom.xml" data-no-instant>Subscribe</a>
 </nav>
 
 <section id="wrapper">
-    <div class="profile">
-	<section id="wrapper">
-		<header id="header">
-        	<a href="/about/">
-        	    <img id="avatar" class="2x" src="/images/avatar.png">
-        	</a>
-        	<h1>F4miti0n&#39;s Blog</h1>
-        	
-        		<h2></h2>
-        	
-		</header>
-	</section>
-</div>
-<ul id="post-list">
-    
-        <li>
-    <aside class="dates">Mar 29 2023</aside>
-    <a href="/2023/03/29/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-Shiro550%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/">代码审计:Shiro550流程分析</a>
-    <h2></h2>
-</li>
-    
-</ul>
-<nav id="post-nav">
-    <span class="prev">
+    <article class="post">
+    <header>
         
-    </span>
-    <span class="next">
+            <h1>Freinds</h1>
         
-    </span>
-</nav>
+        <h2 class="headline">Mar 30 2023
+        
+        </h2>
+    </header>
+</article>
+<section id="post-body"></section>
+    
+
+
+  <section id="comment">
+    <button class="btn" id="loadcmts" onclick="cmts.load();">Load Comments</button>
+    <div id="gitment"></div>
+    <script src='/js/gitment.browser.js'></script>
+    <link rel="stylesheet" href=''>
+    <script>
+      var cmts={
+        load:function cmts(){
+          var gitment = new Gitment({
+          
+            id: "Freinds",
+          
+            owner: "",
+            repo: "",
+            oauth: {
+              client_id: "",
+              client_secret: "",
+            },
+          })
+          gitment.render('gitment');
+          var loadcmt = document.getElementById("loadcmts");
+          var imyourfather = loadcmt.parentNode;
+          imyourfather.removeChild(loadcmts)
+        }
+      }
+    </script>
+  </section>
+
+
 	<footer id="footer">
 	<div id="social">
 		<p class="small">©  F4miti0n| Powered by Hexo & 
@@ -82,31 +97,3 @@
 
 
 
-
-	<script>
-		// To make images retina, add a class "2x" to the img element
-		var isMobile = {
-			Android:function() {
-				return navigator.userAgent.match(/Android/i) ? true : false;
-			},
-			BlackBerry:function(){
-				return navigator.userAgent.match(/BlackBerry/i) ? true : false;
-			},
-			iOS:function(){
-				return navigator.userAgent.match(/iPhone|iPad|iPod/i) ? true : false;
-			},
-			Windows:function(){
-				return navigator.userAgent.match(/IEMobile/i) ? true : false;
-			},
-			any:function(){
-			   return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Windows());
-			}
-		};
-		if (isMobile.any()) {
-			var suffix = document.getElementsByClassName('2x')[0].getAttribute('src');
-			suffix = suffix.replace('.png','@2x.png');
-			suffix = suffix.replace('.jpg','@2x.jpg');
-			document.getElementsByClassName('2x')[0].setAttribute('src',suffix);
-		};
-	</script>
-	
