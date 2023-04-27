@@ -45,37 +45,47 @@
 <p>考验sql功底，这里其实不用管他，我们的flag并不是藏在数据表里面，知不知道这句sql的执行流程无关紧要，但这里出于学习的角度还是试着分析一下。</p>
 <p>先把它的语句结构拆分一下</p>
 <ul>
-<li>第一层结构<ul>
-<li>WITH bytes(i, s)  AS ( <code>用来生成bytes临时表的查询语句</code>)  调用bytes临时表的查询语句</li>
-</ul>
+<li>第一层结构<blockquote>
+<p>WITH bytes(i, s)  AS ( <code>用来生成bytes临时表的查询语句</code>)  调用bytes临时表的查询语句</p>
+</blockquote>
 </li>
-<li>第二层结构（ <code>用来生成bytes临时表的查询语句</code>）<ul>
-<li>VALUES(1, ‘’) UNION ALL SELECT i + 1,（<code>用来生成第二列数据的查询语句，这里给这个列取了别名c</code>）AS c FROM bytes WHERE c &lt;&gt; ‘’ limit 64 offset 1</li>
-</ul>
+<li>第二层结构（ <code>用来生成bytes临时表的查询语句</code>）<blockquote>
+<p>VALUES(1, ‘’) UNION ALL SELECT i + 1,（<code>用来生成第二列数据的查询语句，这里给这个列取了别名c</code>）AS c FROM bytes WHERE c &lt;&gt; ‘’ limit 64 offset 1</p>
+</blockquote>
 </li>
-<li>第三层结构<ul>
-<li>SELECT ((v|k)-(v&amp;k)) &amp; 255 FROM (<code>第四层结构</code>)</li>
-</ul>
+<li>第三层结构<blockquote>
+<p>SELECT ((v|k)-(v&amp;k)) &amp; 255 FROM (<code>第四层结构</code>)</p>
+</blockquote>
 </li>
-<li>第四层结构<ul>
-<li>SELECT  (<code>第五层结构之k列的生成</code>) as k, (<code>第五层结构之v列的生成</code>) as v FROM mw</li>
-</ul>
+<li>第四层结构<blockquote>
+<p>SELECT  (<code>第五层结构之k列的生成</code>) as k, (<code>第五层结构之v列的生成</code>) as v FROM mw</p>
+</blockquote>
 </li>
-<li>第五层结构<ul>
-<li>K列<br>   SELECT asciicode from ascii where hexcode &#x3D; hex(SUBSTR(sha512(‘hxp{REDACTED}’), i, 1))</li>
-<li>V列<br>   SELECT asciicode from ascii where hexcode &#x3D; hex(SUBSTR(encrypted, i, 1))</li>
-</ul>
+<li>第五层结构<blockquote>
+<p>K列 </p>
+<blockquote>
+<p>SELECT asciicode from ascii where hexcode &#x3D; hex(SUBSTR(sha512(‘hxp{REDACTED}’), i, 1))</p>
+</blockquote>
+</blockquote>
 </li>
-<li>调用bytes临时表的查询语句<ul>
-<li>SELECT group_concat(char(s),’’) FROM bytes</li>
 </ul>
+<blockquote>
+<p>V列 </p>
+<blockquote>
+<p>SELECT asciicode from ascii where hexcode &#x3D; hex(SUBSTR(encrypted, i, 1))</p>
+</blockquote>
+</blockquote>
+<ul>
+<li>调用bytes临时表的查询语句<blockquote>
+<p> SELECT group_concat(char(s),’’) FROM bytes</p>
+</blockquote>
 </li>
 </ul>
 <p>PS :  在这个题里面，所有的表（除了ascii这个表），都只有一行数据</p>
 <p>我们先从第一层的With语句整体分析一下<br><code>WITH bytes(i, s)  AS (用来生成bytes临时表的查询语句)  调用bytes临时表的查询语句</code><br>这里先是定义了一个名为bytes临时表，这个临时表一共就两列，一列叫做i，一列叫做s</p>
 <p>关于具体的定义语句，咱们这里跟进一下第二层结构<br><code>VALUES(1, &#39;&#39;) UNION ALL SELECT i + 1,（用来生成第二列数据的查询语句，这里给这个列取了别名c）AS c FROM bytes WHERE c &lt;&gt; &#39;&#39; limit 64 offset 1</code><br>VALUES语句给i列和s列分别插入了一条数据，i列插入的是1，s插入的是个空字符。<br>插入完之后，<code>UNION ALL</code> 之后的语句开始执行，其返回结果会与前面的  <code>VALUES(1,&#39;&#39;)</code> 值拼接起来，构成一个新表。咱们看一下后面的语句，可以发现，其第一个表达式是 <code>i + 1</code>，其中的 <code>i</code> 表示从前一个查询中选出来的整数值，<code>+ 1</code> 表示将该整数值加一。因此，第二个查询返回的整数值是从 2 开始递增的。第二个表达式是一个子查询，它返回从 <code>bytes</code> 表中选择所有 <code>c</code> 列不为 <code>&#39;&#39;</code> 的行，按照行号的顺序选择前 64 行并跳过第一行（也就是前面提到的 <code>(1, &#39;&#39;)</code> 行）。</p>
 <p>分析完第二层结构，咱们先不急着分析第三层结构，这里咱们直接从第五层结构开始倒着分析（要时刻牢记3-5层结构的最终返回结果就是条简单的数据）。</p>
-<p>第五层结构<br>    K列：SELECT asciicode from ascii where hexcode &#x3D; hex(SUBSTR(sha512(‘hxp{REDACTED}’), i, 1))<br>    V列：SELECT asciicode from ascii where hexcode &#x3D; hex(SUBSTR(encrypted, i, 1))<br>    &#x2F;&#x2F;encrypted是mw里面的列<br>这里用到了ascii这个表，咱们可以看一下这个表的结构<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/hxf-sqlite-less1.png"><br>emmm，平平无奇，不多赘述<br>依次从<code>sha512(&#39;hxp&#123;REDACTED&#125;&#39;)</code> 和 <code>encrypted</code>这两行数据里面截取字符，分别作为k列的生成条件和v列的生成条件，最终k列和v列都新增了一行数字数据。</p>
+<p>第五层结构<br>    &gt; K列：SELECT asciicode from ascii where hexcode &#x3D; hex(SUBSTR(sha512(‘hxp{REDACTED}’), i, 1))<br>    &gt; V列：SELECT asciicode from ascii where hexcode &#x3D; hex(SUBSTR(encrypted, i, 1))<br>    &#x2F;&#x2F;encrypted是mw里面的列<br>这里用到了ascii这个表，咱们可以看一下这个表的结构<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/hxf-sqlite-less1.png"><br>emmm，平平无奇，不多赘述<br>依次从<code>sha512(&#39;hxp&#123;REDACTED&#125;&#39;)</code> 和 <code>encrypted</code>这两行数据里面截取字符，分别作为k列的生成条件和v列的生成条件，最终k列和v列都新增了一行数字数据。</p>
 <p>跳到第四层看一下<br><code>SELECT  (第五层结构之k列的生成) as k, (第五层结构之v列的生成) as v FROM mw</code><br>也是平平无奇的很，就是把k列和v列整合了起来作为了一个临时表给返了回去</p>
 <p>再看下第三层结构<br><code>SELECT ((v|k)-(v&amp;k)) &amp; 255 FROM (第四层结构)</code><br>把v列的那一行数据和k列的那一行数据从第四层结构生成的那个临时表取了过来，做位运算，生成了一个只有一列一行数据的临时表</p>
 <p>回溯到第二层<br>到这里那个c列数据的整个生成流程就已经明晰了，就是第三层位运算得来的那个数据。<br>就这么递归生成呗，出来的表是下面这样的</p>
