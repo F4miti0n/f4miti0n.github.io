@@ -64,18 +64,10 @@
 <li>第五层结构<blockquote>
 <p>K列 </p>
 <blockquote>
-<p>SELECT asciicode from ascii where hexcode &#x3D; hex(SUBSTR(sha512(‘hxp{REDACTED}’), i, 1))</p>
+<p>SELECT asciicode from ascii where hexcode &#x3D; hex(SUBSTR(sha512(‘hxp{REDACTED}’), i, 1))<br>V列<br>SELECT asciicode from ascii where hexcode &#x3D; hex(SUBSTR(encrypted, i, 1))</p>
 </blockquote>
 </blockquote>
 </li>
-</ul>
-<blockquote>
-<p>V列 </p>
-<blockquote>
-<p>SELECT asciicode from ascii where hexcode &#x3D; hex(SUBSTR(encrypted, i, 1))</p>
-</blockquote>
-</blockquote>
-<ul>
 <li>调用bytes临时表的查询语句<blockquote>
 <p> SELECT group_concat(char(s),’’) FROM bytes</p>
 </blockquote>
@@ -115,6 +107,11 @@
 <p>emm，，其实官方的一把梭poc写的就很不错<br>经典的wget带外（这里很离谱，官方的docker环境里面没有curl，当时用curl跑就一直出不来）<br>由于这里涉及到一些双引号转义的问题，太麻烦了，直接用base64编码的形式跑也是一样的</p>
 <p>结果如下:<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/sqliteweb-04.png"></p>
 </section>
+    
+        
+        <h2 class="footline">
+            <a href="/tags/ctf复现/#ctf复现">ctf复现</a>
+        </h2>
     
 
     <footer id="post-meta" class="clearfix">
