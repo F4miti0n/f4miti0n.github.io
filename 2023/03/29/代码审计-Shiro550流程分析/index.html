@@ -1,46 +1,311 @@
 <!DOCTYPE html>
 
-<meta charset="UTF-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
 
-  <meta name="description" content="流程调试之加密根据网上的复现文章，我们知道在登录的时候会先调用DeafultSecurityManager这个类里面的login方法，这里直接来到这个目标类里，给Login方法加上一个断点。
-
-流程解释    这里是在这个info这里先停了一下，根据我们传入的token对象，实例化一个名为info的">
-
-
-<link rel="alternate" href="/atom.xml" title="F4miti0n&#39;s Blog" type="application/atom+xml">
-<meta name="theme-color" content="#">
-<title>代码审计:Shiro550流程分析 - F4miti0n&#39;s Blog</title>
-<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
-<link rel="shortcut icon" href="/favicon.png">
-
+<html theme="dark" showBanner="true" hasBanner="false" > 
+<link href="/fontawesome/css/fontawesome.css" rel="stylesheet">
+<link href="/fontawesome/css/brands.css" rel="stylesheet">
+<link href="/fontawesome/css/solid.css" rel="stylesheet">
+<script src="/js/color.global.min.js" ></script>
+<script src="/js/load-settings.js" ></script>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>代码审计:Shiro550流程分析 | F4miti0n&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="流程调试之加密根据网上的复现文章，我们知道在登录的时候会先调用DeafultSecurityManager这个类里面的login方法，这里直接来到这个目标类里，给Login方法加上一个断点。  流程解释    这里是在这个info这里先停了一下，根据我们传入的token对象，实例化一个名为info的AuthenticationInfo对象（token的属性包括当前输入的账号和密码，host路径和r">
+<meta property="og:type" content="article">
+<meta property="og:title" content="代码审计:Shiro550流程分析">
+<meta property="og:url" content="http://example.com/2023/03/29/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-Shiro550%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="F4miti0n&#39;s Blog">
+<meta property="og:description" content="流程调试之加密根据网上的复现文章，我们知道在登录的时候会先调用DeafultSecurityManager这个类里面的login方法，这里直接来到这个目标类里，给Login方法加上一个断点。  流程解释    这里是在这个info这里先停了一下，根据我们传入的token对象，实例化一个名为info的AuthenticationInfo对象（token的属性包括当前输入的账号和密码，host路径和r">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B001.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2002.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B003.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2004.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2005.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%20%E5%A4%8D%E7%8E%B006.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2007.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2008.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2009.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%20%E5%A4%8D%E7%8E%B010.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2011.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2012.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2013.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2014.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2015.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2016.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%20%E5%A4%8D%E7%8E%B017.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2018.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2019.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2020.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2021.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2022.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2023.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%20%E5%A4%8D%E7%8E%B024.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2025.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2026.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2027.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2028.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2029.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2030.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2031.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2032.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2033.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2034.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2035.png">
+<meta property="article:published_time" content="2023-03-29T04:50:08.000Z">
+<meta property="article:modified_time" content="2023-05-03T15:08:57.425Z">
+<meta property="article:author" content="F4miti0n">
+<meta property="article:tag" content="Java安全">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B001.png">
+  
+    <link rel="alternate" href="/atom.xml" title="F4miti0n's Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-32.png" sizes="32x32">
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-128.png" sizes="128x128">
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-180.png" sizes="180x180">
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-192.png" sizes="192x192">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-32.png" sizes="32x32">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-128.png" sizes="128x128">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-180.png" sizes="180x180">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-192.png" sizes="192x192">
+  
+  
 <link rel="stylesheet" href="/css/style.css">
 
-<nav class="main-nav">
-	
-	    <a href="/">← Home</a>
-	
-	
-	    <a href="/about/">About</a>
-	
-	    <a href="/archives/">Archives</a>
-	
-	<a class="cta" href="/atom.xml" data-no-instant>Subscribe</a>
-</nav>
+<meta name="generator" content="Hexo 6.3.0"></head>
 
-<section id="wrapper">
-    <article class="post">
-    <header>
+<body>
+  
+   
+  <div id="main-grid" class="shadow   ">
+    <div id="nav" class=""  >
+      <navbar id="navbar">
+  <nav id="title-nav">
+    <a href="/">
+      <div id="vivia-logo">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+      <div>F4miti0n's Blog </div>
+    </a>
+  </nav>
+  <nav id="main-nav">
+    
+      <a class="main-nav-link" href="/">Home</a>
+    
+      <a class="main-nav-link" href="/archives">Archives</a>
+    
+      <a class="main-nav-link" href="/about">About</a>
+    
+  </nav>
+  <nav id="sub-nav">
+    <a id="theme-btn" class="nav-icon">
+      <span class="material-symbols-rounded light-mode-icon">wb_sunny</span>
+      <span class="material-symbols-rounded dark-mode-icon">dark_mode</span>
+    </a>
+    
+      <a id="nav-rss-link" class="nav-icon mobile-hide" href="/atom.xml" title="RSS Feed">
+        <span class="material-symbols-rounded rss">rss_feed</span>
+      </a>
+    
+    <a id="nav-search-btn" class="nav-icon" title="Search" style="display: none;">
+      <span class="material-symbols-rounded">search</span>
+    </a>
+    <div id="nav-menu-btn" class="nav-icon">
+      <span class="material-symbols-rounded">menu</span>
+    </div>
+  </nav>
+</navbar>
+<div id="nav-dropdown" class="hidden">
+  <div id="dropdown-link-list">
+    
+      <a class="nav-dropdown-link" href="/">Home</a>
+    
+      <a class="nav-dropdown-link" href="/archives">Archives</a>
+    
+      <a class="nav-dropdown-link" href="/about">About</a>
+    
+    
+      <a class="nav-dropdown-link" href="/atom.xml" title="RSS Feed">RSS</a>
+     
+    </div>
+</div>
+<script>
+  let dropdownBtn = document.getElementById("nav-menu-btn");
+  let dropdownEle = document.getElementById("nav-dropdown");
+  dropdownBtn.onclick = function() {
+    dropdownEle.classList.toggle("hidden");
+  }
+</script>
+    </div>
+    <div id="sidebar-wrapper">
+      <sidebar id="sidebar">
+  
+    <div class="widget-wrap">
+  <div class="info-card">
+    <div class="avatar">
+      
+        <image src=/images/avatar.png></image>
+      
+      <div class="img-dim"></div>
+    </div>
+    <div class="info">
+      <div class="username">F4miti0n </div>
+      <div class="dot"></div>
+      <div class="subtitle">每天都在对抗无趣的生活 </div>
+      <div class="link-list">
         
-            <h1>代码审计:Shiro550流程分析</h1>
+          <a class="link-btn" target="_blank" rel="noopener" href="https://twitter.com" title="Twitter"><i class="fa-brands fa-twitter"></i></a>
         
-        <h2 class="headline">Mar 29 2023
+          <a class="link-btn" target="_blank" rel="noopener" href="https://store.steampowered.com" title="Steam"><i class="fa-brands fa-steam"></i></a>
         
-        </h2>
-    </header>
-</article>
-<section id="post-body"><h2 id="流程调试之加密"><a href="#流程调试之加密" class="headerlink" title="流程调试之加密"></a>流程调试之加密</h2><p>根据网上的复现文章，我们知道在登录的时候会先调用DeafultSecurityManager这个类里面的login方法，这里直接来到这个目标类里，给Login方法加上一个断点。</p>
+          <a class="link-btn" target="_blank" rel="noopener" href="https://github.com" title="GitHub"><i class="fa-brands fa-github"></i></a>
+         
+      </div>  
+    </div>
+  </div>
+</div>
+
+  
+  <div class="sticky">
+    
+      
+
+
+
+    
+      
+  <div class="widget-wrap">
+    <div class="widget">
+      <h3 class="widget-title">Tags</h3>
+      <ul class="widget-tag-list" itemprop="keywords"><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/CTF%E6%80%BB%E7%BB%93/" rel="tag">CTF总结</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/Java%E5%AE%89%E5%85%A8/" rel="tag">Java安全</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/ctf%E5%A4%8D%E7%8E%B0/" rel="tag">ctf复现</a></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap">
+    <div class="widget">
+      <h3 class="widget-title">Archives</h3>
+      
+      
+        <a class="archive-link" href="/archives/2023/05 ">
+          May 2023 
+          <div class="archive-count">3 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/04 ">
+          April 2023 
+          <div class="archive-count">2 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/03 ">
+          March 2023 
+          <div class="archive-count">1 </div>
+        </a>
+      
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap">
+    <div class="widget">
+      <h3 class="widget-title">Recent Posts</h3>
+      <ul>
+        
+          <a class="recent-link" href="/2023/05/21/Fastjson%E3%81%AE%E4%BB%BB%E6%84%8Fget%E4%B8%8Eset/">
+            <div class="recent-link-text">
+              Fastjsonの任意get与set
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2023/05/04/JDBC%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/">
+            <div class="recent-link-text">
+              JDBC反序列化
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2023/05/02/jndi%E6%B3%A8%E5%85%A5%E5%AD%A6%E4%B9%A0/">
+            <div class="recent-link-text">
+              JNDI注入总结
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2023/04/11/Jinja2-SSTI-%E6%80%BB%E7%BB%93/">
+            <div class="recent-link-text">
+              Jinja2 SSTI 总结
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2023/04/05/2022hxpctf-sqliteweb%E5%A4%8D%E7%8E%B0/">
+            <div class="recent-link-text">
+              2022hxpctf:sqliteweb复现
+            </div>
+          </a>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+  </div>
+</sidebar>
+    </div>
+    <div id="content-body">
+       
+
+<article id="post-代码审计-Shiro550流程分析" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  
+    
+   
+  <div class="article-inner">
+    <div class="article-main">
+      <header class="article-header">
+        
+<div class="main-title-bar">
+  <div class="main-title-dot"></div>
+  
+    
+      <h1 class="p-name article-title" itemprop="headline name">
+        代码审计:Shiro550流程分析
+      </h1>
+    
+  
+</div>
+
+        <div class='meta-info-bar'>
+          <div class="meta-info">
+  <time class="dt-published" datetime="2023-03-29T04:50:08.000Z" itemprop="datePublished">2023-03-29</time>
+</div>
+          <div class="need-seperator meta-info">
+            <div class="meta-cate-flex">
+  
+    Uncategorized 
+   
+</div>
+  
+          </div>
+          <div class="wordcount need-seperator meta-info">
+            1.5k words 
+          </div>
+        </div>
+        
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Java%E5%AE%89%E5%85%A8/" rel="tag">Java安全</a></li></ul>
+
+      </header>
+      <div class="e-content article-entry" itemprop="articleBody">
+        
+          <h2 id="流程调试之加密"><a href="#流程调试之加密" class="headerlink" title="流程调试之加密"></a>流程调试之加密</h2><p>根据网上的复现文章，我们知道在登录的时候会先调用DeafultSecurityManager这个类里面的login方法，这里直接来到这个目标类里，给Login方法加上一个断点。</p>
 <p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B001.png"></p>
 <p>流程解释<br>    这里是在这个info这里先停了一下，根据我们传入的token对象，实例化一个名为info的AuthenticationInfo对象（token的属性包括当前输入的账号和密码，host路径和remeberme选项），这里的try和catch语句相当于一个判断是否登录成功的if语句<br>          相关解释如下(来自new bing):<br>            (  <code>AuthenticationException 是一个 Java 异常类，当访问命名或目录服务时发生身份验证错误时抛出此异常。例如，当用户程序提供的凭据无效或以其他方式无法将用户验证到命名/目录服务时，可能会发生身份验证错误</code>  )<br>    这里我们是登录成功了，直接跳到如下部分<br>    <img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2002.png"></p>
 <p>   根据本类定义的createSubject方法生成了一个名为loggedIn的对象<br>   这里因为login这个方法最终的返回值就是我们的loggedIn对象，我们给loggedIn这里打上一个断点，持续跟踪它，这里先跟进一下createSubject这个方法的定义<br>   <img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B003.png"><br>   相当麻烦，又出来了很多新的量，先继续跟进一下creatSubjectContext()这个方法，代码部分相当简单，就只是return了一个DefaultSubjectContext的无参构造，这里直接贴一下DefaultSubjectContext的属性定义部分，没发现和我们Cookie直接相关的属性，步出回到createSubject这里</p>
@@ -62,89 +327,81 @@
 <p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2033.png"></p>
 <p>大象真白了(雾)<br>我们最后再进到这个反序列化方法看一看</p>
 <p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2034.png"><br>大体如下，很普通的反序列化实现<br>至此，Shiro 550流程分析完成<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2035.png"></p>
-</section>
-    
+
         
-        <h2 class="footline">
-            <a href="/tags/Java安全/#Java安全">Java安全</a>
-        </h2>
+      </div>
+
+         
+    </div>
     
+     
+  </div>
+  
+    
+<nav id="article-nav">
+  <a class="article-nav-btn left "
+    
+      href="/2023/04/05/2022hxpctf-sqliteweb%E5%A4%8D%E7%8E%B0/"
+      title="2022hxpctf:sqliteweb复现"
+     >
+    <i class="fa-solid fa-angle-left"></i>
+    <p class="title-text">
+      
+        2022hxpctf:sqliteweb复现
+        
+    </p>
+  </a>
+  <a class="article-nav-btn right  disabled "
+     >
 
-    <footer id="post-meta" class="clearfix">
-        <a href="/about/">
-        <img class="avatar" src="/images/avatar.png">
-        <div>
-            <span class="dark">F4miti0n&#39;s Blog</span>
-            <span></span>
-        </div>
-        </a>
-        <section id="sharing">
-            <a title="Share to Twitter" class="twitter" target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text=http://example.com/2023/03/29/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-Shiro550%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/ - 代码审计:Shiro550流程分析 @"><span class="icon-twitter">tweet</span></a>
-            <a title="Share to Facebook" class="facebook" href="#" onclick="
-                window.open(
-                  'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
-                  'facebook-share-dialog',
-                  'width=626,height=436');
-                return false;"><span class="icon-facebook-sign">Share</span>
-            </a>
-        </section>
-    </footer>
-
-
-  <section id="comment">
-    <button class="btn" id="loadcmts" onclick="cmts.load();">Load Comments</button>
-    <div id="gitment"></div>
-    <script src='/js/gitment.browser.js'></script>
-    <link rel="stylesheet" href=''>
-    <script>
-      var cmts={
-        load:function cmts(){
-          var gitment = new Gitment({
-          
-            id: "代码审计:Shiro550流程分析",
-          
-            owner: "",
-            repo: "",
-            oauth: {
-              client_id: "",
-              client_secret: "",
-            },
-          })
-          gitment.render('gitment');
-          var loadcmt = document.getElementById("loadcmts");
-          var imyourfather = loadcmt.parentNode;
-          imyourfather.removeChild(loadcmts)
-        }
-      }
-    </script>
-  </section>
+    <p class="title-text">
+        
+    </p>
+    <i class="fa-solid fa-angle-right"></i>
+  </a>
+</nav>
 
 
-	<footer id="footer">
-	<div id="social">
-		<p class="small">©  F4miti0n| Powered by Hexo & 
-			<a target="_blank" rel="noopener" href="https://github.com/F0r3at/Lights"> Lights</a>
-		</p>
-	</div>
+  
+</article>
+
+ 
+    </div>
+    <div id="footer-wrapper">
+      <footer id="footer">
+  
+  <div id="footer-info" class="inner">
+    
+    &copy; 2023 F4miti0n<br>
+    Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & Theme <a target="_blank" rel="noopener" href="https://github.com/saicaca/hexo-theme-vivia">Vivia</a>
+  </div>
 </footer>
 
-</section>
+    </div>
+    <div class="back-to-top-wrapper">
+    <button id="back-to-top-btn" class="back-to-top-btn" onclick="topFunction()">
+        <span class="material-symbols-rounded">keyboard_arrow_up</span>
+    </button>
+</div>
 
-	<script src="//cdnjs.loli.net/ajax/libs/instantclick/3.0.1/instantclick.min.js" data-no-instant></script>
-	<script data-no-instant>
-		
-			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-			})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-			ga('create', 'UA-XXXXXXXX-Y', 'auto');
-			ga('send', 'pageview');
-  			InstantClick.on('change', function() {
-  				ga('send', 'pageview', location.pathname + location.search);
-			});
-		
-		InstantClick.init('mousedown');
-	</script>
+<script>
+    function topFunction() {
+        window.scroll({ top: 0, behavior: 'smooth' });
+    }
+    let btn = document.getElementById('back-to-top-btn');
+    function scrollFunction() {
+        if (document.body.scrollTop > 600 || document.documentElement.scrollTop > 600) {
+            btn.style.opacity = 1;
+        } else {
+            btn.style.opacity = 0;
+        }
+    }
+    window.onscroll = function() {
+        scrollFunction();
+    }
+</script>
 
-
-
+  </div>
+  <script src="/js/light-dark-switch.js"></script>
+</body>
+</html>
