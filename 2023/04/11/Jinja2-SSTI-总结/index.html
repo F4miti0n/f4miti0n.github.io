@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 
-<html theme="dark" showBanner="true" hasBanner="false" > 
+<html theme="dark" showBanner="true" hasBanner="true" > 
 <link href="/fontawesome/css/fontawesome.css" rel="stylesheet">
 <link href="/fontawesome/css/brands.css" rel="stylesheet">
 <link href="/fontawesome/css/solid.css" rel="stylesheet">
@@ -11,17 +11,17 @@
   <meta charset="utf-8">
   
   
-  <title>Jinja2 SSTI 总结 | F4miti0n&#39;s Blog</title>
+  <title>SSTI常用Payload | F4miti0n&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="基本流程寻找基类 寻找Object类 解释:在python中,object类是Python中所有类的基类,如果定义一个类时没有指定继承哪个类,则默认继承object类。常用payload:   &amp;#123;&amp;#123;().__class__.__mro__[-1]&amp;#125;&amp;#125;     （__class__这个获得到str类，mro获得基类列表，这里选的-1就是object这个类）">
+  <meta name="description" content="用来打Jinja2的一些常用Payload">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Jinja2 SSTI 总结">
+<meta property="og:title" content="SSTI常用Payload">
 <meta property="og:url" content="http://example.com/2023/04/11/Jinja2-SSTI-%E6%80%BB%E7%BB%93/index.html">
 <meta property="og:site_name" content="F4miti0n&#39;s Blog">
-<meta property="og:description" content="基本流程寻找基类 寻找Object类 解释:在python中,object类是Python中所有类的基类,如果定义一个类时没有指定继承哪个类,则默认继承object类。常用payload:   &amp;#123;&amp;#123;().__class__.__mro__[-1]&amp;#125;&amp;#125;     （__class__这个获得到str类，mro获得基类列表，这里选的-1就是object这个类）">
+<meta property="og:description" content="用来打Jinja2的一些常用Payload">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2023-04-11T07:31:20.000Z">
-<meta property="article:modified_time" content="2023-05-03T15:28:06.117Z">
+<meta property="article:modified_time" content="2023-07-27T17:08:06.679Z">
 <meta property="article:author" content="F4miti0n">
 <meta property="article:tag" content="CTF总结">
 <meta name="twitter:card" content="summary">
@@ -45,6 +45,13 @@
 
 <body>
   
+  
+    
+<div id="banner" class="">
+  <img src="/images/banner.png" itemprop="image">
+  <div id="banner-dim"></div>
+</div>
+ 
    
   <div id="main-grid" class="shadow   ">
     <div id="nav" class=""  >
@@ -189,31 +196,31 @@
         
           <a class="recent-link" href="/2023/05/21/Fastjson%E3%81%AE%E4%BB%BB%E6%84%8Fget%E4%B8%8Eset/">
             <div class="recent-link-text">
-              Fastjsonの任意get与set
+              Fastjson利用链初探
             </div>
           </a>
         
           <a class="recent-link" href="/2023/05/04/JDBC%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/">
             <div class="recent-link-text">
-              JDBC反序列化
+              JDBC反序列化简单审计
             </div>
           </a>
         
           <a class="recent-link" href="/2023/05/02/jndi%E6%B3%A8%E5%85%A5%E5%AD%A6%E4%B9%A0/">
             <div class="recent-link-text">
-              JNDI注入总结
+              关于JNDI注入那点事儿
             </div>
           </a>
         
           <a class="recent-link" href="/2023/04/11/Jinja2-SSTI-%E6%80%BB%E7%BB%93/">
             <div class="recent-link-text">
-              Jinja2 SSTI 总结
+              SSTI常用Payload
             </div>
           </a>
         
           <a class="recent-link" href="/2023/04/05/2022hxpctf-sqliteweb%E5%A4%8D%E7%8E%B0/">
             <div class="recent-link-text">
-              2022hxpctf:sqliteweb复现
+              2022hxpctf (sqliteweb复现)
             </div>
           </a>
         
@@ -241,7 +248,7 @@
   
     
       <h1 class="p-name article-title" itemprop="headline name">
-        Jinja2 SSTI 总结
+        SSTI常用Payload
       </h1>
     
   
@@ -269,7 +276,8 @@
       </header>
       <div class="e-content article-entry" itemprop="articleBody">
         
-          <h1 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h1><h2 id="寻找基类"><a href="#寻找基类" class="headerlink" title="寻找基类"></a>寻找基类</h2><h5 id=""><a href="#" class="headerlink" title=""></a></h5><ul>
+          <p>用来打Jinja2的一些常用Payload                                                                                                                                                                                                                                                                                                                                                     </p>
+<h1 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h1><h2 id="寻找基类"><a href="#寻找基类" class="headerlink" title="寻找基类"></a>寻找基类</h2><h5 id=""><a href="#" class="headerlink" title=""></a></h5><ul>
 <li>寻找Object类<blockquote>
 <p>解释:在python中,object类是Python中所有类的基类,如果定义一个类时没有指定继承哪个类,则默认继承object类。<br>常用payload:   <code>&#123;&#123;().__class__.__mro__[-1]&#125;&#125;</code><br>     （<code>__class__</code>这个获得到str类，mro获得基类列表，这里选的-1就是object这个类）</p>
 </blockquote>
@@ -378,24 +386,24 @@
   <a class="article-nav-btn left "
     
       href="/2023/05/02/jndi%E6%B3%A8%E5%85%A5%E5%AD%A6%E4%B9%A0/"
-      title="JNDI注入总结"
+      title="关于JNDI注入那点事儿"
      >
     <i class="fa-solid fa-angle-left"></i>
     <p class="title-text">
       
-        JNDI注入总结
+        关于JNDI注入那点事儿
         
     </p>
   </a>
   <a class="article-nav-btn right "
     
       href="/2023/04/05/2022hxpctf-sqliteweb%E5%A4%8D%E7%8E%B0/"
-      title="2022hxpctf:sqliteweb复现"
+      title="2022hxpctf (sqliteweb复现)"
      >
 
     <p class="title-text">
       
-        2022hxpctf:sqliteweb复现
+        2022hxpctf (sqliteweb复现)
         
     </p>
     <i class="fa-solid fa-angle-right"></i>

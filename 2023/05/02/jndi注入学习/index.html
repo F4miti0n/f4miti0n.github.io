@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 
-<html theme="dark" showBanner="true" hasBanner="false" > 
+<html theme="dark" showBanner="true" hasBanner="true" > 
 <link href="/fontawesome/css/fontawesome.css" rel="stylesheet">
 <link href="/fontawesome/css/brands.css" rel="stylesheet">
 <link href="/fontawesome/css/solid.css" rel="stylesheet">
@@ -11,11 +11,11 @@
   <meta charset="utf-8">
   
   
-  <title>JNDI注入总结 | F4miti0n&#39;s Blog</title>
+  <title>关于JNDI注入那点事儿 | F4miti0n&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta name="description" content="JNDI概述JNDI(Java Naming and Directory Interface，Java命名和目录接口)是为Java应用程序提供命名和目录访问服务的API，允许客户端通过名称发现和查找数据、对象，用于提供基于配置的动态调用。这些对象可以存储在不同的命名或目录服务中，例如RMI、CORBA、LDAP、DNS等。   JNDI包括以下提供者  LDAP  轻量级目录协议    RMI">
 <meta property="og:type" content="article">
-<meta property="og:title" content="JNDI注入总结">
+<meta property="og:title" content="关于JNDI注入那点事儿">
 <meta property="og:url" content="http://example.com/2023/05/02/jndi%E6%B3%A8%E5%85%A5%E5%AD%A6%E4%B9%A0/index.html">
 <meta property="og:site_name" content="F4miti0n&#39;s Blog">
 <meta property="og:description" content="JNDI概述JNDI(Java Naming and Directory Interface，Java命名和目录接口)是为Java应用程序提供命名和目录访问服务的API，允许客户端通过名称发现和查找数据、对象，用于提供基于配置的动态调用。这些对象可以存储在不同的命名或目录服务中，例如RMI、CORBA、LDAP、DNS等。   JNDI包括以下提供者  LDAP  轻量级目录协议    RMI">
@@ -61,7 +61,7 @@
 <meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/JNDI%E6%B3%A8%E5%85%A5%201/Pasted%20image%2020230430011249.png">
 <meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/JNDI%E6%B3%A8%E5%85%A5%201/Pasted%20image%2020230430005921.png">
 <meta property="article:published_time" content="2023-05-02T05:34:20.000Z">
-<meta property="article:modified_time" content="2023-05-03T15:09:02.427Z">
+<meta property="article:modified_time" content="2023-07-27T16:58:44.217Z">
 <meta property="article:author" content="F4miti0n">
 <meta property="article:tag" content="Java安全">
 <meta name="twitter:card" content="summary">
@@ -86,6 +86,13 @@
 
 <body>
   
+  
+    
+<div id="banner" class="">
+  <img src="/images/banner.png" itemprop="image">
+  <div id="banner-dim"></div>
+</div>
+ 
    
   <div id="main-grid" class="shadow   ">
     <div id="nav" class=""  >
@@ -230,31 +237,31 @@
         
           <a class="recent-link" href="/2023/05/21/Fastjson%E3%81%AE%E4%BB%BB%E6%84%8Fget%E4%B8%8Eset/">
             <div class="recent-link-text">
-              Fastjsonの任意get与set
+              Fastjson利用链初探
             </div>
           </a>
         
           <a class="recent-link" href="/2023/05/04/JDBC%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/">
             <div class="recent-link-text">
-              JDBC反序列化
+              JDBC反序列化简单审计
             </div>
           </a>
         
           <a class="recent-link" href="/2023/05/02/jndi%E6%B3%A8%E5%85%A5%E5%AD%A6%E4%B9%A0/">
             <div class="recent-link-text">
-              JNDI注入总结
+              关于JNDI注入那点事儿
             </div>
           </a>
         
           <a class="recent-link" href="/2023/04/11/Jinja2-SSTI-%E6%80%BB%E7%BB%93/">
             <div class="recent-link-text">
-              Jinja2 SSTI 总结
+              SSTI常用Payload
             </div>
           </a>
         
           <a class="recent-link" href="/2023/04/05/2022hxpctf-sqliteweb%E5%A4%8D%E7%8E%B0/">
             <div class="recent-link-text">
-              2022hxpctf:sqliteweb复现
+              2022hxpctf (sqliteweb复现)
             </div>
           </a>
         
@@ -282,7 +289,7 @@
   
     
       <h1 class="p-name article-title" itemprop="headline name">
-        JNDI注入总结
+        关于JNDI注入那点事儿
       </h1>
     
   
@@ -428,24 +435,24 @@
   <a class="article-nav-btn left "
     
       href="/2023/05/04/JDBC%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/"
-      title="JDBC反序列化"
+      title="JDBC反序列化简单审计"
      >
     <i class="fa-solid fa-angle-left"></i>
     <p class="title-text">
       
-        JDBC反序列化
+        JDBC反序列化简单审计
         
     </p>
   </a>
   <a class="article-nav-btn right "
     
       href="/2023/04/11/Jinja2-SSTI-%E6%80%BB%E7%BB%93/"
-      title="Jinja2 SSTI 总结"
+      title="SSTI常用Payload"
      >
 
     <p class="title-text">
       
-        Jinja2 SSTI 总结
+        SSTI常用Payload
         
     </p>
     <i class="fa-solid fa-angle-right"></i>
