@@ -151,7 +151,7 @@
   <div class="widget-wrap">
     <div class="widget">
       <h3 class="widget-title">Tags</h3>
-      <ul class="widget-tag-list" itemprop="keywords"><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/CTF%E6%80%BB%E7%BB%93/" rel="tag">CTF总结</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/Java%E5%AE%89%E5%85%A8/" rel="tag">Java安全</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/%E9%97%B2%E8%B0%88/" rel="tag">闲谈</a></li></ul>
+      <ul class="widget-tag-list" itemprop="keywords"><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/CTF%E5%A4%8D%E7%8E%B0/" rel="tag">CTF复现</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/CTF%E6%80%BB%E7%BB%93/" rel="tag">CTF总结</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/Java%E5%AE%89%E5%85%A8/" rel="tag">Java安全</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/%E9%97%B2%E8%B0%88/" rel="tag">闲谈</a></li></ul>
     </div>
   </div>
 
@@ -175,7 +175,7 @@
       
         <a class="archive-link" href="/archives/2023/04 ">
           April 2023 
-          <div class="archive-count">1 </div>
+          <div class="archive-count">2 </div>
         </a>
       
         <a class="archive-link" href="/archives/2023/03 ">
@@ -588,6 +588,73 @@ JNDI与RMIps ：这个方法在jdk8u121后就被修复了，能碰到的话，�
     <a class="right-panel  non-pic  "
       
       href="/2023/04/11/Jinja2-SSTI-%E6%80%BB%E7%BB%93/" 
+    >
+       
+      <i class="fa-solid fa-angle-right non-pic"></i>
+       
+    </a>
+     
+  </div>
+  
+</article>
+
+ 
+
+   
+
+<article id="post-2022hxpctf-sqliteweb复现" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+   
+  <div class="article-inner">
+    <div class="article-main">
+      <header class="article-header">
+        
+<div class="main-title-bar">
+  <div class="main-title-dot"></div>
+  
+    
+      <h1 itemprop="name">
+        <a class="p-name article-title" href="/2023/04/05/2022hxpctf-sqliteweb%E5%A4%8D%E7%8E%B0/">2022hxpctf (sqliteweb复现)</a>
+      </h1>
+    
+  
+</div>
+
+        <div class='meta-info-bar'>
+          <div class="meta-info">
+  <time class="dt-published" datetime="2023-04-05T10:17:08.000Z" itemprop="datePublished">2023-04-05</time>
+</div>
+          <div class="need-seperator meta-info">
+            <div class="meta-cate-flex">
+  
+    Uncategorized 
+   
+</div>
+  
+          </div>
+          <div class="wordcount need-seperator meta-info">
+            2k words 
+          </div>
+        </div>
+        
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CTF%E5%A4%8D%E7%8E%B0/" rel="tag">CTF复现</a></li></ul>
+
+      </header>
+      <div class="e-content article-entry" itemprop="articleBody">
+        
+          <div class="truncate-text">
+            之前从来没用过sqlite，这次算是长见识了把环境配完后的界面是这样的，打开了一个encrypted的数据库，如果仔细看的话，可以发现他上面的所有数据都是加密的其创建语句大致如下:
+1234567891011WITH bytes(i, s) AS (    VALUES(1, &#x27;&#x27;) UNION ALL    SELECT i + 1, (        SELECT ((v|k)-(v&amp;k)) &amp; 255 FROM (            SELECT                (SELECT asciicode from ascii where hexcode = hex(SUBSTR(sha512(&#x27;hxp&#123;REDACTED&#125;&#x27;), i, 1))) as k,                (SELECT asciicode from ascii where hexcode = hex(SUBSTR(encrypted, i, 1))) as v            FROM mw     ...  
+          </div>
+        
+      </div>
+
+         
+    </div>
+    
+     
+    <a class="right-panel  non-pic  "
+      
+      href="/2023/04/05/2022hxpctf-sqliteweb%E5%A4%8D%E7%8E%B0/" 
     >
        
       <i class="fa-solid fa-angle-right non-pic"></i>
