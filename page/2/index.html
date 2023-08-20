@@ -11,11 +11,11 @@
   <meta charset="utf-8">
   
   
-  <title>Archives: 2023/3 | F4miti0n&#39;s Blog</title>
+  <title>F4miti0n&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta property="og:type" content="website">
 <meta property="og:title" content="F4miti0n&#39;s Blog">
-<meta property="og:url" content="http://example.com/archives/2023/03/index.html">
+<meta property="og:url" content="http://example.com/page/2/index.html">
 <meta property="og:site_name" content="F4miti0n&#39;s Blog">
 <meta property="og:locale" content="en_US">
 <meta property="article:author" content="F4miti0n">
@@ -42,14 +42,14 @@
   
   
     
-<div id="banner" class="">
+<div id="banner" class=" is_home ">
   <img src="/images/banner.png" itemprop="image">
   <div id="banner-dim"></div>
 </div>
  
    
   <div id="main-grid" class="shadow   ">
-    <div id="nav" class=""  >
+    <div id="nav" class=" is_home "  >
       <navbar id="navbar">
   <nav id="title-nav">
     <a href="/">
@@ -238,45 +238,158 @@
 </sidebar>
     </div>
     <div id="content-body">
-       
+      
+   
 
-<div class="archive-main-card">
-    <div class="archive-top">
-      <div class="main-title-bar">
-        <div class="main-title-dot"></div>
-        <h1 class="article-title">Archive</h1>
-      </div>    
+<article id="post-2022hxpctf-sqliteweb复现" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+   
+  <div class="article-inner">
+    <div class="article-main">
+      <header class="article-header">
+        
+<div class="main-title-bar">
+  <div class="main-title-dot"></div>
+  
+    
+      <h1 itemprop="name">
+        <a class="p-name article-title" href="/2023/04/05/2022hxpctf-sqliteweb%E5%A4%8D%E7%8E%B0/">2022hxpctf (sqliteweb复现)</a>
+      </h1>
+    
+  
+</div>
+
+        <div class='meta-info-bar'>
+          <div class="meta-info">
+  <time class="dt-published" datetime="2023-04-05T10:17:08.000Z" itemprop="datePublished">2023-04-05</time>
+</div>
+          <div class="need-seperator meta-info">
+            <div class="meta-cate-flex">
+  
+    Uncategorized 
+   
+</div>
+  
+          </div>
+          <div class="wordcount need-seperator meta-info">
+            2k words 
+          </div>
+        </div>
+        
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CTF%E5%A4%8D%E7%8E%B0/" rel="tag">CTF复现</a></li></ul>
+
+      </header>
+      <div class="e-content article-entry" itemprop="articleBody">
+        
+          <div class="truncate-text">
+            之前从来没用过sqlite，这次算是长见识了把环境配完后的界面是这样的，打开了一个encrypted的数据库，如果仔细看的话，可以发现他上面的所有数据都是加密的其创建语句大致如下:
+1234567891011WITH bytes(i, s) AS (    VALUES(1, &#x27;&#x27;) UNION ALL    SELECT i + 1, (        SELECT ((v|k)-(v&amp;k)) &amp; 255 FROM (            SELECT                (SELECT asciicode from ascii where hexcode = hex(SUBSTR(sha512(&#x27;hxp&#123;REDACTED&#125;&#x27;), i, 1))) as k,                (SELECT asciicode from ascii where hexcode = hex(SUBSTR(encrypted, i, 1))) as v            FROM mw     ...  
+          </div>
+        
+      </div>
+
+         
     </div>
     
-    
+     
+    <a class="right-panel  non-pic  "
       
-      
-        
-        <div class="year-line">
-            <div class="year-num">2023</div>
-            <div class="dot-wrapper">
-                <div class="dot"></div>
-            </div>
-        </div>
-      
-      <a class="archive-article-link" href="/2023/03/29/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-Shiro550%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/" title="Shiro550流程简析">
-        <div class="date">03-29</div>
-        <div class="line">
-            <div class="dot"></div>
-        </div>
-        <div class="title">
-            <div class="title-inner">
-                
-                    Shiro550流程简析
-                
-            </div>
-        </div>
-        <div class="tags">
-            #Java安全
-        </div>
-      </a>
-    
+      href="/2023/04/05/2022hxpctf-sqliteweb%E5%A4%8D%E7%8E%B0/" 
+    >
+       
+      <i class="fa-solid fa-angle-right non-pic"></i>
+       
+    </a>
+     
   </div>
+  
+</article>
+
+ 
+
+   
+
+<article id="post-代码审计-Shiro550流程分析" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+   
+  <div class="article-inner">
+    <div class="article-main">
+      <header class="article-header">
+        
+<div class="main-title-bar">
+  <div class="main-title-dot"></div>
+  
+    
+      <h1 itemprop="name">
+        <a class="p-name article-title" href="/2023/03/29/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-Shiro550%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/">Shiro550流程简析</a>
+      </h1>
+    
+  
+</div>
+
+        <div class='meta-info-bar'>
+          <div class="meta-info">
+  <time class="dt-published" datetime="2023-03-29T04:50:08.000Z" itemprop="datePublished">2023-03-29</time>
+</div>
+          <div class="need-seperator meta-info">
+            <div class="meta-cate-flex">
+  
+    Uncategorized 
+   
+</div>
+  
+          </div>
+          <div class="wordcount need-seperator meta-info">
+            1.5k words 
+          </div>
+        </div>
+        
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Java%E5%AE%89%E5%85%A8/" rel="tag">Java安全</a></li></ul>
+
+      </header>
+      <div class="e-content article-entry" itemprop="articleBody">
+        
+          <div class="truncate-text">
+            流程调试之加密根据网上的复现文章，我们知道在登录的时候会先调用DeafultSecurityManager这个类里面的login方法，这里直接来到这个目标类里，给Login方法加上一个断点。
+
+流程解释    这里是在这个info这里先停了一下，根据我们传入的token对象，实例化一个名为info的AuthenticationInfo对象（token的属性包括当前输入的账号和密码，host路径和remeberme选项），这里的try和catch语句相当于一个判断是否登录成功的if语句          相关解释如下(来自new bing):            (  AuthenticationException 是一个 Java 异常类，当访问命名或目录服务时发生身份验证错误时抛出此异常。例如，当用户程序提供的凭据无效或以其他方式无法将用户验证到命名/目录服务时，可能会发生身份验证错误  )    这里我们是登录成功了，直接跳到如下部分    
+   根据本类定义的createSubject方法生成了一个名为loggedIn的对象   这里因为login这个方法最终的返回值就...  
+          </div>
+        
+      </div>
+
+         
+    </div>
+    
+     
+    <a class="right-panel  non-pic  "
+      
+      href="/2023/03/29/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-Shiro550%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/" 
+    >
+       
+      <i class="fa-solid fa-angle-right non-pic"></i>
+       
+    </a>
+     
+  </div>
+  
+</article>
+
+ 
+
+
+  <nav id="page-nav">
+    <!-- 在第二页时 page.prev_link 不知为何无法返回正确的链接 -->
+    <a id="prev-btn" class="page-nav-btn " href=" /  ">
+      <span class="material-symbols-rounded">navigate_before</span>
+    </a>
+    <div id="num-bar">
+      <a class="page-number" href="/">1</a><span class="page-number current">2</span>  
+    </div>
+    <a id="next-btn" class="page-nav-btn disabled" href="/">
+      <span class="material-symbols-rounded">navigate_next</span>
+    </a>
+  </nav>
+
+
     </div>
     <div id="footer-wrapper">
       <footer id="footer">
