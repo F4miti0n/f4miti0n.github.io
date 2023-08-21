@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 
-<html theme="dark" showBanner="true" hasBanner="true" > 
+<html theme="dark" showBanner="true" hasBanner="desktop" > 
 <link href="/fontawesome/css/fontawesome.css" rel="stylesheet">
 <link href="/fontawesome/css/brands.css" rel="stylesheet">
 <link href="/fontawesome/css/solid.css" rel="stylesheet">
@@ -20,18 +20,13 @@
 <meta property="og:site_name" content="F4miti0n&#39;s Blog">
 <meta property="og:description" content="流程分析众所周知在Tomcat进行初始化的时候，三大组件遵循:Listener -&gt; Filter -&gt; Servlet 的加载顺序。调用栈大体如下，这里就不带着分析了，是在StandardContext#startInternal里面按顺序加载的。我们直接来到栈顶的 StandardContext#configureContext() 这里。这个方法里面通过对web.xml进行解析，">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Tomcat%E5%86%85%E5%AD%98%E9%A9%AC/Pasted%20image%2020230820003132.png">
-<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Tomcat%E5%86%85%E5%AD%98%E9%A9%AC/Q34N%60%28%40L~R%29R9%5BSIRSTW%5D%5B5.png">
-<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Tomcat%E5%86%85%E5%AD%98%E9%A9%AC/Pasted%20image%2020230820005012.png">
-<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Tomcat%E5%86%85%E5%AD%98%E9%A9%AC/Pasted%20image%2020230820005838.png">
-<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Tomcat%E5%86%85%E5%AD%98%E9%A9%AC/Pasted%20image%2020230820010106.png">
-<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Tomcat%E5%86%85%E5%AD%98%E9%A9%AC/Pasted%20image%2020230820011751.png">
+<meta property="og:image" content="http://example.com/images/cover4.jpg">
 <meta property="article:published_time" content="2023-08-19T06:50:08.000Z">
-<meta property="article:modified_time" content="2023-08-20T12:56:26.843Z">
+<meta property="article:modified_time" content="2023-08-21T02:15:26.018Z">
 <meta property="article:author" content="F4miti0n">
 <meta property="article:tag" content="Java安全">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Tomcat%E5%86%85%E5%AD%98%E9%A9%AC/Pasted%20image%2020230820003132.png">
+<meta name="twitter:image" content="http://example.com/images/cover4.jpg">
   
     <link rel="alternate" href="/atom.xml" title="F4miti0n's Blog" type="application/atom+xml">
   
@@ -255,6 +250,16 @@
 <article id="post-Servlet型" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   
     
+<div class="article-gallery">
+  <div class="article-gallery-photos">
+    
+      <a class="article-gallery-img" rel="gallery_cllkb70pq000deotz448n1j7d">
+        <img src="/images/cover4.jpg" itemprop="image">
+      </a>
+    
+  </div>
+</div>
+
    
   <div class="article-inner">
     <div class="article-main">

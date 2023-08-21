@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 
-<html theme="dark" showBanner="true" hasBanner="true" > 
+<html theme="dark" showBanner="true" hasBanner="desktop" > 
 <link href="/fontawesome/css/fontawesome.css" rel="stylesheet">
 <link href="/fontawesome/css/brands.css" rel="stylesheet">
 <link href="/fontawesome/css/solid.css" rel="stylesheet">
@@ -20,21 +20,13 @@
 <meta property="og:site_name" content="F4miti0n&#39;s Blog">
 <meta property="og:description" content="前情提要看Listerner型内存马之前先给自己纠正一个误区，之前一直以为Listener是在Filter之后执行的，也是看了别的师傅的博客才纠正过来，属于是软工白学了。Listener的监听对象可以分为以下三种  ServletContext，服务器启动和终止时触发  Session，有关Session操作时触发  Request，访问服务时触发最好监听的显然是Request，随便访问一个路径就">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Tomcat%E5%86%85%E5%AD%98%E9%A9%AC/Pasted%20image%2020230819202048.png">
-<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Tomcat%E5%86%85%E5%AD%98%E9%A9%AC/Pasted%20image%2020230819205608.png">
-<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Tomcat%E5%86%85%E5%AD%98%E9%A9%AC/Pasted%20image%2020230819205715.png">
-<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Tomcat%E5%86%85%E5%AD%98%E9%A9%AC/Pasted%20image%2020230819220245.png">
-<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Tomcat%E5%86%85%E5%AD%98%E9%A9%AC/Pasted%20image%2020230819221550.png">
-<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Tomcat%E5%86%85%E5%AD%98%E9%A9%AC/Pasted%20image%2020230819222034.png">
-<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Tomcat%E5%86%85%E5%AD%98%E9%A9%AC/Pasted%20image%2020230819222349.png">
-<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Tomcat%E5%86%85%E5%AD%98%E9%A9%AC/Pasted%20image%2020230819222718.png">
-<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Tomcat%E5%86%85%E5%AD%98%E9%A9%AC/Pasted%20image%2020230819224614.png">
+<meta property="og:image" content="http://example.com/images/cover3.jpg">
 <meta property="article:published_time" content="2023-08-19T05:10:08.000Z">
-<meta property="article:modified_time" content="2023-08-20T12:56:16.005Z">
+<meta property="article:modified_time" content="2023-08-21T02:15:35.118Z">
 <meta property="article:author" content="F4miti0n">
 <meta property="article:tag" content="Java安全">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Tomcat%E5%86%85%E5%AD%98%E9%A9%AC/Pasted%20image%2020230819202048.png">
+<meta name="twitter:image" content="http://example.com/images/cover3.jpg">
   
     <link rel="alternate" href="/atom.xml" title="F4miti0n's Blog" type="application/atom+xml">
   
@@ -258,6 +250,16 @@
 <article id="post-Listener型" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   
     
+<div class="article-gallery">
+  <div class="article-gallery-photos">
+    
+      <a class="article-gallery-img" rel="gallery_cllkb70pp000ceotzhgzc3b5h">
+        <img src="/images/cover3.jpg" itemprop="image">
+      </a>
+    
+  </div>
+</div>
+
    
   <div class="article-inner">
     <div class="article-main">
