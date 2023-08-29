@@ -165,7 +165,7 @@
       
         <a class="archive-link" href="/archives/2023/08 ">
           August 2023 
-          <div class="archive-count">6 </div>
+          <div class="archive-count">7 </div>
         </a>
       
         <a class="archive-link" href="/archives/2023/07 ">
@@ -199,6 +199,12 @@
       <h3 class="widget-title">Recent Posts</h3>
       <ul>
         
+          <a class="recent-link" href="/2023/08/29/Hessian%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/">
+            <div class="recent-link-text">
+              关于Hessian链的探究
+            </div>
+          </a>
+        
           <a class="recent-link" href="/2023/08/21/Frida%20%E5%88%9D%E4%BD%93%E9%AA%8C/">
             <div class="recent-link-text">
               Frida的甜蜜初体验
@@ -223,12 +229,6 @@
             </div>
           </a>
         
-          <a class="recent-link" href="/2023/08/19/Filter%E5%9E%8B/">
-            <div class="recent-link-text">
-              Tomcat内存马:Filter型
-            </div>
-          </a>
-        
       </ul>
     </div>
   </div>
@@ -239,6 +239,87 @@
     </div>
     <div id="content-body">
       
+   
+
+<article id="post-Hessian反序列化" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+   
+  <div class="article-inner">
+    <div class="article-main">
+      <header class="article-header">
+        
+<div class="main-title-bar">
+  <div class="main-title-dot"></div>
+  
+    
+      <h1 itemprop="name">
+        <a class="p-name article-title" href="/2023/08/29/Hessian%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/">关于Hessian链的探究</a>
+      </h1>
+    
+  
+</div>
+
+        <div class='meta-info-bar'>
+          <div class="meta-info">
+  <time class="dt-published" datetime="2023-08-29T06:50:08.000Z" itemprop="datePublished">2023-08-29</time>
+</div>
+          <div class="need-seperator meta-info">
+            <div class="meta-cate-flex">
+  
+    Uncategorized 
+   
+</div>
+  
+          </div>
+          <div class="wordcount need-seperator meta-info">
+            1.6k words 
+          </div>
+        </div>
+        
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Java%E5%AE%89%E5%85%A8/" rel="tag">Java安全</a></li></ul>
+
+      </header>
+      <div class="e-content article-entry" itemprop="articleBody">
+        
+          <div class="truncate-text">
+            前置知识
+RPC协议
+和之前学过的RMI协议有相似之处，都是用于实现远程调用的协议，类似于API调用的封装协议。不同的地方在于信息传输过程中对于所传递信息的编码处理上。RPC客户端在传递过程中首先会组织一个请求消息，包含了要调用的远程方法的名称、参数等信息。然后，根据RPC协议的规定，将这些信息按照特定的二进制格式进行编码。当RPC服务端收到传递信息之后，再根据RPC协议规定进行解码还原。
+除了在编码格式上存在差异以外，RPC协议与RMI协议在应用范围上也相差甚远。由于RPC协议使用 HTTP 或 TCP&#x2F;IP 等底层网络协议进行通信，所以RPC协议并不会如RMI协议一样收到语言的限制，不仅仅是Java中可以使用RPC协议，Python等语言同样可以使用RPC协议
+
+
+Hessian协议
+Hessian协议是RPC协议的一种具体的实现方式，是一种用于远程过程调用的二进制协议，通过紧凑的二进制格式实现高效的数据传输，同时具备跨平台的兼容性，适用于各种分布式系统和跨语言集成的场景。
+
+
+Hessian反序列化器总结
+
+环境准备pom.xml
+12345&lt;depende...  
+          </div>
+        
+      </div>
+
+         
+    </div>
+    
+     
+    <a class="right-panel  with-pic  "
+       style="background-image: url(/images/cover7.jpg)" 
+      href="/2023/08/29/Hessian%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" 
+    >
+       
+      <div class="overlay">
+        <i class="fa-solid fa-angle-right with-pic"></i>
+      </div>
+       
+    </a>
+     
+  </div>
+  
+</article>
+
+ 
+
    
 
 <article id="post-Frida 初体验" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
@@ -877,97 +958,6 @@ Mysql认证报文Client
     <a class="right-panel  non-pic  "
       
       href="/2023/05/04/JDBC%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%A6%E4%B9%A0/" 
-    >
-       
-      <i class="fa-solid fa-angle-right non-pic"></i>
-       
-    </a>
-     
-  </div>
-  
-</article>
-
- 
-
-   
-
-<article id="post-jndi注入学习" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-   
-  <div class="article-inner">
-    <div class="article-main">
-      <header class="article-header">
-        
-<div class="main-title-bar">
-  <div class="main-title-dot"></div>
-  
-    
-      <h1 itemprop="name">
-        <a class="p-name article-title" href="/2023/05/02/jndi%E6%B3%A8%E5%85%A5%E5%AD%A6%E4%B9%A0/">关于JNDI注入那点事儿</a>
-      </h1>
-    
-  
-</div>
-
-        <div class='meta-info-bar'>
-          <div class="meta-info">
-  <time class="dt-published" datetime="2023-05-02T05:34:20.000Z" itemprop="datePublished">2023-05-02</time>
-</div>
-          <div class="need-seperator meta-info">
-            <div class="meta-cate-flex">
-  
-    Uncategorized 
-   
-</div>
-  
-          </div>
-          <div class="wordcount need-seperator meta-info">
-            2.7k words 
-          </div>
-        </div>
-        
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Java%E5%AE%89%E5%85%A8/" rel="tag">Java安全</a></li></ul>
-
-      </header>
-      <div class="e-content article-entry" itemprop="articleBody">
-        
-          <div class="truncate-text">
-            JNDI概述JNDI(Java Naming and Directory Interface，Java命名和目录接口)是为Java应用程序提供命名和目录访问服务的API，允许客户端通过名称发现和查找数据、对象，用于提供基于配置的动态调用。这些对象可以存储在不同的命名或目录服务中，例如RMI、CORBA、LDAP、DNS等。  
-JNDI包括以下提供者
-
-LDAP
-
-轻量级目录协议
-
-
-
-RMI
-
-远程对象注册表,具体内容可看RMI反序列化学习
-
-
-
-DNS
-
-域名解析服务
-
-
-
-CORBA的COS服务
-
-JNDI与RMIps ：这个方法在jdk8u121后就被修复了，能碰到的话，评价是且用且珍惜
-导入DemoJndiRmiServer
-12345678public class JNDIRMIServer &#123;      public static void main(String[] args) throws NamingException, RemoteException &#123;          InitialContext initialContext = n...  
-          </div>
-        
-      </div>
-
-         
-    </div>
-    
-     
-    <a class="right-panel  non-pic  "
-      
-      href="/2023/05/02/jndi%E6%B3%A8%E5%85%A5%E5%AD%A6%E4%B9%A0/" 
     >
        
       <i class="fa-solid fa-angle-right non-pic"></i>
