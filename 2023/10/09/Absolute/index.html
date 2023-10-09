@@ -22,7 +22,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="http://example.com/images/cover14.jpg">
 <meta property="article:published_time" content="2023-10-09T08:13:00.000Z">
-<meta property="article:modified_time" content="2023-10-09T08:23:43.452Z">
+<meta property="article:modified_time" content="2023-10-09T10:01:18.482Z">
 <meta property="article:author" content="F4miti0n">
 <meta property="article:tag" content="HackTheBox">
 <meta name="twitter:card" content="summary">
@@ -263,7 +263,7 @@
 <div class="article-gallery">
   <div class="article-gallery-photos">
     
-      <a class="article-gallery-img" rel="gallery_clnimmn820003rwtzab54380k">
+      <a class="article-gallery-img" rel="gallery_clniq4e1e00034gtzetu8a2q1">
         <img src="/images/cover14.jpg" itemprop="image">
       </a>
     
@@ -348,7 +348,7 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[libdefaults]  </span><br><span class="line">        default_realm = ABSOLUTE.HTB  </span><br><span class="line">[realms]  </span><br><span class="line">        ABSOLUTE.HTB = &#123;  </span><br><span class="line">                kdc = DC.ABSOLUTE.HTB  </span><br><span class="line">                admin_server = ABSOLUTE.HTB  </span><br><span class="line">                &#125;</span><br></pre></td></tr></table></figure>
 <p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Absolute/Pasted%20image%2020230928165542.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Absolute/Pasted%20image%2020230928170413.png"></p>
 <hr>
-<p>在进入提权阶段前先碎碎念一会儿，简单解释一下这里到底对<code>winrm</code>这个用户做了些什么。在<code>Kerberos</code>认证协议中，<code>TGT</code>只能通过验证一个名为 “预认证 “的第一步来获得，预认证可以以对称方式（用DES、RC4、AES128或AES256密钥）或非对称方式（用证书）进行验证，而非对称的预认证方式被称其为&#x3D;&#x3D;PKINIT&#x3D;&#x3D; 。&#x3D;&#x3D;PKINIT&#x3D;&#x3D;是一个Kerberos协议的扩展协议，允许Kerberos预认证阶段中使用非对称密钥进行加密。基于PKINIT协议，客户端使用自身私钥对预验证数据（Pre-authentication Data）进行加密，KDC使用客户端的公钥进行解密（与数字证书相似），若KDC成功使用公钥解密，则返回<code>TGT</code>票据。</p>
+<p>在进入提权阶段前先碎碎念一会儿，简单解释一下这里到底对<code>winrm</code>这个用户做了些什么。在<code>Kerberos</code>认证协议中，<code>TGT</code>只能通过验证一个名为 “预认证 “的第一步来获得，预认证可以以对称方式（用DES、RC4、AES128或AES256密钥）或非对称方式（用证书）进行验证，而非对称的预认证方式被称其为<code>PKINIT</code> 。<code>PKINIT</code>是一个Kerberos协议的扩展协议，允许Kerberos预认证阶段中使用非对称密钥进行加密。基于PKINIT协议，客户端使用自身私钥对预验证数据（Pre-authentication Data）进行加密，KDC使用客户端的公钥进行解密（与数字证书相似），若KDC成功使用公钥解密，则返回<code>TGT</code>票据。</p>
 <p>很不巧的是，KDC用于解密的公钥是可以被设置在指定目标的<code>msDs-KeyCredentialLink</code>属性上的，而我们又恰好拥有修改<code>msDs-KeyCredentialLink</code>的权限（别忘了，我们是<code>GenericWrite</code>），所以我们自然能很轻松地拿到<code>winrm</code>的<code>TGT</code>，这里的<code>pywhisker.py</code>是在修改<code>winrm</code>的<code>msDs-KeyCredentialLink</code>为我们的特定公钥，<code>gettgtpkint.py</code>则是在启动这一套<code>pkint</code>验证流程。</p>
 <p>ps: 我们把这一套流程叫做<code>Shadow Credentials</code>，更多信息可以来学一下这篇文章，写的非常nice<br><a target="_blank" rel="noopener" href="https://forum.butian.net/share/1607">https://forum.butian.net/share/1607</a> </p>
 <hr>
@@ -378,9 +378,9 @@
 <p>对文章里关于<code>DCOM Kerberos Relay</code>原理的拙劣概括：</p>
 <ul>
 <li>DCOM是一种基于RPC（远程过程调用）的技术，它允许在不同的进程或主机之间使用COM（组件对象模型）对象。</li>
-<li>当一个COM对象被封送（marshal）时，即被转换为一个可以在不同环境中使用的数据结构，COM运行时会生成一个OBJREF（对象引用）结构，其中包含了连接到原始对象的所有信息，例如对象的类标识符（CLSID）、接口标识符（IID）、安全绑定信息（&#x3D;&#x3D;这个身份验证信息包含了客户端的用户名、域名和密码哈希等信息&#x3D;&#x3D;）。和对象导出器标识符（OXID）等。客户端可以通过解封送（unmarshal）OBJREF来获取对远程对象的接口引用，并通过RPC调用其方法。</li>
+<li>当一个COM对象被封送（marshal）时，即被转换为一个可以在不同环境中使用的数据结构，COM运行时会生成一个OBJREF（对象引用）结构，其中包含了连接到原始对象的所有信息，例如对象的类标识符（CLSID）、接口标识符（IID）、安全绑定信息（<code>这个身份验证信息包含了客户端的用户名、域名和密码哈希等信息</code>）。和对象导出器标识符（OXID）等。客户端可以通过解封送（unmarshal）OBJREF来获取对远程对象的接口引用，并通过RPC调用其方法。</li>
 <li>从OBJREF连接到原始对象是一个两步过程：首先，客户端从OBJREF中提取OXID（对象导出器标识符），并联系OBJREF中指定的OXID解析器服务；其次，客户端使用OXID解析器服务来找到托管对象的COM服务器的RPC绑定信息，并建立连接到RPC端点，以访问对象的接口。</li>
-<li>这两个步骤都需要建立一个MSRPC连接到一个端点。通常这是本地通过ALPC（高级本地过程调用），或者远程通过TCP。&#x3D;&#x3D;如果使用TCP连接，则客户端还会根据OBJREF中的安全绑定信息，使用NTLM或Kerberos对RPC服务器进行身份验证，如果OBJREF中包含了一个具有SYSTEM权限的COM对象的信息，那么它的身份验证信息就相当于SYSTEM用户的身份验证信息。这样，攻击者就截获可以利用这个身份验证信息信息来访问和控制系统的任何资源和任务，从而实现权限提升。&#x3D;&#x3D;</li>
+<li>这两个步骤都需要建立一个MSRPC连接到一个端点。通常这是本地通过ALPC（高级本地过程调用），或者远程通过TCP。<code>如果使用TCP连接，则客户端还会根据OBJREF中的安全绑定信息，使用NTLM或Kerberos对RPC服务器进行身份验证，如果OBJREF中包含了一个具有SYSTEM权限的COM对象的信息，那么它的身份验证信息就相当于SYSTEM用户的身份验证信息。这样，攻击者就截获可以利用这个身份验证信息信息来访问和控制系统的任何资源和任务，从而实现权限提升。</code></li>
 <li>作者发现了一种方法，可以构造一个OBJREF，使得客户端总是通过TCP连接到OXID解析器服务，即使服务在本地机器上。这样做的方法是在OBJREF中指定主机名为IP地址，并指定一个任意的TCP端口供客户端连接。这样就可以在本地监听，并在RPC连接建立时中继或重用身份验证信息。</li>
 <li>这还不是一个权限提升，因为还需要说服一个有权限的用户解封送（unmarshal）OBJREF。作者发现了一种方法，可以使用<code>CoGetInstanceFromIStorage API</code>，并激活一个有权限的COM服务，来轻松地让它解封送任意OBJREF (这里和<code>Potato</code>攻击很像)。</li>
 <li>如果解封送的COM服务使用Kerberos进行身份验证，则可以利用Kerberos中继攻击的技术，将身份验证信息转发到网络服务，例如LDAP。这样就可以利用COM服务的权限来访问网络资源。</li>
