@@ -173,6 +173,11 @@
           <div class="archive-count">1 </div>
         </a>
       
+        <a class="archive-link" href="/archives/2023/11 ">
+          November 2023 
+          <div class="archive-count">1 </div>
+        </a>
+      
         <a class="archive-link" href="/archives/2023/10 ">
           October 2023 
           <div class="archive-count">3 </div>
@@ -231,6 +236,12 @@
             </div>
           </a>
         
+          <a class="recent-link" href="/2023/11/05/Mysql%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96/">
+            <div class="recent-link-text">
+              Mysql任意文件读取
+            </div>
+          </a>
+        
           <a class="recent-link" href="/2023/10/20/bugku%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%952/">
             <div class="recent-link-text">
               bugku渗透测试2
@@ -240,12 +251,6 @@
           <a class="recent-link" href="/2023/10/14/APT/">
             <div class="recent-link-text">
               HackTheBox APT
-            </div>
-          </a>
-        
-          <a class="recent-link" href="/2023/10/09/Absolute/">
-            <div class="recent-link-text">
-              HackTheBox Absolute
             </div>
           </a>
         
@@ -383,6 +388,81 @@
     <a class="right-panel  with-pic  "
        style="background-image: url(/images/cover17.jpg)" 
       href="/2024/01/01/2023%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93/" 
+    >
+       
+      <div class="overlay">
+        <i class="fa-solid fa-angle-right with-pic"></i>
+      </div>
+       
+    </a>
+     
+  </div>
+  
+</article>
+
+ 
+
+   
+
+<article id="post-Mysql客户端任意文件读取" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+   
+  <div class="article-inner">
+    <div class="article-main">
+      <header class="article-header">
+        
+<div class="main-title-bar">
+  <div class="main-title-dot"></div>
+  
+    
+      <h1 itemprop="name">
+        <a class="p-name article-title" href="/2023/11/05/Mysql%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96/">Mysql任意文件读取</a>
+      </h1>
+    
+  
+</div>
+
+        <div class='meta-info-bar'>
+          <div class="meta-info">
+  <time class="dt-published" datetime="2023-11-05T08:13:00.000Z" itemprop="datePublished">2023-11-05</time>
+</div>
+          <div class="need-seperator meta-info">
+            <div class="meta-cate-flex">
+  
+    Uncategorized 
+   
+</div>
+  
+          </div>
+          <div class="wordcount need-seperator meta-info">
+            1.2k words 
+          </div>
+        </div>
+        
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CTF%E6%80%BB%E7%BB%93/" rel="tag">CTF总结</a></li></ul>
+
+      </header>
+      <div class="e-content article-entry" itemprop="articleBody">
+        
+          <div class="truncate-text">
+            LOAD DATA INFILEmysql的LOAD DATA INFILE语句主要用于读取一个文件的内容并且存入一个表中。通常有两种用法，分别是
+12LOAD DATA INFILE &quot;/etc/passwd&quot; into table test fields terminated by &quot;\n&quot;LOAD DATA LOCAL INFILE &quot;/etc/passwd&quot; into table test fields terminated by &quot;\n
+
+情况一读取的是服务端的&#x2F;etc&#x2F;passwd，情况二则读取的是客户端的&#x2F;etc&#x2F;passwd。在读取完文件之后会把他存到Test表中，其间内容以\n为分割符分开，我们重点关注一下LOAD DATA LOCAL INFILE
+其工作过程大致如下：
+
+用户在客户端输入：load data local file “&#x2F;data.txt” into table test；
+客户端-&gt;服务端：我想把我本地的&#x2F;da...  
+          </div>
+        
+      </div>
+
+         
+    </div>
+    
+     
+    <a class="right-panel  with-pic  "
+       style="background-image: url(/images/cover18.jpg)" 
+      href="/2023/11/05/Mysql%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96/" 
     >
        
       <div class="overlay">
@@ -879,76 +959,6 @@
     <a class="right-panel  with-pic  "
        style="background-image: url(/images/cover10.jpg)" 
       href="/2023/09/12/BCEL%20ClassLoader/" 
-    >
-       
-      <div class="overlay">
-        <i class="fa-solid fa-angle-right with-pic"></i>
-      </div>
-       
-    </a>
-     
-  </div>
-  
-</article>
-
- 
-
-   
-
-<article id="post-Thymeleaf SSTI" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-   
-  <div class="article-inner">
-    <div class="article-main">
-      <header class="article-header">
-        
-<div class="main-title-bar">
-  <div class="main-title-dot"></div>
-  
-    
-      <h1 itemprop="name">
-        <a class="p-name article-title" href="/2023/09/12/Thymeleaf%20SSTI/">Thymeleaf与SSTI</a>
-      </h1>
-    
-  
-</div>
-
-        <div class='meta-info-bar'>
-          <div class="meta-info">
-  <time class="dt-published" datetime="2023-09-12T05:10:08.000Z" itemprop="datePublished">2023-09-12</time>
-</div>
-          <div class="need-seperator meta-info">
-            <div class="meta-cate-flex">
-  
-    Uncategorized 
-   
-</div>
-  
-          </div>
-          <div class="wordcount need-seperator meta-info">
-            1.7k words 
-          </div>
-        </div>
-        
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Java%E5%AE%89%E5%85%A8/" rel="tag">Java安全</a></li></ul>
-
-      </header>
-      <div class="e-content article-entry" itemprop="articleBody">
-        
-          <div class="truncate-text">
-            本科学的毕竟是软工，关于Thymeleaf多少还是了解的。就一模板引擎，和Jinja2是一个性质的东西。一些基本的使用和概念这里就不多赘述，直接开始分析。
-环境准备pom.xml
-1234567891011121314151617181920212223242526272829303132333435363738394041&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;  &lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;           xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;      &lt;modelVe...  
-          </div>
-        
-      </div>
-
-         
-    </div>
-    
-     
-    <a class="right-panel  with-pic  "
-       style="background-image: url(/images/cover9.jpg)" 
-      href="/2023/09/12/Thymeleaf%20SSTI/" 
     >
        
       <div class="overlay">
