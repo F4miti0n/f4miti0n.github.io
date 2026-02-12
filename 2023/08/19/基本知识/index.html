@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+
+
+<html theme="dark" showBanner="true" hasBanner="desktop" > 
+<link href="/fontawesome/css/fontawesome.css" rel="stylesheet">
+<link href="/fontawesome/css/brands.css" rel="stylesheet">
+<link href="/fontawesome/css/solid.css" rel="stylesheet">
+<script src="/js/color.global.min.js" ></script>
+<script src="/js/load-settings.js" ></script>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Tomcat内存马:基本知识 | F4miti0n&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="Tomcat架构浅析基本架构如图所示，咱们主要把关注点放在Connector和Container这两个组件这里。  Connector 组件 ，相当于tomcat的外交大臣，把浏览器传来的字节流封装处理成ServletRequest 对象，之后再把ServletRequest 对象 转发给Contaniner组件处理。当Container 组件处理完毕之后，Contaniner 组件会给Conne">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Tomcat内存马:基本知识">
+<meta property="og:url" content="http://example.com/2023/08/19/%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/index.html">
+<meta property="og:site_name" content="F4miti0n&#39;s Blog">
+<meta property="og:description" content="Tomcat架构浅析基本架构如图所示，咱们主要把关注点放在Connector和Container这两个组件这里。  Connector 组件 ，相当于tomcat的外交大臣，把浏览器传来的字节流封装处理成ServletRequest 对象，之后再把ServletRequest 对象 转发给Contaniner组件处理。当Container 组件处理完毕之后，Contaniner 组件会给Conne">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/images/cover2.jpg">
+<meta property="article:published_time" content="2023-08-19T00:50:08.000Z">
+<meta property="article:modified_time" content="2023-08-21T02:15:47.104Z">
+<meta property="article:author" content="F4miti0n">
+<meta property="article:tag" content="Java安全">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/cover2.jpg">
+  
+    <link rel="alternate" href="/atom.xml" title="F4miti0n's Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-32.png" sizes="32x32">
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-128.png" sizes="128x128">
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-180.png" sizes="180x180">
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-192.png" sizes="192x192">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-32.png" sizes="32x32">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-128.png" sizes="128x128">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-180.png" sizes="180x180">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-192.png" sizes="192x192">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  
+  
+    
+<div id="banner" class="">
+  <img src="/images/banner.png" itemprop="image">
+  <div id="banner-dim"></div>
+</div>
+ 
+   
+  <div id="main-grid" class="shadow   ">
+    <div id="nav" class=""  >
+      <navbar id="navbar">
+  <nav id="title-nav">
+    <a href="/">
+      <div id="vivia-logo">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+      <div>F4miti0n's Blog </div>
+    </a>
+  </nav>
+  <nav id="main-nav">
+    
+      <a class="main-nav-link" href="/">Home</a>
+    
+      <a class="main-nav-link" href="/archives">Archives</a>
+    
+      <a class="main-nav-link" href="/about">About</a>
+    
+  </nav>
+  <nav id="sub-nav">
+    <a id="theme-btn" class="nav-icon">
+      <span class="material-symbols-rounded light-mode-icon">wb_sunny</span>
+      <span class="material-symbols-rounded dark-mode-icon">dark_mode</span>
+    </a>
+    
+      <a id="nav-rss-link" class="nav-icon mobile-hide" href="/atom.xml" title="RSS Feed">
+        <span class="material-symbols-rounded rss">rss_feed</span>
+      </a>
+    
+    <a id="nav-search-btn" class="nav-icon" title="Search" style="display: none;">
+      <span class="material-symbols-rounded">search</span>
+    </a>
+    <div id="nav-menu-btn" class="nav-icon">
+      <span class="material-symbols-rounded">menu</span>
+    </div>
+  </nav>
+</navbar>
+<div id="nav-dropdown" class="hidden">
+  <div id="dropdown-link-list">
+    
+      <a class="nav-dropdown-link" href="/">Home</a>
+    
+      <a class="nav-dropdown-link" href="/archives">Archives</a>
+    
+      <a class="nav-dropdown-link" href="/about">About</a>
+    
+    
+      <a class="nav-dropdown-link" href="/atom.xml" title="RSS Feed">RSS</a>
+     
+    </div>
+</div>
+<script>
+  let dropdownBtn = document.getElementById("nav-menu-btn");
+  let dropdownEle = document.getElementById("nav-dropdown");
+  dropdownBtn.onclick = function() {
+    dropdownEle.classList.toggle("hidden");
+  }
+</script>
+    </div>
+    <div id="sidebar-wrapper">
+      <sidebar id="sidebar">
+  
+    <div class="widget-wrap">
+  <div class="info-card">
+    <div class="avatar">
+      
+        <img src="/images/avatar.png" alt="avatar">
+      
+      <div class="img-dim"></div>
+    </div>
+    <div class="info">
+      <div class="username">F4miti0n </div>
+      <div class="dot"></div>
+      <div class="subtitle">每天都在对抗无趣的生活 </div>
+      <div class="link-list">
+        
+          <a class="link-btn" target="_blank" rel="noopener" href="https://twitter.com" title="Twitter"><i class="fa-brands fa-twitter"></i></a>
+        
+          <a class="link-btn" target="_blank" rel="noopener" href="https://store.steampowered.com" title="Steam"><i class="fa-brands fa-steam"></i></a>
+        
+          <a class="link-btn" target="_blank" rel="noopener" href="https://github.com" title="GitHub"><i class="fa-brands fa-github"></i></a>
+         
+      </div>  
+    </div>
+  </div>
+</div>
+
+  
+  <div class="sticky">
+    
+      
+
+
+
+    
+      
+  <div class="widget-wrap">
+    <div class="widget">
+      <h3 class="widget-title">Tags</h3>
+      <ul class="widget-tag-list" itemprop="keywords"><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/CTF%E5%A4%8D%E7%8E%B0/" rel="tag">CTF复现</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/CTF%E6%80%BB%E7%BB%93/" rel="tag">CTF总结</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/HackTheBox/" rel="tag">HackTheBox</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/Java%E5%AE%89%E5%85%A8/" rel="tag">Java安全</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/%E5%AE%89%E5%8D%93%E6%B8%97%E9%80%8F/" rel="tag">安卓渗透</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" rel="tag">渗透测试</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/%E9%97%B2%E8%B0%88/" rel="tag">闲谈</a></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap">
+    <div class="widget">
+      <h3 class="widget-title">Archives</h3>
+      
+      
+        <a class="archive-link" href="/archives/2024/03 ">
+          March 2024 
+          <div class="archive-count">1 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2024/02 ">
+          February 2024 
+          <div class="archive-count">2 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2024/01 ">
+          January 2024 
+          <div class="archive-count">1 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/11 ">
+          November 2023 
+          <div class="archive-count">1 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/10 ">
+          October 2023 
+          <div class="archive-count">3 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/09 ">
+          September 2023 
+          <div class="archive-count">6 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/08 ">
+          August 2023 
+          <div class="archive-count">7 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/07 ">
+          July 2023 
+          <div class="archive-count">1 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/05 ">
+          May 2023 
+          <div class="archive-count">3 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/04 ">
+          April 2023 
+          <div class="archive-count">2 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/03 ">
+          March 2023 
+          <div class="archive-count">1 </div>
+        </a>
+      
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap">
+    <div class="widget">
+      <h3 class="widget-title">Recent Posts</h3>
+      <ul>
+        
+          <a class="recent-link" href="/2024/03/10/RASPDemo/">
+            <div class="recent-link-text">
+              从零开始的RASP学习
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2024/02/26/Weblogic%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90(%E4%B8%80)/">
+            <div class="recent-link-text">
+              Weblogic漏洞分析(一)
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2024/02/19/Jackson%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%20(%E4%B8%80)/">
+            <div class="recent-link-text">
+              Jackson漏洞分析 (一)
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2024/01/01/2023%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93/">
+            <div class="recent-link-text">
+              关于2023的年度总结
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2023/11/05/Mysql%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96/">
+            <div class="recent-link-text">
+              Mysql任意文件读取
+            </div>
+          </a>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+  </div>
+</sidebar>
+    </div>
+    <div id="content-body">
+       
+
+<article id="post-基本知识" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  
+    
+<div class="article-gallery">
+  <div class="article-gallery-photos">
+    
+      <a class="article-gallery-img" rel="gallery_cmljqmlrl001qm0wd1pp78sft">
+        <img src="/images/cover2.jpg" itemprop="image">
+      </a>
+    
+  </div>
+</div>
+
+   
+  <div class="article-inner">
+    <div class="article-main">
+      <header class="article-header">
+        
+<div class="main-title-bar">
+  <div class="main-title-dot"></div>
+  
+    
+      <h1 class="p-name article-title" itemprop="headline name">
+        Tomcat内存马:基本知识
+      </h1>
+    
+  
+</div>
+
+        <div class='meta-info-bar'>
+          <div class="meta-info">
+  <time class="dt-published" datetime="2023-08-19T00:50:08.000Z" itemprop="datePublished">2023-08-19</time>
+</div>
+          <div class="need-seperator meta-info">
+            <div class="meta-cate-flex">
+  
+    Uncategorized 
+   
+</div>
+  
+          </div>
+          <div class="wordcount need-seperator meta-info">
+            1.6k words 
+          </div>
+        </div>
+        
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Java%E5%AE%89%E5%85%A8/" rel="tag">Java安全</a></li></ul>
+
+      </header>
+      <div class="e-content article-entry" itemprop="articleBody">
+        
+          <h3 id="Tomcat架构浅析"><a href="#Tomcat架构浅析" class="headerlink" title="Tomcat架构浅析"></a>Tomcat架构浅析</h3><p>基本架构如图所示，咱们主要把关注点放在<code>Connector</code>和<code>Container</code>这两个组件这里。</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Tomcat%E5%86%85%E5%AD%98%E9%A9%AC/TomcatStage.png"></p>
+<p><code>Connector</code> 组件 ，相当于tomcat的外交大臣，把浏览器传来的字节流封装处理成<code>ServletRequest</code> 对象，之后再把<code>ServletRequest</code> 对象 转发给<code>Contaniner</code>组件处理。当<code>Container</code> 组件处理完毕之后，<code>Contaniner</code> 组件会给<code>Connector</code>组件返回一个 <code>ServletResponse</code>对象，该对象再反过来经由<code>Connector</code>组件一系列处理，还原成字节流，最终把返回结果转发给浏览器，让浏览器进行页面渲染。</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Tomcat%E5%86%85%E5%AD%98%E9%A9%AC/4.png"></p>
+<p>过程挺简单的，但显然不是今天的重点，我们内存马主要还是依靠这里的<code>Container</code>组件来实现的，所以我们再跟进分析一下<code>Container</code>组件的运行机制，大体如下图所示。<br>（<code>Container</code> 组件又称 <code>Catalina</code>，下文存在一定的混用，别混淆了）</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Tomcat%E5%86%85%E5%AD%98%E9%A9%AC/20220218104446.png"></p>
+<p>这里面从Engine到Wrapper涉及到了几个细分概念，我们先不急着解释，可以先从我下面偷的<br>这张图来感受一下他们之间的层次关系。</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Tomcat%E5%86%85%E5%AD%98%E9%A9%AC/6.png"></p>
+<p>能够看出来层次关系大致是遵循树形结构的（wrapper和servlet肯定不是，人家就是一对一的），从这张图的边角注释基本也能猜出来，各个容器的职能，但还是来做一下具体解释。</p>
+<hr>
+<ul>
+<li>Engine：表示整个 Catalina 的 Servlet 引擎，用来管理多个虚拟站点，一个 Service 最多只能有一个 Engine，但是一个引擎可包含多个 Host</li>
+<li>Host：代表一个虚拟主机，或者说一个站点，可以给 Tomcat 配置多个虚拟主机地址，而一个虚拟主机下可包含多个 Context</li>
+<li>Context：表示一个 Web 应用程序，每一个Context都有唯一的path，一个Web应用可包含多个 Wrapper</li>
+<li>Wrapper：表示一个Servlet，负责管理整个 Servlet 的生命周期，包括装载、初始化、资源回收等</li>
+</ul>
+<hr>
+<p>以上就是关于Connector组件中子容器的介绍，但我们重新回到那个图里面，我们仍然可以发现子容器之中亦有迷雾尚未解开，就比如每个容器都出现的那个 <code>Pipeline</code> 我们就不清楚它到底是什么东西。这里就要再介绍一下Tomcat 的 阀和管道 机制。</p>
+<p>首先什么是管道？我们可以先看一下接口的定义</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">Pipeline</span> <span class="keyword">extends</span> <span class="title class_">Contained</span> &#123;  </span><br><span class="line">    <span class="keyword">public</span> Valve <span class="title function_">getBasic</span><span class="params">()</span>;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setBasic</span><span class="params">(Valve valve)</span>;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">addValve</span><span class="params">(Valve valve)</span>;  </span><br><span class="line">    <span class="keyword">public</span> Valve[] getValves();  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">removeValve</span><span class="params">(Valve valve)</span>;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">findNonAsyncValves</span><span class="params">(Set&lt;String&gt; result)</span>;  </span><br><span class="line">&#125;  </span><br><span class="line"><span class="comment">//上面是管道</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">Valve</span> &#123; </span><br><span class="line">    <span class="keyword">public</span> Valve <span class="title function_">getNext</span><span class="params">()</span>;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setNext</span><span class="params">(Valve valve)</span>;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">backgroundProcess</span><span class="params">()</span>;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">invoke</span><span class="params">(Request request, Response response)</span>  <span class="keyword">throws</span> IOException, ServletException;  </span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">isAsyncSupported</span><span class="params">()</span>;   </span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//上面是阀</span></span><br></pre></td></tr></table></figure>
+<p>可以看出来，阀是由管道所调度掌控的，一个管道可以拥有多个阀，但管道并不直接实现功能，而是由阀所掌控的阀来实现具体功能（就是Valve#invoke）这里来实现。他们的运行机制有点类似于FilterChain那种责任链机制，层层外包，通力协作，当一个管道所有的阀的被调度完成，则最后一个阀可以调度别的管道的首阀开始新一轮的外包协作。<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Tomcat%E5%86%85%E5%AD%98%E9%A9%AC/%E7%AE%A1%E9%81%93%E6%9C%BA%E5%88%B6.jpg"><br>(这个图略了点，只有一个管道，稍微抽象点，但毕竟图是偷的，凑合着看吧)</p>
+<h3 id="Tomcat中三个Context"><a href="#Tomcat中三个Context" class="headerlink" title="Tomcat中三个Context"></a>Tomcat中三个Context</h3><ul>
+<li><p>ServletContext</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> javax.servlet;  </span><br><span class="line">...  </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">ServletContext</span> &#123;  </span><br><span class="line">    <span class="type">String</span> <span class="variable">TEMPDIR</span> <span class="operator">=</span> <span class="string">&quot;javax.servlet.context.tempdir&quot;</span>;  </span><br><span class="line">    <span class="type">String</span> <span class="variable">ORDERED_LIBS</span> <span class="operator">=</span> <span class="string">&quot;javax.servlet.context.orderedLibs&quot;</span>;  </span><br><span class="line">    String <span class="title function_">getContextPath</span><span class="params">()</span>;  </span><br><span class="line">    ServletContext <span class="title function_">getContext</span><span class="params">(String var1)</span>;  </span><br><span class="line">    Servlet <span class="title function_">getServlet</span><span class="params">(String var1)</span> <span class="keyword">throws</span> ServletException;  </span><br><span class="line">    Enumeration&lt;Servlet&gt; <span class="title function_">getServlets</span><span class="params">()</span>;  </span><br><span class="line">    Enumeration&lt;String&gt; <span class="title function_">getServletNames</span><span class="params">()</span>;  </span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">log</span><span class="params">(String var1)</span>;  </span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">log</span><span class="params">(Exception var1, String var2)</span>;  </span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">log</span><span class="params">(String var1, Throwable var2)</span>;  </span><br><span class="line">    String <span class="title function_">getRealPath</span><span class="params">(String var1)</span>;  </span><br><span class="line">    String <span class="title function_">getServerInfo</span><span class="params">()</span>;  </span><br><span class="line">    String <span class="title function_">getInitParameter</span><span class="params">(String var1)</span>;  </span><br><span class="line">    Enumeration&lt;String&gt; <span class="title function_">getInitParameterNames</span><span class="params">()</span>;  </span><br><span class="line">    <span class="type">boolean</span> <span class="title function_">setInitParameter</span><span class="params">(String var1, String var2)</span>;  </span><br><span class="line">    Object <span class="title function_">getAttribute</span><span class="params">(String var1)</span>;  </span><br><span class="line">    Enumeration&lt;String&gt; <span class="title function_">getAttributeNames</span><span class="params">()</span>;  </span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">setAttribute</span><span class="params">(String var1, Object var2)</span>;  </span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">removeAttribute</span><span class="params">(String var1)</span>;  </span><br><span class="line">    String <span class="title function_">getServletContextName</span><span class="params">()</span>;  </span><br><span class="line">    Dynamic <span class="title function_">addServlet</span><span class="params">(String var1, String var2)</span>;  </span><br><span class="line">    Dynamic <span class="title function_">addServlet</span><span class="params">(String var1, Servlet var2)</span>;  </span><br><span class="line">    Dynamic <span class="title function_">addServlet</span><span class="params">(String var1, Class&lt;? extends Servlet&gt; var2)</span>;  </span><br><span class="line">    Dynamic <span class="title function_">addJspFile</span><span class="params">(String var1, String var2)</span>;  </span><br><span class="line">    &lt;T <span class="keyword">extends</span> <span class="title class_">Servlet</span>&gt; T <span class="title function_">createServlet</span><span class="params">(Class&lt;T&gt; var1)</span> <span class="keyword">throws</span> ServletException;  </span><br><span class="line">    ServletRegistration <span class="title function_">getServletRegistration</span><span class="params">(String var1)</span>;  </span><br><span class="line">    Map&lt;String, ? <span class="keyword">extends</span> <span class="title class_">ServletRegistration</span>&gt; getServletRegistrations();  </span><br><span class="line">    javax.servlet.FilterRegistration.Dynamic <span class="title function_">addFilter</span><span class="params">(String var1, String var2)</span>;  </span><br><span class="line">    javax.servlet.FilterRegistration.Dynamic <span class="title function_">addFilter</span><span class="params">(String var1, Filter var2)</span>;  </span><br><span class="line">    javax.servlet.FilterRegistration.Dynamic <span class="title function_">addFilter</span><span class="params">(String var1, Class&lt;? extends Filter&gt; var2)</span>;  </span><br><span class="line">    &lt;T <span class="keyword">extends</span> <span class="title class_">Filter</span>&gt; T <span class="title function_">createFilter</span><span class="params">(Class&lt;T&gt; var1)</span> <span class="keyword">throws</span> ServletException;  </span><br><span class="line">    FilterRegistration <span class="title function_">getFilterRegistration</span><span class="params">(String var1)</span>;  </span><br><span class="line">    Map&lt;String, ? <span class="keyword">extends</span> <span class="title class_">FilterRegistration</span>&gt; getFilterRegistrations();  </span><br><span class="line">    SessionCookieConfig <span class="title function_">getSessionCookieConfig</span><span class="params">()</span>;  </span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">setSessionTrackingModes</span><span class="params">(Set&lt;SessionTrackingMode&gt; var1)</span>;  </span><br><span class="line">    Set&lt;SessionTrackingMode&gt; <span class="title function_">getDefaultSessionTrackingModes</span><span class="params">()</span>;  </span><br><span class="line">    Set&lt;SessionTrackingMode&gt; <span class="title function_">getEffectiveSessionTrackingModes</span><span class="params">()</span>;  </span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">addListener</span><span class="params">(String var1)</span>;  </span><br><span class="line">    &lt;T <span class="keyword">extends</span> <span class="title class_">EventListener</span>&gt; <span class="keyword">void</span> <span class="title function_">addListener</span><span class="params">(T var1)</span>;  </span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">addListener</span><span class="params">(Class&lt;? extends EventListener&gt; var1)</span>;  </span><br><span class="line">    &lt;T <span class="keyword">extends</span> <span class="title class_">EventListener</span>&gt; T <span class="title function_">createListener</span><span class="params">(Class&lt;T&gt; var1)</span> <span class="keyword">throws</span> ServletException;  </span><br><span class="line">    JspConfigDescriptor <span class="title function_">getJspConfigDescriptor</span><span class="params">()</span>;  </span><br><span class="line">    ClassLoader <span class="title function_">getClassLoader</span><span class="params">()</span>;  </span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">declareRoles</span><span class="params">(String... var1)</span>;  </span><br><span class="line">    String <span class="title function_">getVirtualServerName</span><span class="params">()</span>;  </span><br><span class="line">    <span class="type">int</span> <span class="title function_">getSessionTimeout</span><span class="params">()</span>;  </span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">setSessionTimeout</span><span class="params">(<span class="type">int</span> var1)</span>;  </span><br><span class="line">    String <span class="title function_">getRequestCharacterEncoding</span><span class="params">()</span>;  </span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">setRequestCharacterEncoding</span><span class="params">(String var1)</span>;  </span><br><span class="line">    String <span class="title function_">getResponseCharacterEncoding</span><span class="params">()</span>;  </span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">setResponseCharacterEncoding</span><span class="params">(String var1)</span>;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当我们使用Tomcat这样的Java Web服务器时，它提供了一个特殊的对象叫做ServletContext（Servlet上下文）。可以把ServletContext看作是一个容器，它存储了与Web应用程序相关的信息和功能。通俗来说，ServletContext就像是整个Web应用程序的大本营。它保存了所有在同一个Web应用程序中运行的Servlet共享的数据、配置和资源。可以把它看作是一个大家庭的家长，负责协调和管理每个Servlet的需求，并提供它们需要的支持。我们所有的Servlet都得对其进行实现。</p>
+</li>
+<li><p>ApplicationContext<br>在Tomcat中，ServletContext接口的具体实现就是ApplicationContext类，其实现了ServletContext接口中定义的一些方法。</p>
+</li>
+<li><p>StandardContext<br><code>org.apache.catalina.core.StandardContext</code>是子容器<code>Context</code>的标准实现类，其中包含了对Context子容器中资源的各种操作。也是我们内存马这里真正起到作用的类。</p>
+</li>
+</ul>
+<p>总结以下大致如下<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Tomcat%E5%86%85%E5%AD%98%E9%A9%AC/ThreeContext.jpg"></p>
+<p>引用下别的师傅的话</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ServletContext接口的实现类为ApplicationContext类和ApplicationContextFacade类，其中ApplicationContextFacade是对ApplicationContext类的包装。我们对Context容器中各种资源进行操作时，最终调用的还是StandardContext中的方法，因此StandardContext是Tomcat中负责与底层交互的Context。</span><br></pre></td></tr></table></figure>
+
+<h3 id="三大组件加载顺序"><a href="#三大组件加载顺序" class="headerlink" title="三大组件加载顺序"></a>三大组件加载顺序</h3><p>三者的加载顺序为<code>Listener-&gt;Filter-&gt;Servlet</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (ok) &#123;</span><br><span class="line">                <span class="keyword">if</span> (!listenerStart()) &#123;</span><br><span class="line">                    log.error(sm.getString(<span class="string">&quot;standardContext.listenerFail&quot;</span>));</span><br><span class="line">                    ok = <span class="literal">false</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="comment">// Start manager</span></span><br><span class="line">                <span class="type">Manager</span> <span class="variable">manager</span> <span class="operator">=</span> getManager();</span><br><span class="line">                <span class="keyword">if</span> (manager <span class="keyword">instanceof</span> Lifecycle) &#123;</span><br><span class="line">                    ((Lifecycle) manager).start();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">catch</span>(Exception e) &#123;</span><br><span class="line">                log.error(sm.getString(<span class="string">&quot;standardContext.managerFail&quot;</span>), e);</span><br><span class="line">                ok = <span class="literal">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// Configure and call application filters</span></span><br><span class="line">            <span class="keyword">if</span> (ok) &#123;</span><br><span class="line">                <span class="keyword">if</span> (!filterStart()) &#123;</span><br><span class="line">                    log.error(sm.getString(<span class="string">&quot;standardContext.filterFail&quot;</span>));</span><br><span class="line">                    ok = <span class="literal">false</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// Load and initialize all &quot;load on startup&quot; servlets</span></span><br><span class="line">            <span class="keyword">if</span> (ok) &#123;</span><br><span class="line">                <span class="keyword">if</span> (!loadOnStartup(findChildren()))&#123;</span><br><span class="line">                    log.error(sm.getString(<span class="string">&quot;standardContext.servletFail&quot;</span>));</span><br><span class="line">                    ok = <span class="literal">false</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// Start ContainerBackgroundProcessor thread</span></span><br><span class="line">            <span class="built_in">super</span>.threadStart();</span><br><span class="line">        &#125;<span class="keyword">if</span> (ok) &#123;</span><br><span class="line">                <span class="keyword">if</span> (!listenerStart()) &#123;</span><br><span class="line">                    log.error(sm.getString(<span class="string">&quot;standardContext.listenerFail&quot;</span>));</span><br><span class="line">                    ok = <span class="literal">false</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="comment">// Start manager</span></span><br><span class="line">                <span class="type">Manager</span> <span class="variable">manager</span> <span class="operator">=</span> getManager();</span><br><span class="line">                <span class="keyword">if</span> (manager <span class="keyword">instanceof</span> Lifecycle) &#123;</span><br><span class="line">                    ((Lifecycle) manager).start();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">catch</span>(Exception e) &#123;</span><br><span class="line">                log.error(sm.getString(<span class="string">&quot;standardContext.managerFail&quot;</span>), e);</span><br><span class="line">                ok = <span class="literal">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// Configure and call application filters</span></span><br><span class="line">            <span class="keyword">if</span> (ok) &#123;</span><br><span class="line">                <span class="keyword">if</span> (!filterStart()) &#123;</span><br><span class="line">                    log.error(sm.getString(<span class="string">&quot;standardContext.filterFail&quot;</span>));</span><br><span class="line">                    ok = <span class="literal">false</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// Load and initialize all &quot;load on startup&quot; servlets</span></span><br><span class="line">            <span class="keyword">if</span> (ok) &#123;</span><br><span class="line">                <span class="keyword">if</span> (!loadOnStartup(findChildren()))&#123;</span><br><span class="line">                    log.error(sm.getString(<span class="string">&quot;standardContext.servletFail&quot;</span>));</span><br><span class="line">                    ok = <span class="literal">false</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// Start ContainerBackgroundProcessor thread</span></span><br><span class="line">            <span class="built_in">super</span>.threadStart();</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<h3 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/Y4tacker/JavaSec/blob/main/5.%E5%86%85%E5%AD%98%E9%A9%AC%E5%AD%A6%E4%B9%A0/Tomcat/Tomcat%E4%BB%8B%E7%BB%8D/Tomcat%E4%BB%8B%E7%BB%8D.md">Y4tacker Tomcat架构介绍</a></li>
+<li><a target="_blank" rel="noopener" href="https://goodapple.top/archives/1355">Java安全学习——内存马 - 枫のBlog (goodapple.top)</a></li>
+<li><a target="_blank" rel="noopener" href="https://drun1baby.top/2022/08/19/Java%E5%86%85%E5%AD%98%E9%A9%AC%E7%B3%BB%E5%88%97-01-%E5%9F%BA%E7%A1%80%E5%86%85%E5%AE%B9%E5%AD%A6%E4%B9%A0/">DrunkBayby 内存马介绍</a></li>
+</ul>
+
+        
+      </div>
+
+         
+    </div>
+    
+     
+  </div>
+  
+    
+<nav id="article-nav">
+  <a class="article-nav-btn left "
+    
+      href="/2023/08/19/Filter%E5%9E%8B/"
+      title="Tomcat内存马:Filter型"
+     >
+    <i class="fa-solid fa-angle-left"></i>
+    <p class="title-text">
+      
+        Tomcat内存马:Filter型
+        
+    </p>
+  </a>
+  <a class="article-nav-btn right "
+    
+      href="/2023/07/20/%E9%97%B2%E8%B0%88/"
+      title="7月闲谈"
+     >
+
+    <p class="title-text">
+      
+        7月闲谈
+        
+    </p>
+    <i class="fa-solid fa-angle-right"></i>
+  </a>
+</nav>
+
+
+  
+</article>
+
+ 
+    </div>
+    <div id="footer-wrapper">
+      <footer id="footer">
+  
+  <div id="footer-info" class="inner">
+    
+    &copy; 2026 F4miti0n<br>
+    Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & Theme <a target="_blank" rel="noopener" href="https://github.com/saicaca/hexo-theme-vivia">Vivia</a>
+  </div>
+</footer>
+
+    </div>
+    <div class="back-to-top-wrapper">
+    <button id="back-to-top-btn" class="back-to-top-btn" onclick="topFunction()">
+        <span class="material-symbols-rounded">keyboard_arrow_up</span>
+    </button>
+</div>
+
+<script>
+    function topFunction() {
+        window.scroll({ top: 0, behavior: 'smooth' });
+    }
+    let btn = document.getElementById('back-to-top-btn');
+    function scrollFunction() {
+        if (document.body.scrollTop > 600 || document.documentElement.scrollTop > 600) {
+            btn.style.opacity = 1;
+        } else {
+            btn.style.opacity = 0;
+        }
+    }
+    window.onscroll = function() {
+        scrollFunction();
+    }
+</script>
+
+  </div>
+  <script src="/js/light-dark-switch.js"></script>
+</body>
+</html>

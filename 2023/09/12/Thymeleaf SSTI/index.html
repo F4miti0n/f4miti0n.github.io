@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+
+
+<html theme="dark" showBanner="true" hasBanner="desktop" > 
+<link href="/fontawesome/css/fontawesome.css" rel="stylesheet">
+<link href="/fontawesome/css/brands.css" rel="stylesheet">
+<link href="/fontawesome/css/solid.css" rel="stylesheet">
+<script src="/js/color.global.min.js" ></script>
+<script src="/js/load-settings.js" ></script>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Thymeleaf与SSTI | F4miti0n&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="本科学的毕竟是软工，关于Thymeleaf多少还是了解的。就一模板引擎，和Jinja2是一个性质的东西。一些基本的使用和概念这里就不多赘述，直接开始分析。 环境准备pom.xml 1234567891011121314151617181920212223242526272829303132333435363738394041&lt;?xml version&#x3D;&quot;1.0&quot; enco">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Thymeleaf与SSTI">
+<meta property="og:url" content="http://example.com/2023/09/12/Thymeleaf%20SSTI/index.html">
+<meta property="og:site_name" content="F4miti0n&#39;s Blog">
+<meta property="og:description" content="本科学的毕竟是软工，关于Thymeleaf多少还是了解的。就一模板引擎，和Jinja2是一个性质的东西。一些基本的使用和概念这里就不多赘述，直接开始分析。 环境准备pom.xml 1234567891011121314151617181920212223242526272829303132333435363738394041&lt;?xml version&#x3D;&quot;1.0&quot; enco">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/images/cover9.jpg">
+<meta property="article:published_time" content="2023-09-12T05:10:08.000Z">
+<meta property="article:modified_time" content="2023-09-11T17:04:45.293Z">
+<meta property="article:author" content="F4miti0n">
+<meta property="article:tag" content="Java安全">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/cover9.jpg">
+  
+    <link rel="alternate" href="/atom.xml" title="F4miti0n's Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-32.png" sizes="32x32">
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-128.png" sizes="128x128">
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-180.png" sizes="180x180">
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-192.png" sizes="192x192">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-32.png" sizes="32x32">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-128.png" sizes="128x128">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-180.png" sizes="180x180">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-192.png" sizes="192x192">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  
+  
+    
+<div id="banner" class="">
+  <img src="/images/banner.png" itemprop="image">
+  <div id="banner-dim"></div>
+</div>
+ 
+   
+  <div id="main-grid" class="shadow   ">
+    <div id="nav" class=""  >
+      <navbar id="navbar">
+  <nav id="title-nav">
+    <a href="/">
+      <div id="vivia-logo">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+      <div>F4miti0n's Blog </div>
+    </a>
+  </nav>
+  <nav id="main-nav">
+    
+      <a class="main-nav-link" href="/">Home</a>
+    
+      <a class="main-nav-link" href="/archives">Archives</a>
+    
+      <a class="main-nav-link" href="/about">About</a>
+    
+  </nav>
+  <nav id="sub-nav">
+    <a id="theme-btn" class="nav-icon">
+      <span class="material-symbols-rounded light-mode-icon">wb_sunny</span>
+      <span class="material-symbols-rounded dark-mode-icon">dark_mode</span>
+    </a>
+    
+      <a id="nav-rss-link" class="nav-icon mobile-hide" href="/atom.xml" title="RSS Feed">
+        <span class="material-symbols-rounded rss">rss_feed</span>
+      </a>
+    
+    <a id="nav-search-btn" class="nav-icon" title="Search" style="display: none;">
+      <span class="material-symbols-rounded">search</span>
+    </a>
+    <div id="nav-menu-btn" class="nav-icon">
+      <span class="material-symbols-rounded">menu</span>
+    </div>
+  </nav>
+</navbar>
+<div id="nav-dropdown" class="hidden">
+  <div id="dropdown-link-list">
+    
+      <a class="nav-dropdown-link" href="/">Home</a>
+    
+      <a class="nav-dropdown-link" href="/archives">Archives</a>
+    
+      <a class="nav-dropdown-link" href="/about">About</a>
+    
+    
+      <a class="nav-dropdown-link" href="/atom.xml" title="RSS Feed">RSS</a>
+     
+    </div>
+</div>
+<script>
+  let dropdownBtn = document.getElementById("nav-menu-btn");
+  let dropdownEle = document.getElementById("nav-dropdown");
+  dropdownBtn.onclick = function() {
+    dropdownEle.classList.toggle("hidden");
+  }
+</script>
+    </div>
+    <div id="sidebar-wrapper">
+      <sidebar id="sidebar">
+  
+    <div class="widget-wrap">
+  <div class="info-card">
+    <div class="avatar">
+      
+        <img src="/images/avatar.png" alt="avatar">
+      
+      <div class="img-dim"></div>
+    </div>
+    <div class="info">
+      <div class="username">F4miti0n </div>
+      <div class="dot"></div>
+      <div class="subtitle">每天都在对抗无趣的生活 </div>
+      <div class="link-list">
+        
+          <a class="link-btn" target="_blank" rel="noopener" href="https://twitter.com" title="Twitter"><i class="fa-brands fa-twitter"></i></a>
+        
+          <a class="link-btn" target="_blank" rel="noopener" href="https://store.steampowered.com" title="Steam"><i class="fa-brands fa-steam"></i></a>
+        
+          <a class="link-btn" target="_blank" rel="noopener" href="https://github.com" title="GitHub"><i class="fa-brands fa-github"></i></a>
+         
+      </div>  
+    </div>
+  </div>
+</div>
+
+  
+  <div class="sticky">
+    
+      
+
+
+
+    
+      
+  <div class="widget-wrap">
+    <div class="widget">
+      <h3 class="widget-title">Tags</h3>
+      <ul class="widget-tag-list" itemprop="keywords"><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/CTF%E5%A4%8D%E7%8E%B0/" rel="tag">CTF复现</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/CTF%E6%80%BB%E7%BB%93/" rel="tag">CTF总结</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/HackTheBox/" rel="tag">HackTheBox</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/Java%E5%AE%89%E5%85%A8/" rel="tag">Java安全</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/%E5%AE%89%E5%8D%93%E6%B8%97%E9%80%8F/" rel="tag">安卓渗透</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" rel="tag">渗透测试</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/%E9%97%B2%E8%B0%88/" rel="tag">闲谈</a></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap">
+    <div class="widget">
+      <h3 class="widget-title">Archives</h3>
+      
+      
+        <a class="archive-link" href="/archives/2024/03 ">
+          March 2024 
+          <div class="archive-count">1 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2024/02 ">
+          February 2024 
+          <div class="archive-count">2 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2024/01 ">
+          January 2024 
+          <div class="archive-count">1 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/11 ">
+          November 2023 
+          <div class="archive-count">1 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/10 ">
+          October 2023 
+          <div class="archive-count">3 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/09 ">
+          September 2023 
+          <div class="archive-count">6 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/08 ">
+          August 2023 
+          <div class="archive-count">7 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/07 ">
+          July 2023 
+          <div class="archive-count">1 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/05 ">
+          May 2023 
+          <div class="archive-count">3 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/04 ">
+          April 2023 
+          <div class="archive-count">2 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/03 ">
+          March 2023 
+          <div class="archive-count">1 </div>
+        </a>
+      
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap">
+    <div class="widget">
+      <h3 class="widget-title">Recent Posts</h3>
+      <ul>
+        
+          <a class="recent-link" href="/2024/03/10/RASPDemo/">
+            <div class="recent-link-text">
+              从零开始的RASP学习
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2024/02/26/Weblogic%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90(%E4%B8%80)/">
+            <div class="recent-link-text">
+              Weblogic漏洞分析(一)
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2024/02/19/Jackson%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%20(%E4%B8%80)/">
+            <div class="recent-link-text">
+              Jackson漏洞分析 (一)
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2024/01/01/2023%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93/">
+            <div class="recent-link-text">
+              关于2023的年度总结
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2023/11/05/Mysql%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96/">
+            <div class="recent-link-text">
+              Mysql任意文件读取
+            </div>
+          </a>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+  </div>
+</sidebar>
+    </div>
+    <div id="content-body">
+       
+
+<article id="post-Thymeleaf SSTI" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  
+    
+<div class="article-gallery">
+  <div class="article-gallery-photos">
+    
+      <a class="article-gallery-img" rel="gallery_cmljqmlrj001bm0wdhxq81fxy">
+        <img src="/images/cover9.jpg" itemprop="image">
+      </a>
+    
+  </div>
+</div>
+
+   
+  <div class="article-inner">
+    <div class="article-main">
+      <header class="article-header">
+        
+<div class="main-title-bar">
+  <div class="main-title-dot"></div>
+  
+    
+      <h1 class="p-name article-title" itemprop="headline name">
+        Thymeleaf与SSTI
+      </h1>
+    
+  
+</div>
+
+        <div class='meta-info-bar'>
+          <div class="meta-info">
+  <time class="dt-published" datetime="2023-09-12T05:10:08.000Z" itemprop="datePublished">2023-09-12</time>
+</div>
+          <div class="need-seperator meta-info">
+            <div class="meta-cate-flex">
+  
+    Uncategorized 
+   
+</div>
+  
+          </div>
+          <div class="wordcount need-seperator meta-info">
+            1.7k words 
+          </div>
+        </div>
+        
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Java%E5%AE%89%E5%85%A8/" rel="tag">Java安全</a></li></ul>
+
+      </header>
+      <div class="e-content article-entry" itemprop="articleBody">
+        
+          <p>本科学的毕竟是软工，关于Thymeleaf多少还是了解的。就一模板引擎，和Jinja2是一个性质的东西。一些基本的使用和概念这里就不多赘述，直接开始分析。</p>
+<h1 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h1><p><code>pom.xml</code></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span>?&gt;</span>  </span><br><span class="line"><span class="tag">&lt;<span class="name">project</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0&quot;</span> <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span>  </span></span><br><span class="line"><span class="tag">         <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd&quot;</span>&gt;</span>  </span><br><span class="line">    <span class="tag">&lt;<span class="name">modelVersion</span>&gt;</span>4.0.0<span class="tag">&lt;/<span class="name">modelVersion</span>&gt;</span>  </span><br><span class="line">    <span class="tag">&lt;<span class="name">parent</span>&gt;</span>        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span>  </span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-parent<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span>  </span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.2.0.RELEASE<span class="tag">&lt;/<span class="name">version</span>&gt;</span>  </span><br><span class="line">        <span class="tag">&lt;<span class="name">relativePath</span>/&gt;</span> <span class="comment">&lt;!-- lookup parent from repository --&gt;</span>  </span><br><span class="line">    <span class="tag">&lt;/<span class="name">parent</span>&gt;</span>  </span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.example<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span>  </span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>demo<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span>  </span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>0.0.1-SNAPSHOT<span class="tag">&lt;/<span class="name">version</span>&gt;</span>  </span><br><span class="line">    <span class="tag">&lt;<span class="name">name</span>&gt;</span>demo<span class="tag">&lt;/<span class="name">name</span>&gt;</span>  </span><br><span class="line">    <span class="tag">&lt;<span class="name">description</span>&gt;</span>demo<span class="tag">&lt;/<span class="name">description</span>&gt;</span>  </span><br><span class="line">    <span class="tag">&lt;<span class="name">properties</span>&gt;</span>        </span><br><span class="line">    <span class="tag">&lt;<span class="name">java.version</span>&gt;</span>1.8<span class="tag">&lt;/<span class="name">java.version</span>&gt;</span>  </span><br><span class="line">    <span class="tag">&lt;/<span class="name">properties</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span>  </span><br><span class="line">				<span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-thymeleaf<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span>  </span><br><span class="line">			<span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span>  </span><br><span class="line">				<span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-web<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span>  </span><br><span class="line">			<span class="tag">&lt;/<span class="name">dependency</span>&gt;</span>  </span><br><span class="line">			<span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span>  </span><br><span class="line">				<span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-test<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span>  </span><br><span class="line">				<span class="tag">&lt;<span class="name">scope</span>&gt;</span>test<span class="tag">&lt;/<span class="name">scope</span>&gt;</span>  </span><br><span class="line">			<span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">		 <span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span>  </span><br><span class="line">    <span class="tag">&lt;<span class="name">build</span>&gt;</span>    </span><br><span class="line">        <span class="tag">&lt;<span class="name">plugins</span>&gt;</span>   </span><br><span class="line">            <span class="tag">&lt;<span class="name">plugin</span>&gt;</span> </span><br><span class="line">                <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span>  </span><br><span class="line">                <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-maven-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span>  </span><br><span class="line">            <span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">plugins</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">build</span>&gt;</span>  </span><br><span class="line"><span class="tag">&lt;/<span class="name">project</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="视图解析流程分析"><a href="#视图解析流程分析" class="headerlink" title="视图解析流程分析"></a>视图解析流程分析</h1><h2 id="封装ModelAndView对象"><a href="#封装ModelAndView对象" class="headerlink" title="封装ModelAndView对象"></a>封装ModelAndView对象</h2><p>在Spring Boot中，ModelAndView是一个用于封装数据模型和视图名称的对象。它主要用于在控制器方法中传递数据给前端视图并指定要展示的视图。</p>
+<p>ModelAndView对象由以下两个部分组成：</p>
+<ol>
+<li>Model：代表数据模型，用于存储要传递给前端视图的数据。通过在Model对象中添加属性键值对，可以将数据传递给前端。这些属性可以在视图中使用，以展示数据或进行操作。在控制器方法中，我们可以使用方法参数绑定或通过调用ModelAndView对象的getModel()方法来获取Model对象，并添加属性。</li>
+<li>View：代表要展示的视图名称。视图名称是指前端页面的名称或路径。Spring Boot会根据视图名称解析对应的模板文件，将数据模型应用到该视图上，并最终返回给客户端。可以通过设置视图名称来指定要加载的视图，可以是JSP、Thymeleaf或其他前端模板。</li>
+</ol>
+<h3 id="流程跟踪"><a href="#流程跟踪" class="headerlink" title="流程跟踪"></a>流程跟踪</h3><p>咱们这里分析的流程发生在<code>DispatcherServlet#doDispatch()</code>这里，着重关注一下504行的<code>ModelAndView</code>对象封装和517行的视图渲染这里，首先跟进一下504行的<code>mv</code>封装</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Thymeleaf%20SSTI/Pasted%20image%2020230911212756.png"></p>
+<p>跳过一些不甚重要的步骤，跟踪<code>ServletInvocableHandlerMethod#invokeAndHandle()</code>方法，调用栈和方法源码如下。<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Thymeleaf%20SSTI/Pasted%20image%2020230911213327.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Thymeleaf%20SSTI/Pasted%20image%2020230911213454.png"></p>
+<p><code>invokeForRequest</code> 从请求中解析出具体 Controller 方法的入参，并通过反射进行调用。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> Object <span class="title function_">invokeForRequest</span><span class="params">(NativeWebRequest request, <span class="meta">@Nullable</span> ModelAndViewContainer mavContainer, Object... providedArgs)</span> <span class="keyword">throws</span> Exception &#123;  </span><br><span class="line">    <span class="comment">//获取请求参数，并赋值给args</span></span><br><span class="line">    Object[] args = <span class="built_in">this</span>.getMethodArgumentValues(request, mavContainer, providedArgs);  </span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">this</span>.logger.isTraceEnabled()) &#123;  </span><br><span class="line">        <span class="built_in">this</span>.logger.trace(<span class="string">&quot;Arguments: &quot;</span> + Arrays.toString(args));  </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//调用相应的controller处理args  </span></span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">this</span>.doInvoke(args);  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里处理完的returnValue是返回了一串值为<code>index</code>的字符串，也就是我们所指定的视图名称。<br>缩略起没起到作用的if结构，接下来就会在67行根据returnValue的值来选择处理器进行处理，再根据处理结果设置<code>mavContainer</code>。</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Thymeleaf%20SSTI/Pasted%20image%2020230911220122.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Thymeleaf%20SSTI/Pasted%20image%2020230911220733.png"></p>
+<p>跟进一下<code>handlerReturnValue</code>，在50行依据<code>returnValue</code>和<code>returnType</code>先选出了一个<code>handler</code>，这里用到的是<code>ViewNameMethodReturnValueHandler</code>这个<code>handler</code>，听名词也知道这里是和视图名称有关的处理器，我们接着跟进一下54行的<code>handler.handleReturnValue()</code></p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Thymeleaf%20SSTI/Pasted%20image%2020230911221114.png"></p>
+<p>没什么需要特别注意的地方，就是会根据传来的viewName来判定是不是需要为<code>mavContainer</code>开启重定向选项，这里因为<code>viewName</code>中不存在<code>redirect:</code>这个字符串，所以并未设置。整完这一套之后<br>相当于对<code>mavcontainer</code>进行了一个基础的设置（<code>HttpStatus</code>，<code>viewName</code>，<code>model</code>），之后要做的就是从<code>mavcontainer</code>中获取<code>mav</code>对象，让我们出栈回到<code>RequestMappingHandlerAdapter#invokeHandlerMethod()</code> ，跟进一下<code>this.getModelAndView</code>这里。我们以上的操作都是553行<code>RequestMappingHandlerAdapter#invokeHandlerMethod()</code>搞得，上面忘提了。</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Thymeleaf%20SSTI/Pasted%20image%2020230911222039.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Thymeleaf%20SSTI/Pasted%20image%2020230911222421.png"></p>
+<p>接着跟进669行的<code>new ModelAndView()</code>这里，为了防止忘了，可以先看看这里的参数，代码就没必要看了，至此mav对象正式创建完毕。<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Thymeleaf%20SSTI/Pasted%20image%2020230911223046.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Thymeleaf%20SSTI/Pasted%20image%2020230911223113.png"></p>
+<h2 id="视图层处理ModelAndView对象"><a href="#视图层处理ModelAndView对象" class="headerlink" title="视图层处理ModelAndView对象"></a>视图层处理ModelAndView对象</h2><p>获取<code>ModelAndView</code>后，回去跟<code>DispatcherServlet#doDispatch</code>部分的517行断点处（上面图有），这里就不一步一步跟了，最终是到了<code>DispatcherServlet#render</code>这里进行视图解析，我们跟进去看看。</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Thymeleaf%20SSTI/Pasted%20image%2020230911223912.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Thymeleaf%20SSTI/Pasted%20image%2020230911224905.png"><br>从宏观的角度浅谈一下这段代码，先通过我们传入的ViewName拿到View对象，之后再根据View对象对我们所传入的数据进行渲染，先跟进一下<code>resolveViewName</code>这一块。</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Thymeleaf%20SSTI/Pasted%20image%2020230911225437.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Thymeleaf%20SSTI/Pasted%20image%2020230911225734.png"></p>
+<p>这里会对 <code>viewResolvers</code> 进行一个遍历，挨个尝试解析 <code>viewName</code> ，看看哪个<code>viewResolver</code>能给解析出来个 <code>view</code> 给返回来。我们直接跟着这个循环进<code>viewResolver.resolveViewName()</code>看返回的<code>view</code>。</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Thymeleaf%20SSTI/Pasted%20image%2020230911230220.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Thymeleaf%20SSTI/Pasted%20image%2020230911230050.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Thymeleaf%20SSTI/Pasted%20image%2020230911230414.png"></p>
+<p>这里没什么好说的，<code>viewResolver</code>会先根据<code>viewName</code>匹配出来一个可解析的<code>view</code>列表，再把view列表传到<code>getBestView</code>里面挑个最合适的<code>view</code>对象，这里是第一次循环就给挑出来了，<code>ThymeleafView</code>，直接返回出栈。因为拿到了合适的<code>view</code>对象，我们已经可以来到<code>view.render()</code>这里了，在<code>render</code>处下个断点跟进几步，最终来到了<code>ThymeleafView#renderFragment()</code>这里，关键部分代码如下。</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Thymeleaf%20SSTI/Pasted%20image%2020230911230654.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Thymeleaf%20SSTI/Pasted%20image%2020230911233807.png"></p>
+<p>能够看到，这里是对我们传入的<code>viewTemplateName</code>进行了判断，如果包含<code>::</code>字符串，则进行188行的片段表达式解析，看着非常像SPEL注入的入口，顺便提一下，我们这里耀手动改一下viewTemplateName的值（前面忘改了），设其值为<code>index:xxx</code>。之后再跟进188行，一路跟到<code>process()</code>这里，来到我们的目的地。</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Thymeleaf%20SSTI/Pasted%20image%2020230912001005.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Thymeleaf%20SSTI/Pasted%20image%2020230912001129.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Thymeleaf%20SSTI/Pasted%20image%2020230912001217.png"></p>
+<p>这里的input就是我们前面经过拼接处理后得到的<code>TemplateName</code>，然后关键看我标断点处的代码，发现是对input进行了一个正则匹配，然后把匹配结果当作参数传给<code>parserExperssion</code>最后再经过<code>execute</code>来执行。现在，我们只需要去查一查这个正则的匹配规则，则完事备矣。查一下这里的<code>PREPROCESS_EVAL_PATTERN</code>，详情如下。</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Thymeleaf%20SSTI/Pasted%20image%2020230912002505.png"></p>
+<p>非常简单的一个非贪婪匹配，我们只需要在payload的前后分别加上两个_即可。<br>因为我们这里的是input是瞎填的，显示效果没有那么好，那假如把input这里改一改，又会发生什么呢？</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">::__$&#123;new java.util.Scanner(T(java.lang.Runtime).getRuntime().exec(&quot;calc&quot;).getInputStream()).next()&#125;_______________</span><br></pre></td></tr></table></figure>
+<p>It is amazing!<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Thymeleaf%20SSTI/Pasted%20image%2020230912002917.png"></p>
+<p>文末简单的总结一下利用条件，这里就直接套用别的师傅的了</p>
+<ol>
+<li>用户传入的字符串拼接到了Controller方法的返回值中且返回的视图非重定向（前面流程可用知晓，重定向优先级最高），或URI路径拼接了用户的输入且Controller方法参数中不带有<code>ServletResponse</code>类型的参数；</li>
+<li>视图引擎名称中需要包含<code>::</code>字符串；</li>
+<li>被执行表达式字符串前后需要带有两个下划线，即<code>__$&#123;EL&#125;__</code>；</li>
+<li>如果POC在URI中，由于URI格式化的原因且我们的POC中带有<code>.</code>符号，所以需要在URI末尾添加<code>.</code>。</li>
+</ol>
+<p>环境上的话，得Thymeleaf的版本 &lt; 3.0.2</p>
+
+        
+      </div>
+
+         
+    </div>
+    
+     
+  </div>
+  
+    
+<nav id="article-nav">
+  <a class="article-nav-btn left "
+    
+      href="/2023/09/12/BCEL%20ClassLoader/"
+      title="BCEL的简单学习"
+     >
+    <i class="fa-solid fa-angle-left"></i>
+    <p class="title-text">
+      
+        BCEL的简单学习
+        
+    </p>
+  </a>
+  <a class="article-nav-btn right "
+    
+      href="/2023/09/05/HackTheBox(support)/"
+      title="HackTheBox:Support"
+     >
+
+    <p class="title-text">
+      
+        HackTheBox:Support
+        
+    </p>
+    <i class="fa-solid fa-angle-right"></i>
+  </a>
+</nav>
+
+
+  
+</article>
+
+ 
+    </div>
+    <div id="footer-wrapper">
+      <footer id="footer">
+  
+  <div id="footer-info" class="inner">
+    
+    &copy; 2026 F4miti0n<br>
+    Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & Theme <a target="_blank" rel="noopener" href="https://github.com/saicaca/hexo-theme-vivia">Vivia</a>
+  </div>
+</footer>
+
+    </div>
+    <div class="back-to-top-wrapper">
+    <button id="back-to-top-btn" class="back-to-top-btn" onclick="topFunction()">
+        <span class="material-symbols-rounded">keyboard_arrow_up</span>
+    </button>
+</div>
+
+<script>
+    function topFunction() {
+        window.scroll({ top: 0, behavior: 'smooth' });
+    }
+    let btn = document.getElementById('back-to-top-btn');
+    function scrollFunction() {
+        if (document.body.scrollTop > 600 || document.documentElement.scrollTop > 600) {
+            btn.style.opacity = 1;
+        } else {
+            btn.style.opacity = 0;
+        }
+    }
+    window.onscroll = function() {
+        scrollFunction();
+    }
+</script>
+
+  </div>
+  <script src="/js/light-dark-switch.js"></script>
+</body>
+</html>

