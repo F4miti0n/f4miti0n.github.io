@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /_astro/
+
+Sitemap: https://f4miti0n.github.io/sitemap-index.xml
